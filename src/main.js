@@ -166,13 +166,13 @@ varying vec2 vUv;
 void main() {
     vec2 uv = vUv;
     vec4 color = texture2D(tDiffuse, uv);
-    const int samples = 5; // Increase the number of samples for a smoother blur
+    const int samples = 3; // Increase the number of samples for a smoother blur
     vec4 blurredColor = vec4(0.0);
     float totalWeight = 0.0;
     
     for (int i = 0; i < samples; i++) {
         float t = float(i) / float(samples - 1);
-        vec2 offset = rotationVelocity * t * 0.1; // Adjust the multiplier to control the length of the blur
+        vec2 offset = rotationVelocity * t * 0.01; // Adjust the multiplier to control the length of the blur
         blurredColor += texture2D(tDiffuse, uv + offset) * (1.0 - t);
         totalWeight += (1.0 - t);
     }
