@@ -170,10 +170,9 @@ void main() {
     const int samples = 20; // Increase the number of samples for a smoother blur
     vec4 blurredColor = vec4(0.0);
     float totalWeight = 0.0;
-    
     for (int i = 0; i < samples; i++) {
         float t = float(i) / float(samples - 1);
-        vec2 offset = rotationVelocity * t * 0.05; // Adjust the multiplier to control the length of the blur
+        vec2 offset = rotationVelocity * t * 0.01; // Adjust the multiplier to control the length of the blur
         blurredColor += texture2D(tDiffuse, uv + offset) * (1.0 - t);
         totalWeight += (1.0 - t);
     }
@@ -181,9 +180,9 @@ void main() {
     blurredColor /= totalWeight;
     
     // RGB offsets for chromatic aberration
-    vec2 offsetR = rotationVelocity * 0.5; // Adjust the multiplier for noticeable effect
+    vec2 offsetR = rotationVelocity * 0.3; // Adjust the multiplier for noticeable effect
     vec2 offsetG = rotationVelocity * 0.25;
-    vec2 offsetB = rotationVelocity * 0.35;
+    vec2 offsetB = rotationVelocity * 0.15;
     vec4 colorR = texture2D(tDiffuse, uv + offsetR);
     vec4 colorG = texture2D(tDiffuse, uv - offsetG);
     vec4 colorB = texture2D(tDiffuse, uv + offsetB);
