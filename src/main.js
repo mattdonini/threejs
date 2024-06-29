@@ -18,7 +18,9 @@ const debounce = (func, wait) => {
     let timeout;
     return (...args) => {
         clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
+        timeout = setTimeout(() => {
+            requestAnimationFrame(() => func.apply(this, args));
+        }, wait);
     };
 };
 
@@ -42,14 +44,15 @@ scene.add(camera);
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setClearColor(0x000000, 0); // Set background to transparent
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.shadowMap.enabled = true;
-renderer.setClearColor(0x000000, 0);
 
-// GLTFLoader instance
+// GLTFLoader and TextureLoader instances
 const loader = new GLTFLoader();
+const textureLoader = new THREE.TextureLoader();
 let model;
 let currentModelUrl = ''; // Variable to keep track of the currently loaded model's URL
 
@@ -73,7 +76,6 @@ const preFetchAssets = () => {
     document.querySelectorAll('[data-texture-url]').forEach((element) => {
         const textureUrl = element.getAttribute('data-texture-url');
         if (textureUrl && !textureCache[textureUrl]) {
-            const textureLoader = new THREE.TextureLoader();
             textureLoader.load(textureUrl, (texture) => {
                 textureCache[textureUrl] = texture;
             });
@@ -85,11 +87,7 @@ const preFetchAssets = () => {
 preFetchAssets();
 
 // Load model from cache or URL
-const loadModel = (url) => {
-    if (currentModelUrl === url) {
-        return;
-    }
-
+const loadModel = (url, callback) => {
     if (modelCache[url]) {
         if (model) scene.remove(model);
         model = modelCache[url].scene.clone();
@@ -98,6 +96,7 @@ const loadModel = (url) => {
         adjustModelScale();
         scene.add(model);
         currentModelUrl = url; // Update the current model URL
+        if (callback) callback();
     } else {
         loader.load(url, (gltf) => {
             if (model) scene.remove(model);
@@ -107,6 +106,7 @@ const loadModel = (url) => {
             adjustModelScale();
             scene.add(model);
             currentModelUrl = url; // Update the current model URL
+            if (callback) callback();
         }, undefined, console.error);
     }
 };
@@ -117,7 +117,7 @@ let currentTextureUrl = '';
 // Function to update the model's texture
 const updateModelTexture = (textureUrl) => {
     if (model && textureUrl) {
-        const texture = textureCache[textureUrl] || new THREE.TextureLoader().load(textureUrl);
+        const texture = textureCache[textureUrl] || textureLoader.load(textureUrl);
         texture.encoding = THREE.sRGBEncoding;
         model.traverse((child) => {
             if (child.isMesh) {
@@ -130,10 +130,11 @@ const updateModelTexture = (textureUrl) => {
     }
 };
 
-// Load initial model
-loadModel('https://uploads-ssl.webflow.com/6665a67f8e924fdecb7b36e5/6675c8cc5cc9e9c9c8156f5d_holographic_hodie.gltf.txt');
-currentTextureUrl = 'https://uploads-ssl.webflow.com/6665a67f8e924fdecb7b36e5/6675a742ad653905eaedaea8_holographic-texture.webp';
-updateModelTexture(currentTextureUrl);
+// Load initial model without pixelation effect
+loadModel('https://uploads-ssl.webflow.com/6665a67f8e924fdecb7b36e5/6675c8cc5cc9e9c9c8156f5d_holographic_hodie.gltf.txt', () => {
+    currentTextureUrl = 'https://uploads-ssl.webflow.com/6665a67f8e924fdecb7b36e5/6675a742ad653905eaedaea8_holographic-texture.webp';
+    updateModelTexture(currentTextureUrl);
+});
 
 // Mouse move event listener
 const mouse = { x: 0, y: 0 };
@@ -180,7 +181,7 @@ void main() {
     blurredColor /= totalWeight;
     
     // RGB offsets for chromatic aberration
-    vec2 offsetR = rotationVelocity * 0.75; // Adjust the multiplier for noticeable effect
+    vec2 offsetR = rotationVelocity * 0.5; // Adjust the multiplier for noticeable effect
     vec2 offsetG = rotationVelocity * 0.25;
     vec2 offsetB = rotationVelocity * 0.35;
     vec4 colorR = texture2D(tDiffuse, uv + offsetR);
@@ -199,7 +200,85 @@ void main() {
 }
 `;
 
-// Post-processing setup
+// Pixelation Displacement Shader
+const pixelationVertexShader = `
+varying vec2 vUv;
+void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+`;
+
+const pixelationFragmentShader = `
+uniform sampler2D tDiffuse;
+uniform float pixelSize;
+uniform float blurAmount;
+uniform vec2 resolution;
+varying vec2 vUv;
+
+void main() {
+    vec2 uv = vUv;
+
+    // Pixelation effect
+    if (pixelSize > 0.0) {
+        uv = floor(uv / pixelSize) * pixelSize;
+    }
+
+    // Fetch the texture color
+    vec4 color = texture2D(tDiffuse, uv);
+
+    // Apply blur effect
+    vec4 blurColor = vec4(0.0);
+    float total = 0.0;
+    for (float x = -4.0; x <= 4.0; x++) {
+        for (float y = -4.0; y <= 4.0; y++) {
+            vec2 offset = vec2(x, y) * blurAmount / resolution;
+            blurColor += texture2D(tDiffuse, uv + offset);
+            total += 1.0;
+        }
+    }
+    blurColor /= total;
+
+    // Combine the original color with the blur color
+    color = mix(color, blurColor, blurAmount);
+
+    // Glitch effect: random offsets
+    float glitchIntensity = 0.95 * pixelSize;
+    vec2 glitchOffset = vec2(glitchIntensity * (fract(sin(dot(uv.xy ,vec2(12.9898,78.233))) * 43758.5453) - 0.5), 0.0);
+
+    // RGB distortion effect
+    vec2 offsetR = glitchOffset;
+    vec2 offsetG = vec2(0.0);
+    vec2 offsetB = -glitchOffset;
+
+    vec4 colorR = texture2D(tDiffuse, uv + offsetR);
+    vec4 colorG = texture2D(tDiffuse, uv + offsetG);
+    vec4 colorB = texture2D(tDiffuse, uv + offsetB);
+
+    // Combine the RGB channels with the glitch effect
+    gl_FragColor = vec4(colorR.r, colorG.g, colorB.b, color.a);
+}
+`;
+
+// Noise Shader
+const noiseFragmentShader = `
+uniform sampler2D tDiffuse;
+uniform float time;
+uniform float noiseStrength;
+varying vec2 vUv;
+
+float random(vec2 co) {
+    return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
+void main() {
+    vec4 color = texture2D(tDiffuse, vUv);
+    float noise = random(vUv + time) * noiseStrength;
+    color.rgb += noise * 0.05; // Adjust the multiplier for noise intensity
+    gl_FragColor = color;
+}
+`;
+
 const composer = new EffectComposer(renderer);
 const renderPass = new RenderPass(scene, camera);
 composer.addPass(renderPass);
@@ -214,6 +293,30 @@ const customPass = new ShaderPass({
 });
 customPass.renderToScreen = true;
 composer.addPass(customPass);
+
+const pixelationPass = new ShaderPass({
+    uniforms: {
+        tDiffuse: { value: null },
+        pixelSize: { value: 0.0 },
+        blurAmount: { value: 0.0 },
+        resolution: { value: new THREE.Vector2(sizes.width, sizes.height) }
+    },
+    vertexShader: pixelationVertexShader,
+    fragmentShader: pixelationFragmentShader
+});
+composer.addPass(pixelationPass);
+
+// Noise Pass
+const noisePass = new ShaderPass({
+    uniforms: {
+        tDiffuse: { value: null },
+        time: { value: 0.0 },
+        noiseStrength: { value: 0.0 }
+    },
+    vertexShader: vertexShader,
+    fragmentShader: noiseFragmentShader
+});
+composer.addPass(noisePass);
 
 // Adjust model scale based on window size
 const adjustModelScale = () => {
@@ -239,6 +342,11 @@ const adjustModelScale = () => {
     }
 };
 
+// Custom easing function for ease-in-out
+const easeInOutQuad = (t) => {
+    return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+};
+
 // Animation loop
 const animate = () => {
     requestAnimationFrame(animate);
@@ -261,6 +369,8 @@ const animate = () => {
 
     customPass.uniforms.rotationVelocity.value.set(rotationVelocityY, rotationVelocityX);
 
+    // Update noise effect parameters
+    noisePass.uniforms.time.value += 0.05; // Adjust the speed of the noise effect
     composer.render();
 };
 animate();
@@ -270,7 +380,47 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
     element.addEventListener('click', () => {
         const modelUrl = element.getAttribute('data-3d-url');
         if (modelUrl) {
-            loadModel(modelUrl);
+            // Apply pixelation and noise effects during transition
+            const duration = 350; // duration of the transition in milliseconds
+            const start = performance.now();
+
+            const transitionOut = () => {
+                const now = performance.now();
+                const elapsed = now - start;
+                const progress = Math.min(elapsed / duration, 1);
+                const easedProgress = easeInOutQuad(progress);
+
+                pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgress;
+                pixelationPass.uniforms.blurAmount.value = 0.1 * easedProgress;
+                noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
+
+                if (progress < 1) {
+                    requestAnimationFrame(transitionOut);
+                } else {
+                    loadModel(modelUrl, transitionIn);
+                }
+            };
+
+            const transitionIn = () => {
+                const start = performance.now();
+                const transition = () => {
+                    const now = performance.now();
+                    const elapsed = now - start;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const easedProgress = easeInOutQuad(1 - progress);
+
+                    pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgress;
+                    pixelationPass.uniforms.blurAmount.value = 0.1 * easedProgress;
+                    noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
+
+                    if (progress < 1) {
+                        requestAnimationFrame(transition);
+                    }
+                };
+                transition();
+            };
+
+            transitionOut();
         } else {
             console.error('No model URL found for this element');
         }
@@ -288,7 +438,6 @@ document.querySelectorAll('[data-threads-id]').forEach((element) => {
         }
     });
 });
-
 
 // Handling switching between garments and textures
 document.addEventListener('DOMContentLoaded', function() {
@@ -413,4 +562,4 @@ document.addEventListener('DOMContentLoaded', function() {
       null, // No corner wrap for threads_img
       false // Disable inner shadow
     );
-  });
+});
