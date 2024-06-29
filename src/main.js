@@ -167,35 +167,24 @@ varying vec2 vUv;
 void main() {
     vec2 uv = vUv;
     vec4 color = texture2D(tDiffuse, uv);
-    const int samples = 20; // Increase the number of samples for a smoother blur
-    vec4 blurredColor = vec4(0.0);
-    float totalWeight = 0.0;
-    for (int i = 0; i < samples; i++) {
-        float t = float(i) / float(samples - 1);
-        vec2 offset = rotationVelocity * t * 0.01; // Adjust the multiplier to control the length of the blur
-        blurredColor += texture2D(tDiffuse, uv + offset) * (1.0 - t);
-        totalWeight += (1.0 - t);
-    }
-    
-    blurredColor /= totalWeight;
-    
+
     // RGB offsets for chromatic aberration
-    vec2 offsetR = rotationVelocity * 0.3; // Adjust the multiplier for noticeable effect
+    vec2 offsetR = rotationVelocity * 0.5;
     vec2 offsetG = rotationVelocity * 0.25;
-    vec2 offsetB = rotationVelocity * 0.15;
+    vec2 offsetB = rotationVelocity * 0.35;
     vec4 colorR = texture2D(tDiffuse, uv + offsetR);
     vec4 colorG = texture2D(tDiffuse, uv - offsetG);
     vec4 colorB = texture2D(tDiffuse, uv + offsetB);
 
     // Smooth the edges by blending the channels slightly
     vec4 finalColor = vec4(
-        mix(blurredColor.r, colorR.r, 0.5),
-        mix(blurredColor.g, colorG.g, 0.5),
-        mix(blurredColor.b, colorB.b, 0.5),
-        blurredColor.a
+        mix(color.r, colorR.r, 0.5),
+        mix(color.g, colorG.g, 0.5),
+        mix(color.b, colorB.b, 0.5),
+        color.a
     );
 
-    gl_FragColor = mix(finalColor, blurredColor, 0.5); // Blend the RGB effect with the motion blur effect
+    gl_FragColor = finalColor; // Use the final color with RGB effect
 }
 `;
 
@@ -211,7 +200,6 @@ void main() {
 const pixelationFragmentShader = `
 uniform sampler2D tDiffuse;
 uniform float pixelSize;
-uniform float blurAmount;
 uniform vec2 resolution;
 varying vec2 vUv;
 
@@ -225,21 +213,6 @@ void main() {
 
     // Fetch the texture color
     vec4 color = texture2D(tDiffuse, uv);
-
-    // Apply blur effect
-    vec4 blurColor = vec4(0.0);
-    float total = 0.0;
-    for (float x = -4.0; x <= 4.0; x++) {
-        for (float y = -4.0; y <= 4.0; y++) {
-            vec2 offset = vec2(x, y) * blurAmount / resolution;
-            blurColor += texture2D(tDiffuse, uv + offset);
-            total += 1.0;
-        }
-    }
-    blurColor /= total;
-
-    // Combine the original color with the blur color
-    color = mix(color, blurColor, blurAmount);
 
     // Glitch effect: random offsets
     float glitchIntensity = 0.95 * pixelSize;
@@ -297,7 +270,6 @@ const pixelationPass = new ShaderPass({
     uniforms: {
         tDiffuse: { value: null },
         pixelSize: { value: 0.0 },
-        blurAmount: { value: 0.0 },
         resolution: { value: new THREE.Vector2(sizes.width, sizes.height) }
     },
     vertexShader: pixelationVertexShader,
@@ -390,7 +362,6 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
                 const easedProgress = easeInOutQuad(progress);
 
                 pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgress;
-                pixelationPass.uniforms.blurAmount.value = 0.1 * easedProgress;
                 noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
 
                 if (progress < 1) {
@@ -409,7 +380,6 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
                     const easedProgress = easeInOutQuad(1 - progress);
 
                     pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgress;
-                    pixelationPass.uniforms.blurAmount.value = 0.1 * easedProgress;
                     noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
 
                     if (progress < 1) {
