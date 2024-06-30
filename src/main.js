@@ -171,8 +171,8 @@ void main() {
     vec4 color = texture2D(tDiffuse, uv);
 
     // RGB offsets for chromatic aberration
-    vec2 offsetR = rotationVelocity * 0.3; // Adjust the multiplier for noticeable effect
-    vec2 offsetG = rotationVelocity * 0.35;
+    vec2 offsetR = rotationVelocity * 0.15; // Adjust the multiplier for noticeable effect
+    vec2 offsetG = rotationVelocity * 0.20;
     vec2 offsetB = rotationVelocity * 0.25;
     vec4 colorR = texture2D(tDiffuse, uv + offsetR);
     vec4 colorG = texture2D(tDiffuse, uv - offsetG);
