@@ -136,6 +136,8 @@ loadModel('https://uploads-ssl.webflow.com/6665a67f8e924fdecb7b36e5/6675c8cc5cc9
     updateModelTexture(currentTextureUrl);
 });
 
+
+
 // Mouse move event listener
 const mouse = { x: 0, y: 0 };
 window.addEventListener('mousemove', (event) => {
