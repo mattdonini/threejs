@@ -136,6 +136,8 @@ loadModel('https://uploads-ssl.webflow.com/6665a67f8e924fdecb7b36e5/6675c8cc5cc9
     updateModelTexture(currentTextureUrl);
 });
 
+
+
 // Mouse move event listener
 const mouse = { x: 0, y: 0 };
 window.addEventListener('mousemove', (event) => {
@@ -284,7 +286,7 @@ void main() {
 }
 `;
 
-// Initialize Effect Composer
+
 const composer = new EffectComposer(renderer);
 const renderPass = new RenderPass(scene, camera);
 composer.addPass(renderPass);
@@ -297,6 +299,7 @@ const customPass = new ShaderPass({
     vertexShader: vertexShader,
     fragmentShader: fragmentShader
 });
+customPass.renderToScreen = true;
 composer.addPass(customPass);
 
 const pixelationPass = new ShaderPass({
@@ -321,28 +324,6 @@ const noisePass = new ShaderPass({
     fragmentShader: noiseFragmentShader
 });
 composer.addPass(noisePass);
-
-// Blur Pass
-const blurPass = new ShaderPass({
-    uniforms: {
-        tDiffuse: { value: null },
-        resolution: { value: new THREE.Vector2(sizes.width, sizes.height) }
-    },
-    vertexShader: vertexShader,
-    fragmentShader: blurFragmentShader
-});
-composer.addPass(blurPass);
-
-// Distortion Pass
-const distortionPass = new ShaderPass({
-    uniforms: {
-        tDiffuse: { value: null },
-        time: { value: 0.0 }
-    },
-    vertexShader: vertexShader,
-    fragmentShader: distortionFragmentShader
-});
-composer.addPass(distortionPass);
 
 // Adjust model scale based on window size
 const adjustModelScale = () => {
@@ -397,10 +378,6 @@ const animate = () => {
 
     // Update noise effect parameters
     noisePass.uniforms.time.value += 0.05; // Adjust the speed of the noise effect
-
-    // Update distortion effect parameters
-    distortionPass.uniforms.time.value += 0.05; // Adjust the speed of the distortion effect
-
     composer.render();
 };
 animate();
@@ -410,7 +387,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
     element.addEventListener('click', () => {
         const modelUrl = element.getAttribute('data-3d-url');
         if (modelUrl) {
-            // Apply pixelation, noise, blur, and distortion effects during transition
+            // Apply pixelation and noise effects during transition
             const duration = 350; // duration of the transition in milliseconds
             const start = performance.now();
 
@@ -422,10 +399,6 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
 
                 pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgress;
                 noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
-
-                // Add blur and distortion effects
-                blurPass.uniforms.resolution.value.set(sizes.width * easedProgress, sizes.height * easedProgress);
-                distortionPass.uniforms.time.value = performance.now() * 0.0001 * easedProgress;
 
                 if (progress < 1) {
                     requestAnimationFrame(transitionOut);
@@ -444,10 +417,6 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
 
                     pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgress;
                     noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
-
-                    // Add blur and distortion effects
-                    blurPass.uniforms.resolution.value.set(sizes.width * easedProgress, sizes.height * easedProgress);
-                    distortionPass.uniforms.time.value = performance.now() * 0.0001 * easedProgress;
 
                     if (progress < 1) {
                         requestAnimationFrame(transition);
@@ -474,7 +443,6 @@ document.querySelectorAll('[data-threads-id]').forEach((element) => {
         }
     });
 });
-
 
 // Handling switching between garments and textures
 document.addEventListener('DOMContentLoaded', function() {
