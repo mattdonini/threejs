@@ -4,6 +4,8 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+import { customVertexShader } from './customVertexShader.js';
+import { customFragmentShader } from './customFragmentShader.js';
 
 // Canvas and Scene
 const canvas = document.querySelector('canvas.webgl');
@@ -251,55 +253,6 @@ void main() {
 }
 `;
 
-// Custom Shader (from JSON)
-const customVertexShader = `
-varying vec2 vUv;
-void main() {
-    vUv = uv;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-}
-`;
-
-const customFragmentShader = `
-#version 300 es
-precision mediump float;
-in vec3 vVertexPosition;
-in vec2 vTextureCoord;
-uniform sampler2D uTexture;
-uniform float uAmount;
-uniform float uChromAbb;
-uniform float uGlitch;
-uniform float uTime;
-float random (in float x) {
-    return fract(sin(x)*1e4);
-}
-out vec4 fragColor;
-void main() {
-    vec2 uv = vTextureCoord;
-    float time = floor(uTime * 0.5) * 2.;
-    float size = uAmount * 0.2 * random(time + 0.001);
-    float floorY = floor(uv.y/size);
-    float floorX = floor(uv.x/size);
-    float phase = 0.01 * 0.01;
-    float phaseTime = phase + uTime;
-    float chromab = uChromAbb * 0.75;
-    float offset = 0.;
-    float glitchMod = max(0., sign(random(sin(floorY + offset + phase)) - 0.5 - (1. - uGlitch*2.)/2.));
-    float offX = ( (random(floorY + offset * glitchMod + phase)) * 0.01 - 0.01/2. )/5.;
-    uv.x = mix(uv.x, uv.x + offX * 2., glitchMod);
-    float waveFreq = 30.0;
-    float waveAmp = 0.005 * 0.00;
-    float rogue = smoothstep(0., 2., sin((uv.y + 0.01) * waveFreq * (1. - uAmount) * 2. + uTime * 0.05) - 0.5) * 0.2 * 0.00;
-    uv.x += sin(uv.y * waveFreq + uTime) * waveAmp + rogue;
-    uv.y += sin(uv.x * waveFreq + uTime) * waveAmp;
-    float waveX = sin(uv.y * waveFreq + uTime) * waveAmp + rogue * chromab * 0.2;
-    vec4 color = texture(uTexture, uv);
-    color.r = texture(uTexture, vec2(uv.x + (glitchMod * -offX * chromab - waveX), uv.y)).r;
-    color.b = texture(uTexture, vec2(uv.x + (glitchMod * offX * chromab + waveX), uv.y)).b;
-    fragColor = color;
-}
-`;
-
 const composer = new EffectComposer(renderer);
 const renderPass = new RenderPass(scene, camera);
 composer.addPass(renderPass);
@@ -342,7 +295,6 @@ composer.addPass(noisePass);
 const customShaderPass = new ShaderPass({
     uniforms: {
         tDiffuse: { value: null },
-        uTexture: { value: null },
         uAmount: { value: 0.0 },
         uChromAbb: { value: 0.0 },
         uGlitch: { value: 0.0 },
