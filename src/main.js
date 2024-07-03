@@ -136,6 +136,8 @@ loadModel('https://uploads-ssl.webflow.com/6665a67f8e924fdecb7b36e5/6675c8cc5cc9
     updateModelTexture(currentTextureUrl);
 });
 
+
+
 // Mouse move event listener
 const mouse = { x: 0, y: 0 };
 window.addEventListener('mousemove', (event) => {
@@ -251,41 +253,8 @@ void main() {
 }
 `;
 
-// Displacement Shader
-const displacementVertexShader = `
-varying vec2 vUv;
-void main() {
-    vUv = uv;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-}
-`;
 
-const displacementFragmentShader = `
-uniform sampler2D tDiffuse;
-uniform vec2 resolution;
-uniform float time;
-varying vec2 vUv;
 
-void main() {
-    vec2 uv = vUv;
-
-    // RGB offsets for chromatic aberration
-    float amount = 0.02 * sin(time);
-    vec2 offsetR = vec2(amount, amount);
-    vec2 offsetG = vec2(-amount, -amount);
-    vec2 offsetB = vec2(-amount, amount);
-
-    vec4 colorR = texture2D(tDiffuse, uv + offsetR);
-    vec4 colorG = texture2D(tDiffuse, uv + offsetG);
-    vec4 colorB = texture2D(tDiffuse, uv + offsetB);
-
-    vec4 finalColor = vec4(colorR.r, colorG.g, colorB.b, 1.0);
-
-    gl_FragColor = finalColor;
-}
-`;
-
-// Post-processing setup
 const composer = new EffectComposer(renderer);
 const renderPass = new RenderPass(scene, camera);
 composer.addPass(renderPass);
@@ -312,6 +281,7 @@ const pixelationPass = new ShaderPass({
 });
 composer.addPass(pixelationPass);
 
+// Noise Pass
 const noisePass = new ShaderPass({
     uniforms: {
         tDiffuse: { value: null },
@@ -322,17 +292,6 @@ const noisePass = new ShaderPass({
     fragmentShader: noiseFragmentShader
 });
 composer.addPass(noisePass);
-
-const displacementPass = new ShaderPass({
-    uniforms: {
-        tDiffuse: { value: null },
-        resolution: { value: new THREE.Vector2(sizes.width, sizes.height) },
-        time: { value: 0.0 },
-    },
-    vertexShader: displacementVertexShader,
-    fragmentShader: displacementFragmentShader
-});
-composer.addPass(displacementPass);
 
 // Adjust model scale based on window size
 const adjustModelScale = () => {
@@ -387,10 +346,6 @@ const animate = () => {
 
     // Update noise effect parameters
     noisePass.uniforms.time.value += 0.05; // Adjust the speed of the noise effect
-    
-    // Update displacement effect parameters
-    displacementPass.uniforms.time.value += 0.05;
-
     composer.render();
 };
 animate();
@@ -400,7 +355,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
     element.addEventListener('click', () => {
         const modelUrl = element.getAttribute('data-3d-url');
         if (modelUrl) {
-            // Apply pixelation, noise, and displacement effects during transition
+            // Apply pixelation and noise effects during transition
             const duration = 350; // duration of the transition in milliseconds
             const start = performance.now();
 
@@ -412,7 +367,6 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
 
                 pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgress;
                 noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
-                displacementPass.uniforms.time.value = elapsed * 0.002; // Add some variation to the displacement
 
                 if (progress < 1) {
                     requestAnimationFrame(transitionOut);
@@ -431,7 +385,6 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
 
                     pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgress;
                     noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
-                    displacementPass.uniforms.time.value = elapsed * 0.002; // Add some variation to the displacement
 
                     if (progress < 1) {
                         requestAnimationFrame(transition);
@@ -458,7 +411,6 @@ document.querySelectorAll('[data-threads-id]').forEach((element) => {
         }
     });
 });
-
 
 // Handling switching between garments and textures
 document.addEventListener('DOMContentLoaded', function() {
