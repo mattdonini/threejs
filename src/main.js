@@ -253,47 +253,6 @@ void main() {
 }
 `;
 
-// Custom Shader (from JSON)
-const customShader = `
-#version 300 es
-precision mediump float;
-in vec3 vVertexPosition;
-in vec2 vTextureCoord;
-uniform sampler2D uTexture;
-uniform float uAmount;
-uniform float uChromAbb;
-uniform float uGlitch;
-uniform float uTime;
-float random (in float x) {
-    return fract(sin(x)*1e4);
-}
-out vec4 fragColor;
-void main() {
-    vec2 uv = vTextureCoord;
-    float time = floor(uTime * 0.5) * 2.;
-    float size = uAmount * 0.2 * random(time + 0.001);
-    float floorY = floor(uv.y/size);
-    float floorX = floor(uv.x/size);
-    float phase = 0.01 * 0.01;
-    float phaseTime = phase + uTime;
-    float chromab = uChromAbb * 0.75;
-    float offset = 0.;
-    float glitchMod = max(0., sign(random(sin(floorY + offset + phase)) - 0.5 - (1. - uGlitch*2.)/2.));
-    float offX = ( (random(floorY + offset * glitchMod + phase)) * 0.01 - 0.01/2. )/5.;
-    uv.x = mix(uv.x, uv.x + offX * 2., glitchMod);
-    float waveFreq = 30.0;
-    float waveAmp = 0.005 * 0.00;
-    float rogue = smoothstep(0., 2., sin((uv.y + 0.01) * waveFreq * (1. - uAmount) * 2. + uTime * 0.05) - 0.5) * 0.2 * 0.00;
-    uv.x += sin(uv.y * waveFreq + uTime) * waveAmp + rogue;
-    uv.y += sin(uv.x * waveFreq + uTime) * waveAmp;
-    float waveX = sin(uv.y * waveFreq + uTime) * waveAmp + rogue * chromab * 0.2;
-    vec4 color = texture(uTexture, uv);
-    color.r = texture(uTexture, vec2(uv.x + (glitchMod * -offX * chromab - waveX), uv.y)).r;
-    color.b = texture(uTexture, vec2(uv.x + (glitchMod * offX * chromab + waveX), uv.y)).b;
-    fragColor = color;
-}
-`;
-
 const composer = new EffectComposer(renderer);
 const renderPass = new RenderPass(scene, camera);
 composer.addPass(renderPass);
@@ -331,21 +290,6 @@ const noisePass = new ShaderPass({
     fragmentShader: noiseFragmentShader
 });
 composer.addPass(noisePass);
-
-// Custom Shader Pass (from JSON)
-const customShaderPass = new ShaderPass({
-    uniforms: {
-        tDiffuse: { value: null },
-        uTexture: { value: null },
-        uAmount: { value: 0.0 },
-        uChromAbb: { value: 0.0 },
-        uGlitch: { value: 0.0 },
-        uTime: { value: 0.0 }
-    },
-    vertexShader: vertexShader,
-    fragmentShader: customShader
-});
-composer.addPass(customShaderPass);
 
 // Adjust model scale based on window size
 const adjustModelScale = () => {
@@ -409,7 +353,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
     element.addEventListener('click', () => {
         const modelUrl = element.getAttribute('data-3d-url');
         if (modelUrl) {
-            // Apply pixelation, noise, and custom effects during transition
+            // Apply pixelation and noise effects during transition
             const duration = 350; // duration of the transition in milliseconds
             const start = performance.now();
 
@@ -421,9 +365,6 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
 
                 pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgress;
                 noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
-                customShaderPass.uniforms.uAmount.value = 0.5 * easedProgress;
-                customShaderPass.uniforms.uChromAbb.value = 30 * easedProgress;
-                customShaderPass.uniforms.uGlitch.value = 0.05 * easedProgress;
 
                 if (progress < 1) {
                     requestAnimationFrame(transitionOut);
@@ -442,9 +383,6 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
 
                     pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgress;
                     noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
-                    customShaderPass.uniforms.uAmount.value = 0.5 * easedProgress;
-                    customShaderPass.uniforms.uChromAbb.value = 30 * easedProgress;
-                    customShaderPass.uniforms.uGlitch.value = 0.05 * easedProgress;
 
                     if (progress < 1) {
                         requestAnimationFrame(transition);
