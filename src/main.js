@@ -341,9 +341,9 @@ composer.addPass(noisePass);
 const glitchPass = new ShaderPass({
     uniforms: {
         tDiffuse: { value: null },
-        uAmount: { value: 1.0 },
-        uChromAbb: { value: 0.5 },
-        uGlitch: { value: 0.5 },
+        uAmount: { value: 0.0 },
+        uChromAbb: { value: 0.0 },
+        uGlitch: { value: 0.0 },
         uTime: { value: 0.0 },
     },
     vertexShader: glitchVertexShader,
@@ -458,9 +458,9 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
                         // Reset uniforms after transition
                         pixelationPass.uniforms.pixelSize.value = 0.0;
                         noisePass.uniforms.noiseStrength.value = 0.0;
-                        glitchPass.uniforms.uAmount.value = 1.0;
-                        glitchPass.uniforms.uChromAbb.value = 0.5;
-                        glitchPass.uniforms.uGlitch.value = 0.5;
+                        glitchPass.uniforms.uAmount.value = 0.0;
+                        glitchPass.uniforms.uChromAbb.value = 0.0;
+                        glitchPass.uniforms.uGlitch.value = 0.0;
                     }
                 };
                 transition();
@@ -484,7 +484,6 @@ document.querySelectorAll('[data-threads-id]').forEach((element) => {
         }
     });
 });
-
 
 // Handling switching between garments and textures
 document.addEventListener('DOMContentLoaded', function() {
