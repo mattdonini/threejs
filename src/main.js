@@ -276,12 +276,12 @@ float random(in float x) {
 void main() {
     vec2 uv = vUv;
     float time = floor(uTime * 0.5) * 2.;
-    float size = uAmount * 0.2 * random(time + 0.001);
+    float size = uAmount * 1.2 * random(time + 0.001);
     float floorY = floor(uv.y / size);
     float floorX = floor(uv.x / size);
     float phase = 0.01 * 0.01;
     float phaseTime = phase + uTime;
-    float chromab = uChromAbb * 0.75;
+    float chromab = uChromAbb * 1.75;
     float offset = 0.;
     float glitchMod = max(0., sign(random(sin(floorY + offset + phase)) - 0.5 - (1. - uGlitch*2.) / 2.));
     float offX = ((random(floorY + offset * glitchMod + phase)) * 0.01 - 0.01 / 2.) / 5.;
