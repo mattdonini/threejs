@@ -281,7 +281,7 @@ void main() {
     float floorX = floor(uv.x / size);
     float phase = 0.01 * 0.01;
     float phaseTime = phase + uTime;
-    float chromab = uChromAbb * 4.75;
+    float chromab = uChromAbb * 2.75;
     float offset = 0.;
     float glitchMod = max(0., sign(random(sin(floorY + offset + phase)) - 0.5 - (1. - uGlitch*2.) / 2.));
     float offX = ((random(floorY + offset * glitchMod + phase)) * 0.01 - 0.01 / 2.) / 5.;
@@ -433,9 +433,9 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
 
                 pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgress;
                 noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
-                glitchPass.uniforms.uAmount.value = 3.5 * easedProgress;
-                glitchPass.uniforms.uChromAbb.value = 3.5 * easedProgress;
-                glitchPass.uniforms.uGlitch.value = 3.5 * easedProgress;
+                glitchPass.uniforms.uAmount.value = 2.5 * easedProgress;
+                glitchPass.uniforms.uChromAbb.value = easedProgress;
+                glitchPass.uniforms.uGlitch.value = 2.5 * easedProgress;
 
                 if (progress < 1) {
                     requestAnimationFrame(transitionOut);
@@ -454,9 +454,9 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
 
                     pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgress;
                     noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
-                    glitchPass.uniforms.uAmount.value = 3.5 * easedProgress;
-                    glitchPass.uniforms.uChromAbb.value = 3.5 * easedProgress;
-                    glitchPass.uniforms.uGlitch.value = 3.5 * easedProgress;
+                    glitchPass.uniforms.uAmount.value = 2.5 * easedProgress;
+                    glitchPass.uniforms.uChromAbb.value = easedProgress;
+                    glitchPass.uniforms.uGlitch.value = 2.5 * easedProgress;
 
                     if (progress < 1) {
                         requestAnimationFrame(transition);
