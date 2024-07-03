@@ -454,6 +454,13 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
 
                     if (progress < 1) {
                         requestAnimationFrame(transition);
+                    } else {
+                        // Reset uniforms after transition
+                        pixelationPass.uniforms.pixelSize.value = 0.0;
+                        noisePass.uniforms.noiseStrength.value = 0.0;
+                        glitchPass.uniforms.uAmount.value = 1.0;
+                        glitchPass.uniforms.uChromAbb.value = 0.5;
+                        glitchPass.uniforms.uGlitch.value = 0.5;
                     }
                 };
                 transition();
@@ -477,6 +484,7 @@ document.querySelectorAll('[data-threads-id]').forEach((element) => {
         }
     });
 });
+
 
 // Handling switching between garments and textures
 document.addEventListener('DOMContentLoaded', function() {
