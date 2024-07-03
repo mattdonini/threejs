@@ -325,6 +325,30 @@ const noisePass = new ShaderPass({
 });
 composer.addPass(noisePass);
 
+// Blur Shader Pass
+const blurPass = new ShaderPass({
+    uniforms: {
+        tDiffuse: { value: null },
+        resolution: { value: new THREE.Vector2(sizes.width, sizes.height) }
+    },
+    vertexShader: vertexShader,
+    fragmentShader: blurFragmentShader
+});
+composer.addPass(blurPass);
+
+// Distortion Shader Pass
+const distortionPass = new ShaderPass({
+    uniforms: {
+        tDiffuse: { value: null },
+        time: { value: 0.0 }
+    },
+    vertexShader: vertexShader,
+    fragmentShader: distortionFragmentShader
+});
+distortionPass.renderToScreen = true; // Ensure this pass renders to screen
+composer.addPass(distortionPass);
+
+
 // Adjust model scale based on window size
 const adjustModelScale = () => {
     if (model) {
@@ -378,9 +402,15 @@ const animate = () => {
 
     // Update noise effect parameters
     noisePass.uniforms.time.value += 0.05; // Adjust the speed of the noise effect
+
+    // Update distortion effect parameters
+    distortionPass.uniforms.time.value += 0.05; // Adjust the speed of the distortion effect
+
+    // Render the scene using composer
     composer.render();
 };
 animate();
+
 
 // Add event listeners to the divs for model switching
 document.querySelectorAll('[data-garment-id]').forEach((element) => {
