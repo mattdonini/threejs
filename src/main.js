@@ -479,7 +479,6 @@ document.querySelectorAll('[data-threads-id]').forEach((element) => {
     });
 });
 
-
 // Handling switching between garments and textures
 document.addEventListener('DOMContentLoaded', function() {
     // Garment items functionality
