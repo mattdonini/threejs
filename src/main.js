@@ -251,8 +251,8 @@ void main() {
 }
 `;
 
-// Displacement Shader
-const displacementVertexShader = `
+// Advanced Glitch Shader
+const glitchVertexShader = `
 varying vec2 vUv;
 void main() {
     vUv = uv;
@@ -260,14 +260,23 @@ void main() {
 }
 `;
 
-const displacementFragmentShader = `
+const glitchFragmentShader = `
 uniform sampler2D tDiffuse;
 uniform vec2 resolution;
 uniform float time;
 varying vec2 vUv;
 
+float random(vec2 co) {
+    return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
 void main() {
     vec2 uv = vUv;
+
+    // Horizontal and vertical displacement
+    float displacement = 0.1 * sin(uv.y * 10.0 + time) + 0.1 * sin(uv.x * 10.0 + time);
+    uv.x += displacement;
+    uv.y += displacement;
 
     // RGB offsets for chromatic aberration
     float amount = 0.02 * sin(time);
@@ -280,6 +289,10 @@ void main() {
     vec4 colorB = texture2D(tDiffuse, uv + offsetB);
 
     vec4 finalColor = vec4(colorR.r, colorG.g, colorB.b, 1.0);
+
+    // Add some noise to enhance the glitch effect
+    float noise = random(uv + time);
+    finalColor.rgb += noise * 0.05;
 
     gl_FragColor = finalColor;
 }
@@ -323,16 +336,18 @@ const noisePass = new ShaderPass({
 });
 composer.addPass(noisePass);
 
-const displacementPass = new ShaderPass({
+const glitchPass = new ShaderPass({
     uniforms: {
         tDiffuse: { value: null },
         resolution: { value: new THREE.Vector2(sizes.width, sizes.height) },
         time: { value: 0.0 },
     },
-    vertexShader: displacementVertexShader,
-    fragmentShader: displacementFragmentShader
+    vertexShader: glitchVertexShader,
+    fragmentShader: glitchFragmentShader
 });
-composer.addPass(displacementPass);
+// Initially add glitch pass, but keep it inactive
+glitchPass.enabled = false;
+composer.addPass(glitchPass);
 
 // Adjust model scale based on window size
 const adjustModelScale = () => {
@@ -388,6 +403,11 @@ const animate = () => {
     // Update noise effect parameters
     noisePass.uniforms.time.value += 0.05; // Adjust the speed of the noise effect
 
+    // Update glitch effect parameters only during transition
+    if (glitchPass.enabled) {
+        glitchPass.uniforms.time.value += 0.05;
+    }
+
     composer.render();
 };
 animate();
@@ -397,7 +417,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
     element.addEventListener('click', () => {
         const modelUrl = element.getAttribute('data-3d-url');
         if (modelUrl) {
-            // Apply pixelation, noise, and displacement effects during transition
+            // Apply pixelation, noise, and glitch effects during transition
             const duration = 350; // duration of the transition in milliseconds
             const start = performance.now();
 
@@ -409,7 +429,8 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
 
                 pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgress;
                 noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
-                displacementPass.uniforms.time.value = elapsed * 0.002; // Add some variation to the displacement
+                glitchPass.enabled = true;
+                glitchPass.uniforms.time.value = elapsed * 0.002; // Add some variation to the glitch
 
                 if (progress < 1) {
                     requestAnimationFrame(transitionOut);
@@ -428,10 +449,12 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
 
                     pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgress;
                     noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
-                    displacementPass.uniforms.time.value = elapsed * 0.002; // Add some variation to the displacement
+                    glitchPass.uniforms.time.value = elapsed * 0.002; // Add some variation to the glitch
 
                     if (progress < 1) {
                         requestAnimationFrame(transition);
+                    } else {
+                        glitchPass.enabled = false; // Disable glitch effect after transition
                     }
                 };
                 transition();
