@@ -378,7 +378,6 @@ const easeInOutQuad = (t) => {
     return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 };
 
-// Animation loop
 const animate = () => {
     requestAnimationFrame(animate);
 
@@ -403,13 +402,10 @@ const animate = () => {
     // Update noise effect parameters
     noisePass.uniforms.time.value += 0.05; // Adjust the speed of the noise effect
 
-    // Update distortion effect parameters
-    distortionPass.uniforms.time.value += 0.05; // Adjust the speed of the distortion effect
-
-    // Render the scene using composer
     composer.render();
 };
 animate();
+
 
 
 // Add event listeners to the divs for model switching
