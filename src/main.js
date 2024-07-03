@@ -248,7 +248,7 @@ float random(vec2 co) {
 void main() {
     vec4 color = texture2D(tDiffuse, vUv);
     float noise = random(vUv + time) * noiseStrength;
-    color.rgb += noise * 0.25; // Adjust the multiplier for noise intensity
+    color.rgb += noise * 0.15; // Adjust the multiplier for noise intensity
     gl_FragColor = color;
 }
 `;
