@@ -153,15 +153,15 @@ let lastRotationX = 0, lastRotationY = 0;
 let rotationVelocityX = 0, rotationVelocityY = 0;
 
 // Post-processing shaders
-const vertexShader = 
+const vertexShader = `
 varying vec2 vUv;
 void main() {
     vUv = uv;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
-;
+`;
 
-const fragmentShader = 
+const fragmentShader = `
 uniform sampler2D tDiffuse;
 uniform vec2 rotationVelocity;
 varying vec2 vUv;
@@ -188,18 +188,18 @@ void main() {
 
     gl_FragColor = finalColor; // Use the final color with RGB effect
 }
-;
+`;
 
 // Pixelation Displacement Shader
-const pixelationVertexShader = 
+const pixelationVertexShader = `
 varying vec2 vUv;
 void main() {
     vUv = uv;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
-;
+`;
 
-const pixelationFragmentShader = 
+const pixelationFragmentShader = `
 uniform sampler2D tDiffuse;
 uniform float pixelSize;
 uniform vec2 resolution;
@@ -232,10 +232,10 @@ void main() {
     // Combine the RGB channels with the glitch effect
     gl_FragColor = vec4(colorR.r, colorG.g, colorB.b, color.a);
 }
-;
+`;
 
 // Noise Shader
-const noiseFragmentShader = 
+const noiseFragmentShader = `
 uniform sampler2D tDiffuse;
 uniform float time;
 uniform float noiseStrength;
@@ -251,8 +251,7 @@ void main() {
     color.rgb += noise * 0.15; // Adjust the multiplier for noise intensity
     gl_FragColor = color;
 }
-;
-
+`;
 
 const composer = new EffectComposer(renderer);
 const renderPass = new RenderPass(scene, camera);
@@ -410,7 +409,6 @@ document.querySelectorAll('[data-threads-id]').forEach((element) => {
         }
     });
 });
-
 
 // Handling switching between garments and textures
 document.addEventListener('DOMContentLoaded', function() {
