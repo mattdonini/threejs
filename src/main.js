@@ -153,15 +153,15 @@ let lastRotationX = 0, lastRotationY = 0;
 let rotationVelocityX = 0, rotationVelocityY = 0;
 
 // Post-processing shaders
-const vertexShader = `
+const vertexShader = 
 varying vec2 vUv;
 void main() {
     vUv = uv;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
-`;
+;
 
-const fragmentShader = `
+const fragmentShader = 
 uniform sampler2D tDiffuse;
 uniform vec2 rotationVelocity;
 varying vec2 vUv;
@@ -188,18 +188,18 @@ void main() {
 
     gl_FragColor = finalColor; // Use the final color with RGB effect
 }
-`;
+;
 
 // Pixelation Displacement Shader
-const pixelationVertexShader = `
+const pixelationVertexShader = 
 varying vec2 vUv;
 void main() {
     vUv = uv;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
-`;
+;
 
-const pixelationFragmentShader = `
+const pixelationFragmentShader = 
 uniform sampler2D tDiffuse;
 uniform float pixelSize;
 uniform vec2 resolution;
@@ -232,10 +232,10 @@ void main() {
     // Combine the RGB channels with the glitch effect
     gl_FragColor = vec4(colorR.r, colorG.g, colorB.b, color.a);
 }
-`;
+;
 
 // Noise Shader
-const noiseFragmentShader = `
+const noiseFragmentShader = 
 uniform sampler2D tDiffuse;
 uniform float time;
 uniform float noiseStrength;
@@ -251,56 +251,8 @@ void main() {
     color.rgb += noise * 0.15; // Adjust the multiplier for noise intensity
     gl_FragColor = color;
 }
-`;
+;
 
-// Displacement Mapping Shader
-const displacementFragmentShader = `
-uniform sampler2D tDiffuse;
-uniform sampler2D tDisplacement;
-uniform float amount;
-varying vec2 vUv;
-
-void main() {
-    vec2 uv = vUv;
-
-    // Sample the displacement map
-    vec4 displacement = texture2D(tDisplacement, uv);
-
-    // Apply displacement effect
-    vec2 displacedUv = uv + amount * (displacement.rg * 2.0 - 1.0);
-
-    // Sample the texture with the displaced UVs
-    vec4 color = texture2D(tDiffuse, displacedUv);
-
-    gl_FragColor = color;
-}
-`;
-
-// Glitch Shader
-const glitchFragmentShader = `
-uniform sampler2D tDiffuse;
-uniform float time;
-uniform float intensity;
-varying vec2 vUv;
-
-float rand(vec2 co){
-    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
-}
-
-void main() {
-    vec2 uv = vUv;
-    vec4 color = texture2D(tDiffuse, uv);
-
-    // Apply glitch effect by randomly shifting UVs
-    if (rand(uv + time) < intensity) {
-        uv.y += intensity * 0.1 * rand(uv);
-    }
-
-    color = texture2D(tDiffuse, uv);
-
-    gl_FragColor = color;
-}
-`;
 
 const composer = new EffectComposer(renderer);
 const renderPass = new RenderPass(scene, camera);
@@ -339,30 +291,6 @@ const noisePass = new ShaderPass({
     fragmentShader: noiseFragmentShader
 });
 composer.addPass(noisePass);
-
-// Displacement Map Pass
-const displacementPass = new ShaderPass({
-    uniforms: {
-        tDiffuse: { value: null },
-        tDisplacement: { value: new THREE.TextureLoader().load('path/to/displacement-map.png') }, // Replace with actual displacement map
-        amount: { value: 0.0 }
-    },
-    vertexShader: vertexShader,
-    fragmentShader: displacementFragmentShader
-});
-composer.addPass(displacementPass);
-
-// Glitch Pass
-const glitchPass = new ShaderPass({
-    uniforms: {
-        tDiffuse: { value: null },
-        time: { value: 0.0 },
-        intensity: { value: 0.0 }
-    },
-    vertexShader: vertexShader,
-    fragmentShader: glitchFragmentShader
-});
-composer.addPass(glitchPass);
 
 // Adjust model scale based on window size
 const adjustModelScale = () => {
@@ -426,7 +354,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
     element.addEventListener('click', () => {
         const modelUrl = element.getAttribute('data-3d-url');
         if (modelUrl) {
-            // Apply pixelation, noise, displacement, and glitch effects during transition
+            // Apply pixelation and noise effects during transition
             const duration = 350; // duration of the transition in milliseconds
             const start = performance.now();
 
@@ -438,8 +366,6 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
 
                 pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgress;
                 noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
-                displacementPass.uniforms.amount.value = 0.5 * easedProgress;
-                glitchPass.uniforms.intensity.value = 0.5 * easedProgress;
 
                 if (progress < 1) {
                     requestAnimationFrame(transitionOut);
@@ -450,7 +376,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
 
             const transitionIn = () => {
                 const start = performance.now();
-                const animate = () => {
+                const transition = () => {
                     const now = performance.now();
                     const elapsed = now - start;
                     const progress = Math.min(elapsed / duration, 1);
@@ -458,14 +384,12 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
 
                     pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgress;
                     noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
-                    displacementPass.uniforms.amount.value = 0.5 * easedProgress;
-                    glitchPass.uniforms.intensity.value = 0.5 * easedProgress;
 
                     if (progress < 1) {
-                        requestAnimationFrame(animate);
+                        requestAnimationFrame(transition);
                     }
                 };
-                animate();
+                transition();
             };
 
             transitionOut();
