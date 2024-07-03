@@ -136,6 +136,8 @@ loadModel('https://uploads-ssl.webflow.com/6665a67f8e924fdecb7b36e5/6675c8cc5cc9
     updateModelTexture(currentTextureUrl);
 });
 
+
+
 // Mouse move event listener
 const mouse = { x: 0, y: 0 };
 window.addEventListener('mousemove', (event) => {
@@ -251,54 +253,55 @@ void main() {
 }
 `;
 
-// Advanced Glitch Shader
-const glitchVertexShader = `
-varying vec2 vUv;
-void main() {
-    vUv = uv;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-}
-`;
-
-const glitchFragmentShader = `
+// Displacement Mapping Shader
+const displacementFragmentShader = `
 uniform sampler2D tDiffuse;
-uniform vec2 resolution;
-uniform float time;
+uniform sampler2D tDisplacement;
+uniform float amount;
 varying vec2 vUv;
-
-float random(vec2 co) {
-    return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
-}
 
 void main() {
     vec2 uv = vUv;
 
-    // Horizontal and vertical displacement
-    float displacement = 0.1 * sin(uv.y * 10.0 + time) + 0.1 * sin(uv.x * 10.0 + time);
-    uv.x += displacement;
-    uv.y += displacement;
+    // Sample the displacement map
+    vec4 displacement = texture2D(tDisplacement, uv);
 
-    // RGB offsets for chromatic aberration
-    float amount = 0.02 * sin(time);
-    vec2 offsetR = vec2(amount, amount);
-    vec2 offsetG = vec2(-amount, -amount);
-    vec2 offsetB = vec2(-amount, amount);
+    // Apply displacement effect
+    vec2 displacedUv = uv + amount * (displacement.rg * 2.0 - 1.0);
 
-    vec4 colorR = texture2D(tDiffuse, uv + offsetR);
-    vec4 colorG = texture2D(tDiffuse, uv + offsetG);
-    vec4 colorB = texture2D(tDiffuse, uv + offsetB);
+    // Sample the texture with the displaced UVs
+    vec4 color = texture2D(tDiffuse, displacedUv);
 
-    vec4 finalColor = vec4(colorR.r, colorG.g, colorB.b, 1.0);
-
-    // Add some noise to enhance the glitch effect
-    float noise = random(uv + time);
-    finalColor.rgb += noise * 0.05;
-
-    gl_FragColor = finalColor;
+    gl_FragColor = color;
 }
 `;
 
-// Post-processing setup
+// Glitch Shader
+const glitchFragmentShader = `
+uniform sampler2D tDiffuse;
+uniform float time;
+uniform float intensity;
+varying vec2 vUv;
+
+float rand(vec2 co){
+    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
+
+void main() {
+    vec2 uv = vUv;
+    vec4 color = texture2D(tDiffuse, uv);
+
+    // Apply glitch effect by randomly shifting UVs
+    if (rand(uv + time) < intensity) {
+        uv.y += intensity * 0.1 * rand(uv);
+    }
+
+    color = texture2D(tDiffuse, uv);
+
+    gl_FragColor = color;
+}
+`;
+
 const composer = new EffectComposer(renderer);
 const renderPass = new RenderPass(scene, camera);
 composer.addPass(renderPass);
@@ -325,6 +328,7 @@ const pixelationPass = new ShaderPass({
 });
 composer.addPass(pixelationPass);
 
+// Noise Pass
 const noisePass = new ShaderPass({
     uniforms: {
         tDiffuse: { value: null },
@@ -336,17 +340,28 @@ const noisePass = new ShaderPass({
 });
 composer.addPass(noisePass);
 
+// Displacement Map Pass
+const displacementPass = new ShaderPass({
+    uniforms: {
+        tDiffuse: { value: null },
+        tDisplacement: { value: new THREE.TextureLoader().load('path/to/displacement-map.png') }, // Replace with actual displacement map
+        amount: { value: 0.0 }
+    },
+    vertexShader: vertexShader,
+    fragmentShader: displacementFragmentShader
+});
+composer.addPass(displacementPass);
+
+// Glitch Pass
 const glitchPass = new ShaderPass({
     uniforms: {
         tDiffuse: { value: null },
-        resolution: { value: new THREE.Vector2(sizes.width, sizes.height) },
         time: { value: 0.0 },
+        intensity: { value: 0.0 }
     },
-    vertexShader: glitchVertexShader,
+    vertexShader: vertexShader,
     fragmentShader: glitchFragmentShader
 });
-// Initially add glitch pass, but keep it inactive
-glitchPass.enabled = false;
 composer.addPass(glitchPass);
 
 // Adjust model scale based on window size
@@ -402,12 +417,6 @@ const animate = () => {
 
     // Update noise effect parameters
     noisePass.uniforms.time.value += 0.05; // Adjust the speed of the noise effect
-
-    // Update glitch effect parameters only during transition
-    if (glitchPass.enabled) {
-        glitchPass.uniforms.time.value += 0.05;
-    }
-
     composer.render();
 };
 animate();
@@ -417,7 +426,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
     element.addEventListener('click', () => {
         const modelUrl = element.getAttribute('data-3d-url');
         if (modelUrl) {
-            // Apply pixelation, noise, and glitch effects during transition
+            // Apply pixelation, noise, displacement, and glitch effects during transition
             const duration = 350; // duration of the transition in milliseconds
             const start = performance.now();
 
@@ -429,8 +438,8 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
 
                 pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgress;
                 noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
-                glitchPass.enabled = true;
-                glitchPass.uniforms.time.value = elapsed * 0.002; // Add some variation to the glitch
+                displacementPass.uniforms.amount.value = 0.5 * easedProgress;
+                glitchPass.uniforms.intensity.value = 0.5 * easedProgress;
 
                 if (progress < 1) {
                     requestAnimationFrame(transitionOut);
@@ -441,7 +450,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
 
             const transitionIn = () => {
                 const start = performance.now();
-                const transition = () => {
+                const animate = () => {
                     const now = performance.now();
                     const elapsed = now - start;
                     const progress = Math.min(elapsed / duration, 1);
@@ -449,15 +458,14 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
 
                     pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgress;
                     noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
-                    glitchPass.uniforms.time.value = elapsed * 0.002; // Add some variation to the glitch
+                    displacementPass.uniforms.amount.value = 0.5 * easedProgress;
+                    glitchPass.uniforms.intensity.value = 0.5 * easedProgress;
 
                     if (progress < 1) {
-                        requestAnimationFrame(transition);
-                    } else {
-                        glitchPass.enabled = false; // Disable glitch effect after transition
+                        requestAnimationFrame(animate);
                     }
                 };
-                transition();
+                animate();
             };
 
             transitionOut();
