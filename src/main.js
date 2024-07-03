@@ -415,7 +415,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
     element.addEventListener('click', () => {
         const modelUrl = element.getAttribute('data-3d-url');
         if (modelUrl) {
-            // Apply pixelation and noise effects during transition
+            // Apply pixelation, noise, and glitch effects during transition
             const duration = 350; // duration of the transition in milliseconds
             const start = performance.now();
 
