@@ -351,6 +351,9 @@ const glitchPass = new ShaderPass({
 });
 composer.addPass(glitchPass);
 
+// Disable glitch pass initially
+glitchPass.enabled = false;
+
 // Adjust model scale based on window size
 const adjustModelScale = () => {
     if (model) {
@@ -419,6 +422,9 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
             const duration = 350; // duration of the transition in milliseconds
             const start = performance.now();
 
+            // Enable glitch pass during transition
+            glitchPass.enabled = true;
+
             const transitionOut = () => {
                 const now = performance.now();
                 const elapsed = now - start;
@@ -461,6 +467,8 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
                         glitchPass.uniforms.uAmount.value = 0.0;
                         glitchPass.uniforms.uChromAbb.value = 0.0;
                         glitchPass.uniforms.uGlitch.value = 0.0;
+                        // Disable glitch pass after transition
+                        glitchPass.enabled = false;
                     }
                 };
                 transition();
