@@ -252,6 +252,14 @@ void main() {
 `;
 
 // Custom Shader (from JSON)
+const customVertexShader = `
+varying vec2 vUv;
+void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+`;
+
 const customFragmentShader = `
 #version 300 es
 precision mediump float;
@@ -340,7 +348,7 @@ const customShaderPass = new ShaderPass({
         uGlitch: { value: 0.0 },
         uTime: { value: 0.0 }
     },
-    vertexShader: vertexShader,
+    vertexShader: customVertexShader,
     fragmentShader: customFragmentShader
 });
 composer.addPass(customShaderPass);
