@@ -253,6 +253,40 @@ void main() {
 }
 `;
 
+// Blur effect fragment shader
+const blurFragmentShader = `
+uniform sampler2D tDiffuse;
+uniform vec2 resolution;
+varying vec2 vUv;
+
+void main() {
+    vec4 sum = vec4(0.0);
+    vec2 texcoord = vUv;
+    float blurSize = 1.0 / resolution.x; // Adjust blur size
+    for (int x = -4; x <= 4; x++) {
+        for (int y = -4; y <= 4; y++) {
+            sum += texture2D(tDiffuse, texcoord + vec2(x, y) * blurSize);
+        }
+    }
+    gl_FragColor = sum / 81.0; // Average the samples
+}
+`;
+
+// Distortion effect fragment shader
+const distortionFragmentShader = `
+uniform sampler2D tDiffuse;
+uniform float time;
+varying vec2 vUv;
+
+void main() {
+    vec2 uv = vUv;
+    uv.y += 0.1 * sin(uv.x * 10.0 + time);
+    vec4 color = texture2D(tDiffuse, uv);
+    gl_FragColor = color;
+}
+`;
+
+
 const composer = new EffectComposer(renderer);
 const renderPass = new RenderPass(scene, camera);
 composer.addPass(renderPass);
