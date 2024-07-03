@@ -345,8 +345,8 @@ const distortionPass = new ShaderPass({
     vertexShader: vertexShader,
     fragmentShader: distortionFragmentShader
 });
-distortionPass.renderToScreen = true; // Ensure this pass renders to screen
 composer.addPass(distortionPass);
+
 
 
 // Adjust model scale based on window size
@@ -426,17 +426,21 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
                 const elapsed = now - start;
                 const progress = Math.min(elapsed / duration, 1);
                 const easedProgress = easeInOutQuad(progress);
-
+            
                 pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgress;
                 noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
-
+            
+                // Add blur and distortion effects
+                blurPass.uniforms.resolution.value.set(sizes.width * easedProgress, sizes.height * easedProgress);
+                distortionPass.uniforms.time.value = performance.now() * 0.0001 * easedProgress;
+            
                 if (progress < 1) {
                     requestAnimationFrame(transitionOut);
                 } else {
                     loadModel(modelUrl, transitionIn);
                 }
             };
-
+            
             const transitionIn = () => {
                 const start = performance.now();
                 const transition = () => {
@@ -444,17 +448,20 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
                     const elapsed = now - start;
                     const progress = Math.min(elapsed / duration, 1);
                     const easedProgress = easeInOutQuad(1 - progress);
-
+            
                     pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgress;
                     noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
-
+            
+                    // Add blur and distortion effects
+                    blurPass.uniforms.resolution.value.set(sizes.width * easedProgress, sizes.height * easedProgress);
+                    distortionPass.uniforms.time.value = performance.now() * 0.0001 * easedProgress;
+            
                     if (progress < 1) {
                         requestAnimationFrame(transition);
                     }
                 };
                 transition();
             };
-
             transitionOut();
         } else {
             console.error('No model URL found for this element');
