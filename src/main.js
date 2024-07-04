@@ -559,7 +559,7 @@ const animate = () => {
     noisePass.uniforms.time.value += 0.05; // Adjust the speed of the noise effect
     glitchPass.uniforms.uTime.value += 0.05; // Update time for glitch effect
     blindsPass.uniforms.uTime.value += 0.05; // Update time for blinds effect
-    grainPass.uniforms.uTime.value += 0.05; // Update time for grain effect
+    grainPass.uniforms.uTime.value += 10.05; // Update time for grain effect
 
     composer.render();
 };
@@ -589,7 +589,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
                 glitchPass.uniforms.uAmount.value = 5 * easedProgress;
                 glitchPass.uniforms.uChromAbb.value = 9 * easedProgress;
                 glitchPass.uniforms.uGlitch.value = 4 * easedProgress;
-                blindsPass.uniforms.uAmount.value = 5 * easedProgress;
+                blindsPass.uniforms.uAmount.value = 0.17 * easedProgress;
 
                 if (progress < 1) {
                     requestAnimationFrame(transitionOut);
@@ -611,7 +611,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
                     glitchPass.uniforms.uAmount.value = 5 * easedProgress;
                     glitchPass.uniforms.uChromAbb.value = 9 * easedProgress;
                     glitchPass.uniforms.uGlitch.value = 4 * easedProgress;
-                    blindsPass.uniforms.uAmount.value = 5 * easedProgress;
+                    blindsPass.uniforms.uAmount.value = 0.17 * easedProgress;
 
                     if (progress < 1) {
                         requestAnimationFrame(transition);
