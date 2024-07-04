@@ -622,12 +622,12 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
 
                 pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgress;
                 noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
-                glitchPass.uniforms.uAmount.value = 5 * easedProgress;
-                glitchPass.uniforms.uChromAbb.value = 9 * easedProgress;
+                glitchPass.uniforms.uAmount.value = 10 * easedProgress;
+                glitchPass.uniforms.uChromAbb.value = 4 * easedProgress;
                 glitchPass.uniforms.uGlitch.value = 4 * easedProgress;
                 blindsPass.uniforms.uAmount.value = 0.2 * easedProgress;
                 diffusePass.uniforms.xy.value = 3 * easedProgress;
-                diffusePass.uniforms.amount.value = 0.2 * easedProgress;
+                diffusePass.uniforms.amount.value = 0.15 * easedProgress;
 
                 if (progress < 1) {
                     requestAnimationFrame(transitionOut);
@@ -647,10 +647,10 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
                     pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgress;
                     noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
                     glitchPass.uniforms.uAmount.value = 5 * easedProgress;
-                    glitchPass.uniforms.uChromAbb.value = 7 * easedProgress;
+                    glitchPass.uniforms.uChromAbb.value = 6 * easedProgress;
                     glitchPass.uniforms.uGlitch.value = 6 * easedProgress;
                     blindsPass.uniforms.uAmount.value = 0.2 * easedProgress;
-                    diffusePass.uniforms.xy.value = 6 * easedProgress;
+                    diffusePass.uniforms.xy.value = 2 * easedProgress;
                     diffusePass.uniforms.amount.value = 0.1 * easedProgress;
 
                     if (progress < 1) {
