@@ -613,7 +613,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
             // Define different durations for each effect
             const durationPixelation = 350;
             const durationNoise = 350;
-            const durationGlitch = 350;
+            const durationGlitch = 750;
             const durationBlinds = 350;
             const durationDiffuse = 350;
             const start = performance.now();
