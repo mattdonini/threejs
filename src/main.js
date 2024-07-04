@@ -376,6 +376,82 @@ void main() {
 }
 `;
 
+// Diffuse Shader
+const diffuseVertexShader = `
+varying vec2 vUv;
+void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+`;
+
+const diffuseFragmentShader = `
+precision mediump float;
+
+varying vec2 vUv;
+
+uniform sampler2D tDiffuse;
+uniform float uTime;
+uniform float xy;
+uniform vec2 uMousePos;
+uniform vec2 uResolution;
+
+float ease(int easingFunc, float t) { 
+    return t; 
+}
+
+const float MAX_ITERATIONS = 24.0;
+const float PI = 3.14159265;
+const float TWOPI = 6.2831853;
+
+float random(vec2 seed) { 
+    seed.x *= uResolution.x / uResolution.y; 
+    return fract(sin(dot(seed.xy, vec2(12.9898, 78.233))) * 43758.5453); 
+}
+
+void main() {
+    vec2 uv = vUv;
+    vec2 pos = vec2(0.5, 0.5) + mix(vec2(0), (uMousePos - 0.5), 0.00); 
+    float aspectRatio = uResolution.x / uResolution.y;
+    float delta = fract(floor(uTime) / 20.0);
+
+    float angle, rotation, amp;
+    float inner = distance(uv * vec2(aspectRatio, 1.0), pos * vec2(aspectRatio, 1.0));
+    float outer = max(0.0, 1.0 - distance(uv * vec2(aspectRatio, 1.0), pos * vec2(aspectRatio, 1.0)));
+    float amount = 0.53 * ease(0, mix(inner, outer, 0.11)) * 2.0;
+    vec2 mPos = vec2(0.5, 0.5) + mix(vec2(0), (uMousePos - 0.5), 0.00); 
+    pos = vec2(0.5, 0.5);
+    float dist = ease(0, max(0.0, 1.0 - distance(uv * vec2(aspectRatio, 1.0), mPos * vec2(aspectRatio, 1.0)) * 4.0 * (1.0 - 1.00)));
+    amount *= dist;
+
+    if (amount == 0.0) {
+        vec4 color = texture2D(tDiffuse, uv);
+        gl_FragColor = color;
+        return;
+    }
+
+    vec4 result = vec4(0);
+    float threshold = max(1.0 - 0.53, 2.0 / MAX_ITERATIONS);
+    const float invMaxIterations = 1.0 / float(MAX_ITERATIONS);
+
+    for (float i = 1.0; i <= MAX_ITERATIONS; i++) {
+        float th = i * invMaxIterations;
+        if (th > threshold) break;
+        float random1 = random(uv + th + delta);
+        float random2 = random(uv + th * 2.0 + delta);
+        float random3 = random(uv + th * 3.0 + delta);
+        vec2 ranPoint = vec2(random1 * 2.0 - 1.0, random2 * 2.0 - 1.0) * mix(1.0, random3, 0.8);
+        vec2 offset = ranPoint * vec2(0.91, 1.0 - 0.91) * amount * 0.4;
+        offset.x /= aspectRatio;
+        result += texture2D(tDiffuse, uv + offset);
+    }
+
+    result /= floor(MAX_ITERATIONS * threshold);
+    vec4 col = result;
+    gl_FragColor = col;
+}
+`;
+
 const composer = new EffectComposer(renderer);
 const renderPass = new RenderPass(scene, camera);
 composer.addPass(renderPass);
@@ -442,6 +518,20 @@ const blindsPass = new ShaderPass({
 });
 composer.addPass(blindsPass);
 
+// Diffuse Pass
+const diffusePass = new ShaderPass({
+    uniforms: {
+        tDiffuse: { value: null },
+        uTime: { value: 0.0 },
+        xy: { value: 0.0 },
+        uMousePos: { value: new THREE.Vector2(0.5, 0.5) },
+        uResolution: { value: new THREE.Vector2(sizes.width, sizes.height) },
+    },
+    vertexShader: diffuseVertexShader,
+    fragmentShader: diffuseFragmentShader
+});
+composer.addPass(diffusePass);
+
 // Disable glitch and blinds pass initially
 glitchPass.enabled = false;
 blindsPass.enabled = false;
@@ -501,6 +591,7 @@ const animate = () => {
     noisePass.uniforms.time.value += 0.05; // Adjust the speed of the noise effect
     glitchPass.uniforms.uTime.value += 0.05; // Update time for glitch effect
     blindsPass.uniforms.uTime.value += 0.05; // Update time for blinds effect
+    diffusePass.uniforms.uTime.value += 0.05; // Update time for diffuse effect
 
     composer.render();
 };
