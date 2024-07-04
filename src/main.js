@@ -422,7 +422,7 @@ void main() {
     float amt = amount * ease(0, mix(inner, outer, 0.11)) * 2.0;
     vec2 mPos = vec2(0.5, 0.5) + mix(vec2(0), (uMousePos - 0.5), 0.00); 
     pos = vec2(0.5, 0.5);
-    float dist = ease(0, max(0.0, 1.0 - distance(uv * vec2(aspectRatio, 1.0), mPos * vec2(aspectRatio, 1.0)) * 2.0 * (1.0 - 1.00)));
+    float dist = ease(0, max(0.0, 1.0 - distance(uv * vec2(aspectRatio, 1.0), mPos * vec2(aspectRatio, 1.0)) * 8.0 * (1.0 - 1.00)));
     amt *= dist;
 
     if (amt == 0.0) {
