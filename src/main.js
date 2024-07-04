@@ -592,7 +592,7 @@ const animate = () => {
 
     // Update noise effect parameters
     noisePass.uniforms.time.value += 0.05; // Adjust the speed of the noise effect
-    glitchPass.uniforms.uTime.value += 0.05; // Update time for glitch effect
+    glitchPass.uniforms.uTime.value += 1.05; // Update time for glitch effect
     blindsPass.uniforms.uTime.value += 0.05; // Update time for blinds effect
     diffusePass.uniforms.uTime.value += 0.05; // Update time for diffuse effect
 
