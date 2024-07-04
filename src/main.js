@@ -532,9 +532,10 @@ const diffusePass = new ShaderPass({
 });
 composer.addPass(diffusePass);
 
-// Disable glitch and blinds pass initially
+// Disable glitch, blinds, and diffuse pass initially
 glitchPass.enabled = false;
 blindsPass.enabled = false;
+diffusePass.enabled = false;
 
 // Adjust model scale based on window size
 const adjustModelScale = () => {
@@ -602,13 +603,14 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
     element.addEventListener('click', () => {
         const modelUrl = element.getAttribute('data-3d-url');
         if (modelUrl) {
-            // Apply pixelation, noise, glitch, and blinds effects during transition
+            // Apply pixelation, noise, glitch, blinds, and diffuse effects during transition
             const duration = 350; // duration of the transition in milliseconds
             const start = performance.now();
 
-            // Enable glitch and blinds pass during transition
+            // Enable glitch, blinds, and diffuse pass during transition
             glitchPass.enabled = true;
             blindsPass.enabled = true;
+            diffusePass.enabled = true;
 
             const transitionOut = () => {
                 const now = performance.now();
@@ -622,6 +624,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
                 glitchPass.uniforms.uChromAbb.value = 9 * easedProgress;
                 glitchPass.uniforms.uGlitch.value = 4 * easedProgress;
                 blindsPass.uniforms.uAmount.value = 0.2 * easedProgress;
+                diffusePass.uniforms.xy.value = 0.53 * easedProgress;
 
                 if (progress < 1) {
                     requestAnimationFrame(transitionOut);
@@ -644,6 +647,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
                     glitchPass.uniforms.uChromAbb.value = 9 * easedProgress;
                     glitchPass.uniforms.uGlitch.value = 4 * easedProgress;
                     blindsPass.uniforms.uAmount.value = 0.2 * easedProgress;
+                    diffusePass.uniforms.xy.value = 0.53 * easedProgress;
 
                     if (progress < 1) {
                         requestAnimationFrame(transition);
@@ -655,9 +659,11 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
                         glitchPass.uniforms.uChromAbb.value = 0.0;
                         glitchPass.uniforms.uGlitch.value = 0.0;
                         blindsPass.uniforms.uAmount.value = 0.0;
-                        // Disable glitch and blinds pass after transition
+                        diffusePass.uniforms.xy.value = 0.0;
+                        // Disable glitch, blinds, and diffuse pass after transition
                         glitchPass.enabled = false;
                         blindsPass.enabled = false;
+                        diffusePass.enabled = false;
                     }
                 };
                 transition();
