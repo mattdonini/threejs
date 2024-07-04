@@ -530,7 +530,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
                 glitchPass.uniforms.uAmount.value = 5 * easedProgress;
                 glitchPass.uniforms.uChromAbb.value = 9 * easedProgress;
                 glitchPass.uniforms.uGlitch.value = 4 * easedProgress;
-                blindsPass.uniforms.uAmount.value = 1 * easedProgress;
+                blindsPass.uniforms.uAmount.value = 0.2 * easedProgress;
 
                 if (progress < 1) {
                     requestAnimationFrame(transitionOut);
@@ -552,7 +552,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
                     glitchPass.uniforms.uAmount.value = 5 * easedProgress;
                     glitchPass.uniforms.uChromAbb.value = 9 * easedProgress;
                     glitchPass.uniforms.uGlitch.value = 4 * easedProgress;
-                    blindsPass.uniforms.uAmount.value = 1 * easedProgress;
+                    blindsPass.uniforms.uAmount.value = 0.2 * easedProgress;
 
                     if (progress < 1) {
                         requestAnimationFrame(transition);
