@@ -433,9 +433,9 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
 
                 pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgress;
                 noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
-                glitchPass.uniforms.uAmount.value = 10 * easedProgress;
+                glitchPass.uniforms.uAmount.value = 100 * easedProgress;
                 glitchPass.uniforms.uChromAbb.value = 3 * easedProgress;
-                glitchPass.uniforms.uGlitch.value = 10 * easedProgress;
+                glitchPass.uniforms.uGlitch.value = 100 * easedProgress;
 
                 if (progress < 1) {
                     requestAnimationFrame(transitionOut);
