@@ -292,9 +292,9 @@ void main() {
     uv.x += sin(uv.y * waveFreq + uTime) * waveAmp + rogue;
     uv.y += sin(uv.x * waveFreq + uTime) * waveAmp;
     float waveX = sin(uv.y * waveFreq + uTime) * waveAmp + rogue * chromab * 0.2;
-    vec4 color = texture2D(tDiffuse, uv);
-    color.r = texture2D(tDiffuse, vec2(uv.x + (glitchMod * -offX * chromab - waveX), uv.y)).r;
-    color.b = texture2D(tDiffuse, vec2(uv.x + (glitchMod * offX * chromab + waveX), uv.y)).b;
+    vec4 color = texture(tDiffuse, uv);
+    color.r = texture(tDiffuse, vec2(uv.x + (glitchMod * -offX * chromab - waveX), uv.y)).r;
+    color.b = texture(tDiffuse, vec2(uv.x + (glitchMod * offX * chromab + waveX), uv.y)).b;
     gl_FragColor = color;
 }
 `;
@@ -393,6 +393,7 @@ varying vec2 vUv;
 uniform sampler2D tDiffuse;
 uniform float uTime;
 uniform float xy;
+uniform float amount; // New uniform for controlling amount
 uniform vec2 uMousePos;
 uniform vec2 uResolution;
 
@@ -418,19 +419,13 @@ void main() {
     float angle, rotation, amp;
     float inner = distance(uv * vec2(aspectRatio, 1.0), pos * vec2(aspectRatio, 1.0));
     float outer = max(0.0, 1.0 - distance(uv * vec2(aspectRatio, 1.0), pos * vec2(aspectRatio, 1.0)));
-    
-    // Adjust the radius by changing the multipliers below
-    float amount = 0.13 * ease(0, mix(inner, outer, 0.11)) * 2.0;
-    
+    float amt = amount * ease(0, mix(inner, outer, 0.11)) * 2.0;
     vec2 mPos = vec2(0.5, 0.5) + mix(vec2(0), (uMousePos - 0.5), 0.00); 
     pos = vec2(0.5, 0.5);
-    
-    // Adjust the multiplier here to change the spread of the effect
     float dist = ease(0, max(0.0, 1.0 - distance(uv * vec2(aspectRatio, 1.0), mPos * vec2(aspectRatio, 1.0)) * 4.0 * (1.0 - 1.00)));
-    
-    amount *= dist;
+    amt *= dist;
 
-    if (amount == 0.0) {
+    if (amt == 0.0) {
         vec4 color = texture2D(tDiffuse, uv);
         gl_FragColor = color;
         return;
@@ -447,7 +442,7 @@ void main() {
         float random2 = random(uv + th * 2.0 + delta);
         float random3 = random(uv + th * 3.0 + delta);
         vec2 ranPoint = vec2(random1 * 2.0 - 1.0, random2 * 2.0 - 1.0) * mix(1.0, random3, 0.8);
-        vec2 offset = ranPoint * vec2(0.91, 1.0 - 0.91) * amount * 0.4;
+        vec2 offset = ranPoint * vec2(0.91, 1.0 - 0.91) * amt * 0.4;
         offset.x /= aspectRatio;
         result += texture2D(tDiffuse, uv + offset);
     }
@@ -530,9 +525,9 @@ const diffusePass = new ShaderPass({
         tDiffuse: { value: null },
         uTime: { value: 0.0 },
         xy: { value: 0.0 },
+        amount: { value: 0.13 }, // Set the amount to 0.13
         uMousePos: { value: new THREE.Vector2(0.5, 0.5) },
         uResolution: { value: new THREE.Vector2(sizes.width, sizes.height) },
-        amount: { value: 0.0 } // Add this line
     },
     vertexShader: diffuseVertexShader,
     fragmentShader: diffuseFragmentShader
@@ -610,12 +605,8 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
     element.addEventListener('click', () => {
         const modelUrl = element.getAttribute('data-3d-url');
         if (modelUrl) {
-            // Define different durations for each effect
-            const durationPixelation = 350;
-            const durationNoise = 350;
-            const durationGlitch = 750;
-            const durationBlinds = 350;
-            const durationDiffuse = 350;
+            // Apply pixelation, noise, glitch, blinds, and diffuse effects during transition
+            const duration = 350; // duration of the transition in milliseconds
             const start = performance.now();
 
             // Enable glitch, blinds, and diffuse pass during transition
@@ -626,27 +617,19 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
             const transitionOut = () => {
                 const now = performance.now();
                 const elapsed = now - start;
-                const progressPixelation = Math.min(elapsed / durationPixelation, 1);
-                const progressNoise = Math.min(elapsed / durationNoise, 1);
-                const progressGlitch = Math.min(elapsed / durationGlitch, 1);
-                const progressBlinds = Math.min(elapsed / durationBlinds, 1);
-                const progressDiffuse = Math.min(elapsed / durationDiffuse, 1);
-                const easedProgressPixelation = easeInOutQuad(progressPixelation);
-                const easedProgressNoise = easeInOutQuad(progressNoise);
-                const easedProgressGlitch = easeInOutQuad(progressGlitch);
-                const easedProgressBlinds = easeInOutQuad(progressBlinds);
-                const easedProgressDiffuse = easeInOutQuad(progressDiffuse);
+                const progress = Math.min(elapsed / duration, 1);
+                const easedProgress = easeInOutQuad(progress);
 
-                pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgressPixelation;
-                noisePass.uniforms.noiseStrength.value = 0.5 * easedProgressNoise;
-                glitchPass.uniforms.uAmount.value = 10 * easedProgressGlitch;
-                glitchPass.uniforms.uChromAbb.value = 4 * easedProgressGlitch;
-                glitchPass.uniforms.uGlitch.value = 4 * easedProgressGlitch;
-                blindsPass.uniforms.uAmount.value = 0.2 * easedProgressBlinds;
-                diffusePass.uniforms.xy.value = 1.2 * easedProgressDiffuse;
-                diffusePass.uniforms.amount.value = 0.12 * easedProgressDiffuse;
+                pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgress;
+                noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
+                glitchPass.uniforms.uAmount.value = 16 * easedProgress;
+                glitchPass.uniforms.uChromAbb.value = 2 * easedProgress;
+                glitchPass.uniforms.uGlitch.value = 4 * easedProgress;
+                blindsPass.uniforms.uAmount.value = 0.2 * easedProgress;
+                diffusePass.uniforms.xy.value = 1.2 * easedProgress;
+                diffusePass.uniforms.amount.value = 0.12 * easedProgress;
 
-                if (progressPixelation < 1 || progressNoise < 1 || progressGlitch < 1 || progressBlinds < 1 || progressDiffuse < 1) {
+                if (progress < 1) {
                     requestAnimationFrame(transitionOut);
                 } else {
                     loadModel(modelUrl, transitionIn);
@@ -658,27 +641,19 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
                 const transition = () => {
                     const now = performance.now();
                     const elapsed = now - start;
-                    const progressPixelation = Math.min(elapsed / durationPixelation, 1);
-                    const progressNoise = Math.min(elapsed / durationNoise, 1);
-                    const progressGlitch = Math.min(elapsed / durationGlitch, 1);
-                    const progressBlinds = Math.min(elapsed / durationBlinds, 1);
-                    const progressDiffuse = Math.min(elapsed / durationDiffuse, 1);
-                    const easedProgressPixelation = easeInOutQuad(1 - progressPixelation);
-                    const easedProgressNoise = easeInOutQuad(1 - progressNoise);
-                    const easedProgressGlitch = easeInOutQuad(1 - progressGlitch);
-                    const easedProgressBlinds = easeInOutQuad(1 - progressBlinds);
-                    const easedProgressDiffuse = easeInOutQuad(1 - progressDiffuse);
+                    const progress = Math.min(elapsed / duration, 1);
+                    const easedProgress = easeInOutQuad(1 - progress);
 
-                    pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgressPixelation;
-                    noisePass.uniforms.noiseStrength.value = 0.5 * easedProgressNoise;
-                    glitchPass.uniforms.uAmount.value = 5 * easedProgressGlitch;
-                    glitchPass.uniforms.uChromAbb.value = 6 * easedProgressGlitch;
-                    glitchPass.uniforms.uGlitch.value = 6 * easedProgressGlitch;
-                    blindsPass.uniforms.uAmount.value = 0.2 * easedProgressBlinds;
-                    diffusePass.uniforms.xy.value = 2 * easedProgressDiffuse;
-                    diffusePass.uniforms.amount.value = 0.1 * easedProgressDiffuse;
+                    pixelationPass.uniforms.pixelSize.value = 0.012 * easedProgress;
+                    noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
+                    glitchPass.uniforms.uAmount.value = 5 * easedProgress;
+                    glitchPass.uniforms.uChromAbb.value = 3 * easedProgress;
+                    glitchPass.uniforms.uGlitch.value = 6 * easedProgress;
+                    blindsPass.uniforms.uAmount.value = 0.2 * easedProgress;
+                    diffusePass.uniforms.xy.value = 2 * easedProgress;
+                    diffusePass.uniforms.amount.value = 0.1 * easedProgress;
 
-                    if (progressPixelation < 1 || progressNoise < 1 || progressGlitch < 1 || progressBlinds < 1 || progressDiffuse < 1) {
+                    if (progress < 1) {
                         requestAnimationFrame(transition);
                     } else {
                         // Reset uniforms after transition
