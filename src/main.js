@@ -393,6 +393,7 @@ varying vec2 vUv;
 uniform sampler2D tDiffuse;
 uniform float uTime;
 uniform float xy;
+uniform float amount; // New uniform for controlling amount
 uniform vec2 uMousePos;
 uniform vec2 uResolution;
 
@@ -418,13 +419,13 @@ void main() {
     float angle, rotation, amp;
     float inner = distance(uv * vec2(aspectRatio, 1.0), pos * vec2(aspectRatio, 1.0));
     float outer = max(0.0, 1.0 - distance(uv * vec2(aspectRatio, 1.0), pos * vec2(aspectRatio, 1.0)));
-    float amount = 0.05 * ease(0, mix(inner, outer, 0.11)) * 2.0;
+    float amt = amount * ease(0, mix(inner, outer, 0.11)) * 2.0;
     vec2 mPos = vec2(0.5, 0.5) + mix(vec2(0), (uMousePos - 0.5), 0.00); 
     pos = vec2(0.5, 0.5);
     float dist = ease(0, max(0.0, 1.0 - distance(uv * vec2(aspectRatio, 1.0), mPos * vec2(aspectRatio, 1.0)) * 4.0 * (1.0 - 1.00)));
-    amount *= dist;
+    amt *= dist;
 
-    if (amount == 0.0) {
+    if (amt == 0.0) {
         vec4 color = texture2D(tDiffuse, uv);
         gl_FragColor = color;
         return;
@@ -441,7 +442,7 @@ void main() {
         float random2 = random(uv + th * 2.0 + delta);
         float random3 = random(uv + th * 3.0 + delta);
         vec2 ranPoint = vec2(random1 * 2.0 - 1.0, random2 * 2.0 - 1.0) * mix(1.0, random3, 0.8);
-        vec2 offset = ranPoint * vec2(0.91, 1.0 - 0.91) * amount * 0.4;
+        vec2 offset = ranPoint * vec2(0.91, 1.0 - 0.91) * amt * 0.4;
         offset.x /= aspectRatio;
         result += texture2D(tDiffuse, uv + offset);
     }
@@ -524,6 +525,7 @@ const diffusePass = new ShaderPass({
         tDiffuse: { value: null },
         uTime: { value: 0.0 },
         xy: { value: 0.0 },
+        amount: { value: 0.13 }, // Set the amount to 0.13
         uMousePos: { value: new THREE.Vector2(0.5, 0.5) },
         uResolution: { value: new THREE.Vector2(sizes.width, sizes.height) },
     },
@@ -625,6 +627,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
                 glitchPass.uniforms.uGlitch.value = 4 * easedProgress;
                 blindsPass.uniforms.uAmount.value = 0.2 * easedProgress;
                 diffusePass.uniforms.xy.value = 0.03 * easedProgress;
+                diffusePass.uniforms.amount.value = 0.13 * easedProgress;
 
                 if (progress < 1) {
                     requestAnimationFrame(transitionOut);
@@ -648,6 +651,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
                     glitchPass.uniforms.uGlitch.value = 4 * easedProgress;
                     blindsPass.uniforms.uAmount.value = 0.2 * easedProgress;
                     diffusePass.uniforms.xy.value = 0.03 * easedProgress;
+                    diffusePass.uniforms.amount.value = 0.13 * easedProgress;
 
                     if (progress < 1) {
                         requestAnimationFrame(transition);
@@ -660,6 +664,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
                         glitchPass.uniforms.uGlitch.value = 0.0;
                         blindsPass.uniforms.uAmount.value = 0.0;
                         diffusePass.uniforms.xy.value = 0.0;
+                        diffusePass.uniforms.amount.value = 0.0;
                         // Disable glitch, blinds, and diffuse pass after transition
                         glitchPass.enabled = false;
                         blindsPass.enabled = false;
