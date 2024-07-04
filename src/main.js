@@ -304,75 +304,31 @@ const blindsVertexShader = `
 #version 300 es
 precision mediump float;
 in vec2 vTextureCoord;
+in vec3 position;
 uniform sampler2D uTexture;
 uniform float uAmount;
 uniform float uTime;
 uniform vec2 uMousePos;
 uniform vec2 uResolution;
-float ease (int easingFunc, float t) {
-    return t;
-}
-const float STEPS = 10.0;
-const float PI = 3.14159265359;
-mat2 rot(float a) {
-    return mat2(cos(a), -sin(a), sin(a), cos(a));
-}
-vec2 scaleAspect(vec2 st, float aspectRatio) {
-    return st * vec2(aspectRatio, 1.0);
-}
-vec2 unscaleAspect(vec2 st) {
-    float aspectRatio = uResolution.x / uResolution.y;
-    return st * vec2(1.0/aspectRatio, 1.0);
-}
-vec2 rotate(vec2 st, float angle) {
-    float s = sin(angle);
-    float c = cos(angle);
-    mat2 rot = mat2(c, -s, s, c);
-    return rot * st;
-}
-struct StructFunc {
-    vec2 st;
-    vec3 distort;
-};
-StructFunc style0(vec2 st, vec2 pos, float divisions, float dist, float amount, vec3 first, vec3 second, vec3 third) {
-    float segment = fract((st.y + 1. - pos.y - 1. + uTime * 0.01) * divisions);
-    vec3 distort = mix(mix(first, second, segment * 2.), mix(second, third, (segment - 0.5) / (1. - 0.5)), step(0.5, segment));
-    st.y -= pow(distort.r, dist) / 10. * amount;
-    st.y += pow(distort.b, dist) / 10. * amount;
-    st = rot(0.00 * 2. * PI) * (st - pos) + pos;
-    st = unscaleAspect(st);
-    return StructFunc(st, distort);
-}
-StructFunc getStyle(vec2 st, vec2 pos, float divisions, float dist, float amount, vec3 first, vec3 second, vec3 third) {
-    return style0(st, pos, divisions, dist, amount, first, second, third);
-}
-vec4 blinds(vec2 st, float mDist) {
-    float aspectRatio = uResolution.x / uResolution.y;
-    vec2 pos = vec2(0.5, 0.5) + mix(vec2(0), (uMousePos - 0.5), 0.00) * floor(1.00);
-    pos = scaleAspect(pos, aspectRatio);
-    st = scaleAspect(st, aspectRatio);
-    st = rotate(st - pos, -0.00 * 2.0 * PI) + pos;
-    vec3 first = vec3(1, 0, 0);
-    vec3 second = vec3(0, 1, 0);
-    vec3 third = vec3(0, 0, 1);
-    float divisions = 2. + -30.00 * 30.;
-    float dist = 1.00 * 4. + 1.;
-    float amount = uAmount * mDist;
-    StructFunc result = getStyle(st, pos, divisions, dist, amount, first, second, third);
-    vec4 color = texture(uTexture, result.st);
-    return color;
+out vec2 vUv;
+
+void main() {
+    vUv = vTextureCoord;
+    gl_Position = vec4(position, 1.0);
 }
 `;
 
 const blindsFragmentShader = `
 #version 300 es
 precision mediump float;
-in vec2 vTextureCoord;
+in vec2 vUv;
 uniform sampler2D uTexture;
 uniform float uAmount;
 uniform float uTime;
 uniform vec2 uMousePos;
 uniform vec2 uResolution;
+out vec4 fragColor;
+
 float ease (int easingFunc, float t) {
     return t;
 }
@@ -425,6 +381,10 @@ vec4 blinds(vec2 st, float mDist) {
     StructFunc result = getStyle(st, pos, divisions, dist, amount, first, second, third);
     vec4 color = texture(uTexture, result.st);
     return color;
+}
+
+void main() {
+    fragColor = blinds(vUv, 1.0);
 }
 `;
 
