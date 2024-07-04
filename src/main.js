@@ -443,7 +443,7 @@ composer.addPass(glitchPass);
 // Blinds Pass
 const blindsPass = new ShaderPass({
     uniforms: {
-        uTexture: { value: null },
+        tDiffuse: { value: null },
         uAmount: { value: 0.0 },
         uTime: { value: 0.0 },
         uMousePos: { value: new THREE.Vector2(0.5, 0.5) },
