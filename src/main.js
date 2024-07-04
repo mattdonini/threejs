@@ -434,8 +434,8 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
                 pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgress;
                 noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
                 glitchPass.uniforms.uAmount.value = easedProgress;
-                glitchPass.uniforms.uChromAbb.value = 20 * easedProgress;
-                glitchPass.uniforms.uGlitch.value = easedProgress;
+                glitchPass.uniforms.uChromAbb.value = 7 * easedProgress;
+                glitchPass.uniforms.uGlitch.value = 70 * easedProgress;
 
                 if (progress < 1) {
                     requestAnimationFrame(transitionOut);
@@ -455,8 +455,8 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
                     pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgress;
                     noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
                     glitchPass.uniforms.uAmount.value = easedProgress;
-                    glitchPass.uniforms.uChromAbb.value = 20 * easedProgress;
-                    glitchPass.uniforms.uGlitch.value = easedProgress;
+                    glitchPass.uniforms.uChromAbb.value = 7 * easedProgress;
+                    glitchPass.uniforms.uGlitch.value = 70 * easedProgress;
 
                     if (progress < 1) {
                         requestAnimationFrame(transition);
