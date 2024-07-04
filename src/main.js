@@ -376,6 +376,58 @@ void main() {
 }
 `;
 
+// Grain Shader
+const grainVertexShader = `
+#version 300 es
+precision mediump float;
+in vec2 uv;
+in vec3 position;
+out vec2 vUv;
+void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+`;
+
+const grainFragmentShader = `
+#version 300 es
+precision mediump float;
+in vec2 vUv;
+uniform sampler2D tDiffuse;
+uniform float uTime;
+uniform float uAmount;
+uniform vec2 uResolution;
+out vec4 fragColor;
+
+vec3 blend (int blendMode, vec3 src, vec3 dst) {
+    return vec3((dst.x <= 0.5) ? (2.0 * src.x * dst.x) : (1.0 - 2.0 * (1.0 - dst.x) * (1.0 - src.x)),
+                (dst.y <= 0.5) ? (2.0 * src.y * dst.y) : (1.0 - 2.0 * (1.0 - dst.y) * (1.0 - src.y)),
+                (dst.z <= 0.5) ? (2.0 * src.z * dst.z) : (1.0 - 2.0 * (1.0 - dst.z) * (1.0 - src.z)));
+}
+const float PHI = 1.61803398874989484820459;
+float gold_noise(in vec2 xy, in float seed) {
+    return fract(tan(distance(xy*PHI, xy)*seed)*xy.x);
+}
+
+void main() {
+    vec2 uv = vUv;
+    vec4 color = texture(tDiffuse, uv);
+    vec2 st = uv;
+    vec3 grainRGB = vec3(0);
+    st *= uResolution;
+    float delta = fract((floor(uTime)/20.));
+    if(0 == 1) {
+        grainRGB = vec3( gold_noise(st, delta + 1.), gold_noise(st, delta + 2.), gold_noise(st, delta + 3.) );
+    } else {
+        grainRGB = vec3(gold_noise(st, delta + 1.));
+    }
+    if(5 > 0) {
+        color.rgb = mix(color.rgb, blend(5, grainRGB, color.rgb), uAmount);
+    }
+    fragColor = color;
+}
+`;
+
 const composer = new EffectComposer(renderer);
 const renderPass = new RenderPass(scene, camera);
 composer.addPass(renderPass);
@@ -442,6 +494,19 @@ const blindsPass = new ShaderPass({
 });
 composer.addPass(blindsPass);
 
+// Grain Pass (Always Enabled)
+const grainPass = new ShaderPass({
+    uniforms: {
+        tDiffuse: { value: null },
+        uTime: { value: 0.0 },
+        uAmount: { value: 0.5 },
+        uResolution: { value: new THREE.Vector2(sizes.width, sizes.height) },
+    },
+    vertexShader: grainVertexShader,
+    fragmentShader: grainFragmentShader
+});
+composer.addPass(grainPass);
+
 // Disable glitch and blinds pass initially
 glitchPass.enabled = false;
 blindsPass.enabled = false;
@@ -482,7 +547,6 @@ const animate = () => {
     if (model) {
         model.position.set(0, 0, 0);
 
-        // Increase the factors to make the rotation more noticeable
         const rotationFactorX = 0.2;
         const rotationFactorY = 0.2;
 
@@ -501,6 +565,7 @@ const animate = () => {
     noisePass.uniforms.time.value += 0.05; // Adjust the speed of the noise effect
     glitchPass.uniforms.uTime.value += 0.05; // Update time for glitch effect
     blindsPass.uniforms.uTime.value += 0.05; // Update time for blinds effect
+    grainPass.uniforms.uTime.value += 0.05; // Update time for grain effect
 
     composer.render();
 };
@@ -530,7 +595,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
                 glitchPass.uniforms.uAmount.value = 5 * easedProgress;
                 glitchPass.uniforms.uChromAbb.value = 9 * easedProgress;
                 glitchPass.uniforms.uGlitch.value = 4 * easedProgress;
-                blindsPass.uniforms.uAmount.value = 0.15 * easedProgress;
+                blindsPass.uniforms.uAmount.value = 5 * easedProgress;
 
                 if (progress < 1) {
                     requestAnimationFrame(transitionOut);
@@ -552,7 +617,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
                     glitchPass.uniforms.uAmount.value = 5 * easedProgress;
                     glitchPass.uniforms.uChromAbb.value = 9 * easedProgress;
                     glitchPass.uniforms.uGlitch.value = 4 * easedProgress;
-                    blindsPass.uniforms.uAmount.value = 0.15 * easedProgress;
+                    blindsPass.uniforms.uAmount.value = 5 * easedProgress;
 
                     if (progress < 1) {
                         requestAnimationFrame(transition);
