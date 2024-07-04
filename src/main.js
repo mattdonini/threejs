@@ -559,7 +559,7 @@ const animate = () => {
     noisePass.uniforms.time.value += 0.05; // Adjust the speed of the noise effect
     glitchPass.uniforms.uTime.value += 0.05; // Update time for glitch effect
     blindsPass.uniforms.uTime.value += 0.05; // Update time for blinds effect
-    grainPass.uniforms.uTime.value += 10.05; // Update time for grain effect
+    grainPass.uniforms.uTime.value += 100.05; // Update time for grain effect
 
     composer.render();
 };
