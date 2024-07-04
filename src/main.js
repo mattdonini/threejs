@@ -592,7 +592,7 @@ const animate = () => {
 
     // Update noise effect parameters
     noisePass.uniforms.time.value += 0.05; // Adjust the speed of the noise effect
-    glitchPass.uniforms.uTime.value += 10.05; // Update time for glitch effect
+    glitchPass.uniforms.uTime.value += 0.05; // Update time for glitch effect
     blindsPass.uniforms.uTime.value += 0.05; // Update time for blinds effect
     diffusePass.uniforms.uTime.value += 0.05; // Update time for diffuse effect
 
@@ -623,7 +623,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
                 pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgress;
                 noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
                 glitchPass.uniforms.uAmount.value = 10 * easedProgress;
-                glitchPass.uniforms.uChromAbb.value = 4 * easedProgress;
+                glitchPass.uniforms.uChromAbb.value = 2 * easedProgress;
                 glitchPass.uniforms.uGlitch.value = 4 * easedProgress;
                 blindsPass.uniforms.uAmount.value = 0.2 * easedProgress;
                 diffusePass.uniforms.xy.value = 1.2 * easedProgress;
@@ -647,7 +647,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
                     pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgress;
                     noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
                     glitchPass.uniforms.uAmount.value = 5 * easedProgress;
-                    glitchPass.uniforms.uChromAbb.value = 6 * easedProgress;
+                    glitchPass.uniforms.uChromAbb.value = 3 * easedProgress;
                     glitchPass.uniforms.uGlitch.value = 6 * easedProgress;
                     blindsPass.uniforms.uAmount.value = 0.2 * easedProgress;
                     diffusePass.uniforms.xy.value = 2 * easedProgress;
