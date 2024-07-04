@@ -418,7 +418,7 @@ void main() {
     float angle, rotation, amp;
     float inner = distance(uv * vec2(aspectRatio, 1.0), pos * vec2(aspectRatio, 1.0));
     float outer = max(0.0, 1.0 - distance(uv * vec2(aspectRatio, 1.0), pos * vec2(aspectRatio, 1.0)));
-    float amount = 0.13 * ease(0, mix(inner, outer, 0.11)) * 2.0;
+    float amount = 0.05 * ease(0, mix(inner, outer, 0.11)) * 2.0;
     vec2 mPos = vec2(0.5, 0.5) + mix(vec2(0), (uMousePos - 0.5), 0.00); 
     pos = vec2(0.5, 0.5);
     float dist = ease(0, max(0.0, 1.0 - distance(uv * vec2(aspectRatio, 1.0), mPos * vec2(aspectRatio, 1.0)) * 4.0 * (1.0 - 1.00)));
