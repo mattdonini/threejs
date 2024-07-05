@@ -549,7 +549,7 @@ const adjustModelScale = () => {
         const isMobile = sizes.width < 768;
 
         // Calculate scale factors based on screen size
-        const scaleFactorWidth = isMobile ? sizes.width / 600 : sizes.width / 900;
+        const scaleFactorWidth = isMobile ? sizes.width / 500 : sizes.width / 800;
         const scaleFactorHeight = isMobile ? sizes.height / 500 : sizes.height / 700;
 
         // Determine the final scale factor
