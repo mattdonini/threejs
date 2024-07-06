@@ -644,7 +644,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
                     const progress = Math.min(elapsed / duration, 1);
                     const easedProgress = easeInOutQuad(1 - progress);
 
-                    pixelationPass.uniforms.pixelSize.value = 0.016 * easedProgress;
+                    pixelationPass.uniforms.pixelSize.value = 0.015 * easedProgress;
                     noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
                     glitchPass.uniforms.uAmount.value = 5 * easedProgress;
                     glitchPass.uniforms.uChromAbb.value = 3 * easedProgress;
