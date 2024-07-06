@@ -568,15 +568,6 @@ const easeInOutQuad = (t) => {
     return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 };
 
-// Define durations for each shader effect
-const shaderDurations = {
-    pixelation: 350,
-    noise: 300,
-    glitch: 550,
-    blinds: 300,
-    diffuse: 400,
-};
-
 // Animation loop
 const animate = () => {
     requestAnimationFrame(animate);
@@ -615,82 +606,55 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
         const modelUrl = element.getAttribute('data-3d-url');
         if (modelUrl) {
             // Apply pixelation, noise, glitch, blinds, and diffuse effects during transition
+            const duration = 350; // duration of the transition in milliseconds
+            const start = performance.now();
+
+            // Enable glitch, blinds, and diffuse pass during transition
             glitchPass.enabled = true;
             blindsPass.enabled = true;
             diffusePass.enabled = true;
 
             const transitionOut = () => {
-                const start = performance.now();
+                const now = performance.now();
+                const elapsed = now - start;
+                const progress = Math.min(elapsed / duration, 1);
+                const easedProgress = easeInOutQuad(progress);
 
-                const animateOut = () => {
-                    const now = performance.now();
-                    const elapsed = now - start;
+                pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgress;
+                noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
+                glitchPass.uniforms.uAmount.value = 16 * easedProgress;
+                glitchPass.uniforms.uChromAbb.value = 2 * easedProgress;
+                glitchPass.uniforms.uGlitch.value = 4 * easedProgress;
+                blindsPass.uniforms.uAmount.value = 0.2 * easedProgress;
+                diffusePass.uniforms.xy.value = 1 * easedProgress;
+                diffusePass.uniforms.amount.value = 0.12 * easedProgress;
 
-                    // Progress for each shader based on its duration
-                    const pixelationProgress = Math.min(elapsed / shaderDurations.pixelation, 1);
-                    const noiseProgress = Math.min(elapsed / shaderDurations.noise, 1);
-                    const glitchProgress = Math.min(elapsed / shaderDurations.glitch, 1);
-                    const blindsProgress = Math.min(elapsed / shaderDurations.blinds, 1);
-                    const diffuseProgress = Math.min(elapsed / shaderDurations.diffuse, 1);
-
-                    const easedPixelationProgress = easeInOutQuad(pixelationProgress);
-                    const easedNoiseProgress = easeInOutQuad(noiseProgress);
-                    const easedGlitchProgress = easeInOutQuad(glitchProgress);
-                    const easedBlindsProgress = easeInOutQuad(blindsProgress);
-                    const easedDiffuseProgress = easeInOutQuad(diffuseProgress);
-
-                    // Update shader uniforms based on individual progress
-                    pixelationPass.uniforms.pixelSize.value = 0.008 * easedPixelationProgress;
-                    noisePass.uniforms.noiseStrength.value = 0.5 * easedNoiseProgress;
-                    glitchPass.uniforms.uAmount.value = 16 * easedGlitchProgress;
-                    glitchPass.uniforms.uChromAbb.value = 2 * easedGlitchProgress;
-                    glitchPass.uniforms.uGlitch.value = 4 * easedGlitchProgress;
-                    blindsPass.uniforms.uAmount.value = 0.2 * easedBlindsProgress;
-                    diffusePass.uniforms.xy.value = 1 * easedDiffuseProgress;
-                    diffusePass.uniforms.amount.value = 0.12 * easedDiffuseProgress;
-
-                    if (pixelationProgress < 1 || noiseProgress < 1 || glitchProgress < 1 || blindsProgress < 1 || diffuseProgress < 1) {
-                        requestAnimationFrame(animateOut);
-                    } else {
-                        loadModel(modelUrl, transitionIn);
-                    }
-                };
-
-                animateOut();
+                if (progress < 1) {
+                    requestAnimationFrame(transitionOut);
+                } else {
+                    loadModel(modelUrl, transitionIn);
+                }
             };
 
             const transitionIn = () => {
                 const start = performance.now();
-
-                const animateIn = () => {
+                const transition = () => {
                     const now = performance.now();
                     const elapsed = now - start;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const easedProgress = easeInOutQuad(1 - progress);
 
-                    // Progress for each shader based on its duration
-                    const pixelationProgress = Math.min(elapsed / shaderDurations.pixelation, 1);
-                    const noiseProgress = Math.min(elapsed / shaderDurations.noise, 1);
-                    const glitchProgress = Math.min(elapsed / shaderDurations.glitch, 1);
-                    const blindsProgress = Math.min(elapsed / shaderDurations.blinds, 1);
-                    const diffuseProgress = Math.min(elapsed / shaderDurations.diffuse, 1);
+                    pixelationPass.uniforms.pixelSize.value = 0.015 * easedProgress;
+                    noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
+                    glitchPass.uniforms.uAmount.value = 5 * easedProgress;
+                    glitchPass.uniforms.uChromAbb.value = 3 * easedProgress;
+                    glitchPass.uniforms.uGlitch.value = 6 * easedProgress;
+                    blindsPass.uniforms.uAmount.value = 0.2 * easedProgress;
+                    diffusePass.uniforms.xy.value = 2 * easedProgress;
+                    diffusePass.uniforms.amount.value = 0.1 * easedProgress;
 
-                    const easedPixelationProgress = easeInOutQuad(1 - pixelationProgress);
-                    const easedNoiseProgress = easeInOutQuad(1 - noiseProgress);
-                    const easedGlitchProgress = easeInOutQuad(1 - glitchProgress);
-                    const easedBlindsProgress = easeInOutQuad(1 - blindsProgress);
-                    const easedDiffuseProgress = easeInOutQuad(1 - diffuseProgress);
-
-                    // Update shader uniforms based on individual progress
-                    pixelationPass.uniforms.pixelSize.value = 0.015 * easedPixelationProgress;
-                    noisePass.uniforms.noiseStrength.value = 0.5 * easedNoiseProgress;
-                    glitchPass.uniforms.uAmount.value = 5 * easedGlitchProgress;
-                    glitchPass.uniforms.uChromAbb.value = 3 * easedGlitchProgress;
-                    glitchPass.uniforms.uGlitch.value = 6 * easedGlitchProgress;
-                    blindsPass.uniforms.uAmount.value = 0.2 * easedBlindsProgress;
-                    diffusePass.uniforms.xy.value = 2 * easedDiffuseProgress;
-                    diffusePass.uniforms.amount.value = 0.1 * easedDiffuseProgress;
-
-                    if (pixelationProgress < 1 || noiseProgress < 1 || glitchProgress < 1 || blindsProgress < 1 || diffuseProgress < 1) {
-                        requestAnimationFrame(animateIn);
+                    if (progress < 1) {
+                        requestAnimationFrame(transition);
                     } else {
                         // Reset uniforms after transition
                         pixelationPass.uniforms.pixelSize.value = 0.0;
@@ -707,8 +671,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
                         diffusePass.enabled = false;
                     }
                 };
-
-                animateIn();
+                transition();
             };
 
             transitionOut();
@@ -729,6 +692,7 @@ document.querySelectorAll('[data-threads-id]').forEach((element) => {
         }
     });
 });
+
 
 // Handling switching between garments and textures
 document.addEventListener('DOMContentLoaded', function() {
