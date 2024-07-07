@@ -643,13 +643,13 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
                     const now = performance.now();
                     const elapsed = now - start;
                     const progress = Math.min(elapsed / glitchDuration, 1);
-                    const easedProgress = easeInOutQuad(1 - (elapsed / duration)); // Ease out for other effects
+                    const easedProgress = easeInOutQuad(1 - (elapsed / glitchDuration)); // Ease out for glitch effect
 
                     pixelationPass.uniforms.pixelSize.value = 0.015 * easedProgress;
                     noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
-                    glitchPass.uniforms.uAmount.value = 5 * (1 - (elapsed / glitchDuration));
-                    glitchPass.uniforms.uChromAbb.value = 3 * (1 - (elapsed / glitchDuration));
-                    glitchPass.uniforms.uGlitch.value = 6 * (1 - (elapsed / glitchDuration));
+                    glitchPass.uniforms.uAmount.value = 5 * easedProgress;
+                    glitchPass.uniforms.uChromAbb.value = 3 * easedProgress;
+                    glitchPass.uniforms.uGlitch.value = 6 * easedProgress;
                     blindsPass.uniforms.uAmount.value = 0.2 * easedProgress;
                     diffusePass.uniforms.xy.value = 2 * easedProgress;
                     diffusePass.uniforms.amount.value = 0.1 * easedProgress;
