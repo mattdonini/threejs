@@ -694,7 +694,7 @@ document.querySelectorAll('[data-threads-id]').forEach((element) => {
     });
 });
 
-let currentActiveGarmentId = 0;
+let currentActiveDiv = null;
 
 // Add event listeners to the divs for texture switching
 document.querySelectorAll('[data-threads-id]').forEach((element, index) => {
@@ -720,16 +720,17 @@ function displayGarmentImages(index) {
 
     // Show the selected garment image based on the index for all garments
     const garmentClass = `.img.is-garment${index === 0 ? '' : '-' + (index + 1)}`;
-    document.querySelectorAll(garmentClass).forEach(selectedImg => {
+    document.querySelectorAll(garmentClass).forEach((selectedImg) => {
         selectedImg.style.display = 'block';
+        selectedImg.style.opacity = '0.5'; // Default to 0.5 opacity for all
     });
 
     // Set the opacity of the active garment
-    const activeGarment = document.querySelector(`[data-garment-id="${currentActiveGarmentId}"]`);
-    if (activeGarment) {
-        activeGarment.querySelectorAll(garmentClass).forEach(img => {
-            img.style.opacity = '1';
-        });
+    if (currentActiveDiv) {
+        const activeGarmentImg = currentActiveDiv.querySelector(garmentClass);
+        if (activeGarmentImg) {
+            activeGarmentImg.style.opacity = '1';
+        }
     }
 }
 
@@ -754,7 +755,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function handleItemSelection(itemSelector, imgSelector, cornerWrapSelector, enableShadow, onlyUpdateTop = false) {
         const divs = document.querySelectorAll(itemSelector);
-        let activeDiv = divs[0]; // Initialize with the first div
+        currentActiveDiv = divs[0]; // Initialize with the first div
         const cornerWrap = cornerWrapSelector ? document.querySelector(cornerWrapSelector) : null;
         let activeParagraph; // Variable to store the active paragraph
 
@@ -778,20 +779,20 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        if (activeDiv) {
-            const firstImg = activeDiv.querySelector(imgSelector);
+        if (currentActiveDiv) {
+            const firstImg = currentActiveDiv.querySelector(imgSelector);
             if (firstImg) {
                 firstImg.style.opacity = '1';
             }
             if (enableShadow) {
-                activeDiv.classList.add('inner-shadow');
+                currentActiveDiv.classList.add('inner-shadow');
             }
-            activeDiv.classList.add('active');
+            currentActiveDiv.classList.add('active');
             if (cornerWrap) {
-                positionCornerWrap(activeDiv);
+                positionCornerWrap(currentActiveDiv);
                 cornerWrap.classList.add('inner-shadow'); // Add inner shadow to the corner wrap
             }
-            updateParagraphIndicator(activeDiv);
+            updateParagraphIndicator(currentActiveDiv);
         }
 
         divs.forEach(div => {
@@ -802,7 +803,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             div.addEventListener('mouseenter', function() {
-                if (activeDiv !== div) {
+                if (currentActiveDiv !== div) {
                     imgs.forEach(img => {
                         img.style.opacity = '0.8';
                     });
@@ -810,7 +811,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             div.addEventListener('mouseleave', function() {
-                if (activeDiv !== div) {
+                if (currentActiveDiv !== div) {
                     imgs.forEach(img => {
                         img.style.opacity = '0.5';
                     });
@@ -836,14 +837,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     div.classList.add('inner-shadow');
                 }
                 div.classList.add('active');
-                activeDiv = div;
-                currentActiveGarmentId = div.getAttribute('data-garment-id'); // Update current active garment ID
+                currentActiveDiv = div; // Update current active div
 
                 if (cornerWrap) {
-                    positionCornerWrap(activeDiv);
+                    positionCornerWrap(currentActiveDiv);
                     cornerWrap.classList.add('inner-shadow'); // Add inner shadow to the corner wrap
                 }
-                updateParagraphIndicator(activeDiv);
+                updateParagraphIndicator(currentActiveDiv);
             });
         });
 
