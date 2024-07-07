@@ -681,7 +681,6 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
         }
     });
 });
-
 let currentActiveDiv = null;
 
 // Add event listeners to the divs for texture switching
@@ -844,4 +843,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Display the first set of garment images by default after everything is set up
     displayGarmentImages(0);
+
+    // Ensure the first garment image is set to full opacity by default
+    const firstGarmentImg = document.querySelector('.garment_item .img.is-garment');
+    if (firstGarmentImg) {
+        firstGarmentImg.style.opacity = '1';
+    }
 });
