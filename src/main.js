@@ -820,7 +820,7 @@ document.addEventListener('DOMContentLoaded', function() {
     );
     // Funzione per nascondere tutte le immagini inizialmente
 const hideAllImages = () => {
-    document.querySelectorAll('.image-item .gallery-image').forEach((img) => {
+    document.querySelectorAll('.image-item img').forEach((img) => {
         img.style.display = 'none';
     });
 };
@@ -828,7 +828,7 @@ const hideAllImages = () => {
 // Funzione per mostrare l'immagine corretta
 const showImageByIndex = (index) => {
     document.querySelectorAll('.image-item').forEach((item) => {
-        const images = item.querySelectorAll('.gallery-image');
+        const images = item.querySelectorAll('img'); // Seleziona tutte le immagini all'interno di image-item
         images.forEach((img, imgIndex) => {
             img.style.display = (imgIndex === index) ? 'block' : 'none';
         });
