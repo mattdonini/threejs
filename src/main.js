@@ -607,7 +607,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
         if (modelUrl) {
             // Apply pixelation, noise, glitch, blinds, and diffuse effects during transition
             const duration = 350; // duration of the transition in milliseconds
-            const glitchDuration = 600; // duration for the glitch effect in milliseconds
+            const glitchDuration = 650; // duration for the glitch effect in milliseconds
             const start = performance.now();
 
             // Enable glitch, blinds, and diffuse pass during transition
@@ -645,7 +645,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
                     const progress = Math.min(elapsed / glitchDuration, 1);
                     const easedProgress = easeInOutQuad(1 - (elapsed / glitchDuration)); // Ease out for glitch effect
 
-                    pixelationPass.uniforms.pixelSize.value = 0.015 * easedProgress;
+                    pixelationPass.uniforms.pixelSize.value = 0.012 * easedProgress;
                     noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
                     glitchPass.uniforms.uAmount.value = 5 * easedProgress;
                     glitchPass.uniforms.uChromAbb.value = 3 * easedProgress;
