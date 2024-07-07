@@ -788,22 +788,28 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             item.addEventListener('mouseenter', function() {
-                if ((currentActiveGarment !== item && itemSelector === '.garment_item') ||
-                    (currentActiveThread !== item && itemSelector === '.threads_trigger-item')) {
+                if (itemSelector === '.garment_item' && currentActiveGarment !== item) {
                     imgs.forEach(img => {
                         img.style.opacity = '0.8';
                     });
-                    item.classList.add('hover-inner-shadow'); // Add hover inner shadow
+                    item.classList.add('hover-inner-shadow'); // Add hover inner shadow for garments
+                } else if (itemSelector === '.threads_trigger-item' && currentActiveThread !== item) {
+                    imgs.forEach(img => {
+                        img.style.opacity = '0.8';
+                    });
                 }
             });
 
             item.addEventListener('mouseleave', function() {
-                if ((currentActiveGarment !== item && itemSelector === '.garment_item') ||
-                    (currentActiveThread !== item && itemSelector === '.threads_trigger-item')) {
+                if (itemSelector === '.garment_item' && currentActiveGarment !== item) {
                     imgs.forEach(img => {
                         img.style.opacity = '0.5';
                     });
-                    item.classList.remove('hover-inner-shadow'); // Remove hover inner shadow
+                    item.classList.remove('hover-inner-shadow'); // Remove hover inner shadow for garments
+                } else if (itemSelector === '.threads_trigger-item' && currentActiveThread !== item) {
+                    imgs.forEach(img => {
+                        img.style.opacity = '0.5';
+                    });
                 }
             });
 
