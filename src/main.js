@@ -807,7 +807,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 items.forEach(d => {
                     const otherImgs = d.querySelectorAll(imgSelector);
                     otherImgs.forEach(otherImg => {
-                        otherImg.style.opacity = '0.5';
+                        if (d !== currentActiveGarment && d !== currentActiveThread) {
+                            otherImg.style.opacity = '0.5';
+                        }
                     });
                     if (enableShadow) {
                         d.classList.remove('inner-shadow');
