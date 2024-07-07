@@ -788,7 +788,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             item.addEventListener('mouseenter', function() {
-                if (currentActiveGarment !== item && currentActiveThread !== item) {
+                if ((currentActiveGarment !== item && itemSelector === '.garment_item') ||
+                    (currentActiveThread !== item && itemSelector === '.threads_trigger-item')) {
                     imgs.forEach(img => {
                         img.style.opacity = '0.8';
                     });
@@ -796,7 +797,8 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             item.addEventListener('mouseleave', function() {
-                if (currentActiveGarment !== item && currentActiveThread !== item) {
+                if ((currentActiveGarment !== item && itemSelector === '.garment_item') ||
+                    (currentActiveThread !== item && itemSelector === '.threads_trigger-item')) {
                     imgs.forEach(img => {
                         img.style.opacity = '0.5';
                     });
