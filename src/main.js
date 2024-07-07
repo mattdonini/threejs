@@ -694,22 +694,23 @@ document.querySelectorAll('[data-threads-id]').forEach((element) => {
     });
 });
 
-
 // Handling switching between garments and textures
 document.addEventListener('DOMContentLoaded', function() {
-    // Function to display images in Lightbox Container
+    // Function to display the corresponding images
     function displayImages(threadsId) {
-        // Hide all lightbox containers
-        document.querySelectorAll('.lightbox_container').forEach(container => {
-            container.style.display = 'none';
+        // Hide all images in the static page collection list
+        document.querySelectorAll('.static-page-image').forEach(image => {
+            image.style.display = 'none';
         });
 
-        // Show the lightbox container with the corresponding ID
-        const lightboxContainer = document.querySelector(`#${threadsId}`);
-        if (lightboxContainer) {
-            lightboxContainer.style.display = 'block';
+        // Show the images with the corresponding ID
+        const imagesToShow = document.querySelectorAll(`.threads_img_id_${threadsId}`);
+        if (imagesToShow.length > 0) {
+            imagesToShow.forEach(image => {
+                image.style.display = 'block';
+            });
         } else {
-            console.error(`No lightbox container found for threads ID: ${threadsId}`);
+            console.error(`No images found for threads ID: ${threadsId}`);
         }
     }
 
