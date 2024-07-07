@@ -718,8 +718,7 @@ function displayGarmentImages(index) {
 
     // Show the selected garment image based on the index for all garments
     const garmentClass = `.img.is-garment${index === 0 ? '' : '-' + (index + 1)}`;
-    const selectedImgs = document.querySelectorAll(garmentClass);
-    selectedImgs.forEach((selectedImg, idx) => {
+    document.querySelectorAll(garmentClass).forEach((selectedImg, idx) => {
         selectedImg.style.display = 'block';
         selectedImg.style.opacity = idx === 0 ? '1' : '0.5'; // Set opacity to 1 for the first image, 0.5 for others
     });
@@ -727,9 +726,6 @@ function displayGarmentImages(index) {
 
 // Handling switching between garments and textures
 document.addEventListener('DOMContentLoaded', function() {
-    // Display the first set of garment images by default
-    displayGarmentImages(0);
-
     // Garment items functionality
     handleItemSelection(
         '.garment_item',
@@ -858,4 +854,6 @@ document.addEventListener('DOMContentLoaded', function() {
         false // Disable inner shadow
     );
 
+    // Display the first set of garment images by default after everything is set up
+    displayGarmentImages(0);
 });
