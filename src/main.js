@@ -793,6 +793,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     imgs.forEach(img => {
                         img.style.opacity = '0.8';
                     });
+                    item.classList.add('hover-inner-shadow'); // Add hover inner shadow
                 }
             });
 
@@ -802,6 +803,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     imgs.forEach(img => {
                         img.style.opacity = '0.5';
                     });
+                    item.classList.remove('hover-inner-shadow'); // Remove hover inner shadow
                 }
             });
 
