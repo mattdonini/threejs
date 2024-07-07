@@ -694,19 +694,6 @@ document.querySelectorAll('[data-threads-id]').forEach((element) => {
     });
 });
 
-// Add event listeners to the divs for image switching
-document.querySelectorAll('.threads_trigger-item').forEach((element) => {
-    element.addEventListener('click', () => {
-        const imgIndex = element.getAttribute('data-threads-img-index') - 1; // Convert to zero-based index
-
-        document.querySelectorAll('.image-item').forEach((item) => {
-            const images = item.querySelectorAll('.gallery-image');
-            images.forEach((img, index) => {
-                img.style.display = (index === imgIndex) ? 'block' : 'none';
-            });
-        });
-    });
-});
 
 // Handling switching between garments and textures
 document.addEventListener('DOMContentLoaded', function() {
