@@ -698,6 +698,8 @@ document.querySelectorAll('[data-threads-id]').forEach((element) => {
 document.addEventListener('DOMContentLoaded', function() {
     // Function to display the corresponding images
     function displayImages(threadsId) {
+        console.log(`Displaying images for threads ID: ${threadsId}`);
+        
         // Hide all images in the static page collection list
         document.querySelectorAll('.static-page-image').forEach(image => {
             image.style.display = 'none';
@@ -705,6 +707,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Show the images with the corresponding ID
         const imagesToShow = document.querySelectorAll(`.threads_img_id_${threadsId}`);
+        console.log(`Found ${imagesToShow.length} images to show`);
         if (imagesToShow.length > 0) {
             imagesToShow.forEach(image => {
                 image.style.display = 'block';
@@ -743,6 +746,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.threads_trigger-item').forEach(thread => {
         thread.addEventListener('click', function() {
             const threadsId = thread.getAttribute('data-threads-id');
+            console.log(`Clicked on threads item with ID: ${threadsId}`);
             if (threadsId) {
                 displayImages(threadsId);
             } else {
