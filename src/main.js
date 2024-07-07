@@ -818,7 +818,6 @@ document.addEventListener('DOMContentLoaded', function() {
       null, // No corner wrap for threads_img
       false // Disable inner shadow
     );
-    
     // Add event listeners to the divs for image switching
 document.querySelectorAll('.threads_trigger-item').forEach((element) => {
     element.addEventListener('click', () => {
@@ -832,6 +831,11 @@ document.querySelectorAll('.threads_trigger-item').forEach((element) => {
             });
         });
     });
+});
+
+// Hide all images initially
+document.querySelectorAll('.gallery-image').forEach((img) => {
+    img.style.display = 'none';
 });
 
 });
