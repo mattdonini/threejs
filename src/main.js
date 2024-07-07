@@ -681,6 +681,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
         }
     });
 });
+
 let currentActiveDiv = null;
 
 // Add event listeners to the divs for texture switching
@@ -852,4 +853,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Display the first set of garment images by default after everything is set up
     displayGarmentImages(0);
+
+    // Set the first garment as active by default
+    const defaultGarment = document.querySelector('.garment_item');
+    if (defaultGarment) {
+        defaultGarment.click();
+    }
 });
