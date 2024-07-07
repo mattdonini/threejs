@@ -822,6 +822,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (enableShadow) {
                         d.classList.remove('inner-shadow');
                     }
+                    d.classList.remove('hover-inner-shadow'); // Remove hover inner shadow when another item is clicked
                     d.classList.remove('active');
                 });
 
