@@ -568,6 +568,15 @@ const easeInOutQuad = (t) => {
     return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 };
 
+// Define durations for each shader effect
+const shaderDurations = {
+    pixelation: 350,
+    noise: 500,
+    glitch: 450,
+    blinds: 300,
+    diffuse: 400,
+};
+
 // Animation loop
 const animate = () => {
     requestAnimationFrame(animate);
@@ -600,81 +609,79 @@ const animate = () => {
 };
 animate();
 
+// Helper function to handle individual shader transitions
+const transitionShader = (pass, uniform, startValue, endValue, duration) => {
+    return new Promise((resolve) => {
+        const start = performance.now();
+
+        const animateTransition = () => {
+            const now = performance.now();
+            const elapsed = now - start;
+            const progress = Math.min(elapsed / duration, 1);
+            const easedProgress = easeInOutQuad(progress);
+
+            pass.uniforms[uniform].value = lerp(startValue, endValue, easedProgress);
+
+            if (progress < 1) {
+                requestAnimationFrame(animateTransition);
+            } else {
+                resolve();
+            }
+        };
+
+        animateTransition();
+    });
+};
+
 // Add event listeners to the divs for model switching
 document.querySelectorAll('[data-garment-id]').forEach((element) => {
     element.addEventListener('click', () => {
         const modelUrl = element.getAttribute('data-3d-url');
         if (modelUrl) {
-            // Apply pixelation, noise, glitch, blinds, and diffuse effects during transition
-            const duration = 350; // duration of the transition in milliseconds
-            const start = performance.now();
-
-            // Enable glitch, blinds, and diffuse pass during transition
             glitchPass.enabled = true;
             blindsPass.enabled = true;
             diffusePass.enabled = true;
 
-            const transitionOut = () => {
-                const now = performance.now();
-                const elapsed = now - start;
-                const progress = Math.min(elapsed / duration, 1);
-                const easedProgress = easeInOutQuad(progress);
-
-                pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgress;
-                noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
-                glitchPass.uniforms.uAmount.value = 16 * easedProgress;
-                glitchPass.uniforms.uChromAbb.value = 2 * easedProgress;
-                glitchPass.uniforms.uGlitch.value = 4 * easedProgress;
-                blindsPass.uniforms.uAmount.value = 0.2 * easedProgress;
-                diffusePass.uniforms.xy.value = 1 * easedProgress;
-                diffusePass.uniforms.amount.value = 0.12 * easedProgress;
-
-                if (progress < 1) {
-                    requestAnimationFrame(transitionOut);
-                } else {
-                    loadModel(modelUrl, transitionIn);
-                }
+            const halfDurations = {
+                pixelation: shaderDurations.pixelation / 2,
+                noise: shaderDurations.noise / 2,
+                glitch: shaderDurations.glitch / 2,
+                blinds: shaderDurations.blinds / 2,
+                diffuse: shaderDurations.diffuse / 2,
             };
 
-            const transitionIn = () => {
-                const start = performance.now();
-                const transition = () => {
-                    const now = performance.now();
-                    const elapsed = now - start;
-                    const progress = Math.min(elapsed / duration, 1);
-                    const easedProgress = easeInOutQuad(1 - progress);
+            const transitionsOut = [
+                transitionShader(pixelationPass, 'pixelSize', 0.0, 0.008, halfDurations.pixelation),
+                transitionShader(noisePass, 'noiseStrength', 0.0, 0.5, halfDurations.noise),
+                transitionShader(glitchPass, 'uAmount', 0.0, 16, halfDurations.glitch),
+                transitionShader(glitchPass, 'uChromAbb', 0.0, 2, halfDurations.glitch),
+                transitionShader(glitchPass, 'uGlitch', 0.0, 4, halfDurations.glitch),
+                transitionShader(blindsPass, 'uAmount', 0.0, 0.2, halfDurations.blinds),
+                transitionShader(diffusePass, 'xy', 0.0, 1, halfDurations.diffuse),
+                transitionShader(diffusePass, 'amount', 0.0, 0.12, halfDurations.diffuse),
+            ];
 
-                    pixelationPass.uniforms.pixelSize.value = 0.015 * easedProgress;
-                    noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
-                    glitchPass.uniforms.uAmount.value = 5 * easedProgress;
-                    glitchPass.uniforms.uChromAbb.value = 3 * easedProgress;
-                    glitchPass.uniforms.uGlitch.value = 6 * easedProgress;
-                    blindsPass.uniforms.uAmount.value = 0.2 * easedProgress;
-                    diffusePass.uniforms.xy.value = 2 * easedProgress;
-                    diffusePass.uniforms.amount.value = 0.1 * easedProgress;
+            // Perform transitions out, then change model and perform transitions in
+            Promise.all(transitionsOut).then(() => {
+                loadModel(modelUrl, () => {
+                    const transitionsIn = [
+                        transitionShader(pixelationPass, 'pixelSize', 0.008, 0.0, halfDurations.pixelation),
+                        transitionShader(noisePass, 'noiseStrength', 0.5, 0.0, halfDurations.noise),
+                        transitionShader(glitchPass, 'uAmount', 16, 0.0, halfDurations.glitch),
+                        transitionShader(glitchPass, 'uChromAbb', 2, 0.0, halfDurations.glitch),
+                        transitionShader(glitchPass, 'uGlitch', 4, 0.0, halfDurations.glitch),
+                        transitionShader(blindsPass, 'uAmount', 0.2, 0.0, halfDurations.blinds),
+                        transitionShader(diffusePass, 'xy', 1, 0.0, halfDurations.diffuse),
+                        transitionShader(diffusePass, 'amount', 0.12, 0.0, halfDurations.diffuse),
+                    ];
 
-                    if (progress < 1) {
-                        requestAnimationFrame(transition);
-                    } else {
-                        // Reset uniforms after transition
-                        pixelationPass.uniforms.pixelSize.value = 0.0;
-                        noisePass.uniforms.noiseStrength.value = 0.0;
-                        glitchPass.uniforms.uAmount.value = 0.0;
-                        glitchPass.uniforms.uChromAbb.value = 0.0;
-                        glitchPass.uniforms.uGlitch.value = 0.0;
-                        blindsPass.uniforms.uAmount.value = 0.0;
-                        diffusePass.uniforms.xy.value = 0.0;
-                        diffusePass.uniforms.amount.value = 0.0;
-                        // Disable glitch, blinds, and diffuse pass after transition
+                    Promise.all(transitionsIn).then(() => {
                         glitchPass.enabled = false;
                         blindsPass.enabled = false;
                         diffusePass.enabled = false;
-                    }
-                };
-                transition();
-            };
-
-            transitionOut();
+                    });
+                });
+            });
         } else {
             console.error('No model URL found for this element');
         }
@@ -692,7 +699,6 @@ document.querySelectorAll('[data-threads-id]').forEach((element) => {
         }
     });
 });
-
 
 // Handling switching between garments and textures
 document.addEventListener('DOMContentLoaded', function() {
