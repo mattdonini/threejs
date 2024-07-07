@@ -723,6 +723,14 @@ function displayGarmentImages(index) {
 
 // Handling switching between garments and textures
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize the first garment as active by default
+    const defaultGarment = document.querySelector('.garment_item');
+    if (defaultGarment) {
+        currentActiveDiv = defaultGarment;
+        currentActiveDiv.classList.add('active');
+        currentActiveDiv.querySelector('.img.is-garment').style.opacity = '1';
+    }
+
     // Garment items functionality
     handleItemSelection(
         '.garment_item',
@@ -742,7 +750,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function handleItemSelection(itemSelector, imgSelector, cornerWrapSelector, enableShadow, onlyUpdateTop = false) {
         const divs = document.querySelectorAll(itemSelector);
-        currentActiveDiv = divs[0]; // Initialize with the first div
         const cornerWrap = cornerWrapSelector ? document.querySelector(cornerWrapSelector) : null;
         let activeParagraph; // Variable to store the active paragraph
 
@@ -764,22 +771,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 paragraph.classList.add('active');
                 activeParagraph = paragraph;
             }
-        }
-
-        if (currentActiveDiv) {
-            const firstImg = currentActiveDiv.querySelector(imgSelector.split(',')[0]);
-            if (firstImg) {
-                firstImg.style.opacity = '1';
-            }
-            if (enableShadow) {
-                currentActiveDiv.classList.add('inner-shadow');
-            }
-            currentActiveDiv.classList.add('active');
-            if (cornerWrap) {
-                positionCornerWrap(currentActiveDiv);
-                cornerWrap.classList.add('inner-shadow'); // Add inner shadow to the corner wrap
-            }
-            updateParagraphIndicator(currentActiveDiv);
         }
 
         divs.forEach(div => {
@@ -853,10 +844,4 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Display the first set of garment images by default after everything is set up
     displayGarmentImages(0);
-
-    // Set the first garment as active by default
-    const defaultGarment = document.querySelector('.garment_item');
-    if (defaultGarment) {
-        defaultGarment.click();
-    }
 });
