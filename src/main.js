@@ -621,7 +621,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
                 const progress = Math.min(elapsed / duration, 1);
                 const easedProgress = easeInOutQuad(progress);
 
-                pixelationPass.uniforms.pixelSize.value = 0.008 * easedProgress;
+                pixelationPass.uniforms.pixelSize.value = 0.006 * easedProgress;
                 noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
                 glitchPass.uniforms.uAmount.value = 16 * easedProgress;
                 glitchPass.uniforms.uChromAbb.value = 2 * easedProgress;
@@ -645,7 +645,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
                     const progress = Math.min(elapsed / glitchDuration, 1);
                     const easedProgress = easeInOutQuad(1 - (elapsed / glitchDuration)); // Ease out for glitch effect
 
-                    pixelationPass.uniforms.pixelSize.value = 0.012 * easedProgress;
+                    pixelationPass.uniforms.pixelSize.value = 0.010 * easedProgress;
                     noisePass.uniforms.noiseStrength.value = 0.5 * easedProgress;
                     glitchPass.uniforms.uAmount.value = 5 * easedProgress;
                     glitchPass.uniforms.uChromAbb.value = 3 * easedProgress;
