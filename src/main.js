@@ -818,4 +818,20 @@ document.addEventListener('DOMContentLoaded', function() {
       null, // No corner wrap for threads_img
       false // Disable inner shadow
     );
+    
+    // Add event listeners to the divs for image switching
+document.querySelectorAll('.threads_trigger-item').forEach((element) => {
+    element.addEventListener('click', () => {
+        const imgIndex = element.getAttribute('data-threads-img-index') - 1; // Convert to zero-based index
+
+        // Loop through each image-item to display the correct image
+        document.querySelectorAll('.image-item').forEach((item) => {
+            const images = item.querySelectorAll('.gallery-image');
+            images.forEach((img, index) => {
+                img.style.display = (index === imgIndex) ? 'block' : 'none';
+            });
+        });
+    });
+});
+
 });
