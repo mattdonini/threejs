@@ -683,6 +683,19 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
 });
 
 // Add event listeners to the divs for texture switching
+document.querySelectorAll('[data-threads-id]').forEach((element) => {
+    element.addEventListener('click', () => {
+        const textureUrl = element.getAttribute('data-texture-url');
+        if (textureUrl) {
+            updateModelTexture(textureUrl);
+        } else {
+            console.error('No texture URL found for this element');
+        }
+    });
+});
+
+
+// Add event listeners to the divs for texture switching
 document.querySelectorAll('[data-threads-id]').forEach((element, index) => {
     element.addEventListener('click', () => {
         const textureUrl = element.getAttribute('data-texture-url');
@@ -701,6 +714,7 @@ function displayGarmentImages(index) {
     // Hide all garment images first
     document.querySelectorAll('.img.is-garment, .img.is-garment-2, .img.is-garment-3').forEach(img => {
         img.style.display = 'none';
+        img.style.opacity = '0.5'; // Reset opacity to 0.5
     });
 
     // Show the selected garment image based on the index for all garments
@@ -776,37 +790,43 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         divs.forEach(div => {
-            const img = div.querySelector(imgSelector);
-            if (!img) {
+            const imgs = div.querySelectorAll(imgSelector);
+            if (imgs.length === 0) {
                 console.error(`Image with class ${imgSelector} not found in div`, div);
                 return;
             }
 
             div.addEventListener('mouseenter', function() {
                 if (activeDiv !== div) {
-                    img.style.opacity = '0.8';
+                    imgs.forEach(img => {
+                        img.style.opacity = '0.8';
+                    });
                 }
             });
 
             div.addEventListener('mouseleave', function() {
                 if (activeDiv !== div) {
-                    img.style.opacity = '0.5';
+                    imgs.forEach(img => {
+                        img.style.opacity = '0.5';
+                    });
                 }
             });
 
             div.addEventListener('click', function() {
                 divs.forEach(d => {
-                    const otherImg = d.querySelector(imgSelector);
-                    if (otherImg) {
+                    const otherImgs = d.querySelectorAll(imgSelector);
+                    otherImgs.forEach(otherImg => {
                         otherImg.style.opacity = '0.5';
-                    }
+                    });
                     if (enableShadow) {
                         d.classList.remove('inner-shadow');
                     }
                     d.classList.remove('active');
                 });
 
-                img.style.opacity = '1';
+                imgs.forEach(img => {
+                    img.style.opacity = '1';
+                });
                 if (enableShadow) {
                     div.classList.add('inner-shadow');
                 }
