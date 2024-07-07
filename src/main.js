@@ -818,34 +818,24 @@ document.addEventListener('DOMContentLoaded', function() {
       null, // No corner wrap for threads_img
       false // Disable inner shadow
     );
-    // Funzione per nascondere tutte le immagini inizialmente
-const hideAllImages = () => {
-    document.querySelectorAll('.image-item img').forEach((img) => {
-        img.style.display = 'none';
-    });
-};
-
-// Funzione per mostrare l'immagine corretta
+    // Funzione per mostrare l'immagine corretta
 const showImageByIndex = (index) => {
+    console.log(`Showing image at index: ${index}`); // Debug
     document.querySelectorAll('.image-item').forEach((item) => {
         const images = item.querySelectorAll('img'); // Seleziona tutte le immagini all'interno di image-item
         images.forEach((img, imgIndex) => {
             img.style.display = (imgIndex === index) ? 'block' : 'none';
+            console.log(`Image at index ${imgIndex}: ${img.style.display}`); // Debug
         });
     });
 };
-
-// Nascondi tutte le immagini inizialmente
-hideAllImages();
-
-// Mostra la prima immagine per default
-showImageByIndex(0);
 
 // Aggiungi event listeners ai trigger
 document.querySelectorAll('.threads_trigger-item').forEach((element) => {
     element.addEventListener('click', () => {
         const threadsId = element.getAttribute('data-threads-id');
         const imgIndex = parseInt(threadsId.split('_').pop()) - 1; // Convert to zero-based index
+        console.log(`Trigger clicked: ${threadsId}, index: ${imgIndex}`); // Debug
         showImageByIndex(imgIndex);
     });
 });
