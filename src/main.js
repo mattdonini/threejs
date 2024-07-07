@@ -692,25 +692,22 @@ document.querySelectorAll('[data-threads-id]').forEach((element, index) => {
             console.error('No texture URL found for this element');
         }
 
-        // Handle showing the appropriate garment image
-        displayGarmentImage(index);
+        // Handle showing the appropriate garment images
+        displayGarmentImages(index);
     });
 });
 
-function displayGarmentImage(index) {
+function displayGarmentImages(index) {
     // Hide all garment images first
     document.querySelectorAll('.img.is-garment, .img.is-garment-2, .img.is-garment-3').forEach(img => {
         img.style.display = 'none';
     });
 
-    // Show the selected garment image based on the index
+    // Show the selected garment image based on the index for all garments
     const garmentClass = `.img.is-garment${index === 0 ? '' : '-' + (index + 1)}`;
-    const selectedImg = document.querySelector(garmentClass);
-    if (selectedImg) {
+    document.querySelectorAll(garmentClass).forEach(selectedImg => {
         selectedImg.style.display = 'block';
-    } else {
-        console.error(`Image with class ${garmentClass} not found`);
-    }
+    });
 }
 
 // Handling switching between garments and textures
