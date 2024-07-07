@@ -712,6 +712,9 @@ function displayGarmentImages(index) {
 
 // Handling switching between garments and textures
 document.addEventListener('DOMContentLoaded', function() {
+    // Display the first set of garment images by default
+    displayGarmentImages(0);
+
     // Garment items functionality
     handleItemSelection(
         '.garment_item',
