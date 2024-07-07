@@ -761,11 +761,13 @@ document.addEventListener('DOMContentLoaded', function() {
         let activeParagraph = null; // Variable to store the active paragraph
 
         function positionCornerWrap(targetItem) {
-            const rect = targetItem.getBoundingClientRect();
-            const parentRect = targetItem.offsetParent.getBoundingClientRect();
-            cornerWrap.style.top = `${rect.top - parentRect.top - 0.25 * window.innerWidth / 100}px`;
-            if (!onlyUpdateTop) {
-                cornerWrap.style.left = `${rect.left - parentRect.left - 0.25 * window.innerWidth / 100}px`;
+            if (cornerWrap) {
+                const rect = targetItem.getBoundingClientRect();
+                const parentRect = targetItem.offsetParent.getBoundingClientRect();
+                cornerWrap.style.top = `${rect.top - parentRect.top - 0.25 * window.innerWidth / 100}px`;
+                if (!onlyUpdateTop) {
+                    cornerWrap.style.left = `${rect.left - parentRect.left - 0.25 * window.innerWidth / 100}px`;
+                }
             }
         }
 
