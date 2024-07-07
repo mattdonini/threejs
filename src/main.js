@@ -572,9 +572,9 @@ const easeInOutQuad = (t) => {
 const shaderDurations = {
     pixelation: 550,
     noise: 500,
-    glitch: 450,
-    blinds: 300,
-    diffuse: 400,
+    glitch: 750,
+    blinds: 400,
+    diffuse: 500,
 };
 
 // Animation loop
