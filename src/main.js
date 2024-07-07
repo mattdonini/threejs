@@ -694,7 +694,6 @@ document.querySelectorAll('[data-threads-id]').forEach((element) => {
     });
 });
 
-
 // Add event listeners to the divs for texture switching
 document.querySelectorAll('[data-threads-id]').forEach((element, index) => {
     element.addEventListener('click', () => {
@@ -719,9 +718,10 @@ function displayGarmentImages(index) {
 
     // Show the selected garment image based on the index for all garments
     const garmentClass = `.img.is-garment${index === 0 ? '' : '-' + (index + 1)}`;
-    document.querySelectorAll(garmentClass).forEach(selectedImg => {
+    const selectedImgs = document.querySelectorAll(garmentClass);
+    selectedImgs.forEach((selectedImg, idx) => {
         selectedImg.style.display = 'block';
-        selectedImg.style.opacity = '1'; // Set opacity to 1 for the visible images
+        selectedImg.style.opacity = idx === 0 ? '1' : '0.5'; // Set opacity to 1 for the first image, 0.5 for others
     });
 }
 
