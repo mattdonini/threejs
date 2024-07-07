@@ -681,19 +681,6 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
         }
     });
 });
-
-// Add event listeners to the divs for texture switching
-document.querySelectorAll('[data-threads-id]').forEach((element) => {
-    element.addEventListener('click', () => {
-        const textureUrl = element.getAttribute('data-texture-url');
-        if (textureUrl) {
-            updateModelTexture(textureUrl);
-        } else {
-            console.error('No texture URL found for this element');
-        }
-    });
-});
-
 let currentActiveDiv = null;
 
 // Add event listeners to the divs for texture switching
@@ -720,9 +707,8 @@ function displayGarmentImages(index) {
 
     // Show the selected garment image based on the index for all garments
     const garmentClass = `.img.is-garment${index === 0 ? '' : '-' + (index + 1)}`;
-    document.querySelectorAll(garmentClass).forEach((selectedImg) => {
+    document.querySelectorAll(garmentClass).forEach(selectedImg => {
         selectedImg.style.display = 'block';
-        selectedImg.style.opacity = '0.5'; // Default to 0.5 opacity for all
     });
 
     // Set the opacity of the active garment
@@ -780,7 +766,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (currentActiveDiv) {
-            const firstImg = currentActiveDiv.querySelector(imgSelector);
+            const firstImg = currentActiveDiv.querySelector(imgSelector.split(',')[0]);
             if (firstImg) {
                 firstImg.style.opacity = '1';
             }
