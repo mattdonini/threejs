@@ -759,12 +759,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (activeDiv) {
-            const firstImg = activeDiv.querySelector(imgSelector);
-            if (firstImg) {
-                firstImg.style.opacity = '1';
-            }
+            document.querySelectorAll(imgSelector).forEach(img => {
+                img.style.opacity = '1';
+            });
             if (enableShadow) {
-                activeDiv.classList.add('inner-shadow');
+                document.querySelectorAll(itemSelector).forEach(div => {
+                    div.classList.add('inner-shadow');
+                });
             }
             activeDiv.classList.add('active');
             if (cornerWrap) {
@@ -783,29 +784,34 @@ document.addEventListener('DOMContentLoaded', function() {
 
             div.addEventListener('mouseenter', function() {
                 if (activeDiv !== div) {
-                    img.style.opacity = '0.8';
+                    document.querySelectorAll(imgSelector).forEach(img => {
+                        img.style.opacity = '0.8';
+                    });
                 }
             });
 
             div.addEventListener('mouseleave', function() {
                 if (activeDiv !== div) {
-                    img.style.opacity = '0.5';
+                    document.querySelectorAll(imgSelector).forEach(img => {
+                        img.style.opacity = '0.5';
+                    });
                 }
             });
 
             div.addEventListener('click', function() {
                 divs.forEach(d => {
-                    const otherImg = d.querySelector(imgSelector);
-                    if (otherImg) {
+                    document.querySelectorAll(imgSelector).forEach(otherImg => {
                         otherImg.style.opacity = '0.5';
-                    }
+                    });
                     if (enableShadow) {
                         d.classList.remove('inner-shadow');
                     }
                     d.classList.remove('active');
                 });
 
-                img.style.opacity = '1';
+                document.querySelectorAll(imgSelector).forEach(img => {
+                    img.style.opacity = '1';
+                });
                 if (enableShadow) {
                     div.classList.add('inner-shadow');
                 }
