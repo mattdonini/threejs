@@ -690,6 +690,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (defaultGarment) {
         currentActiveGarment = defaultGarment;
         currentActiveGarment.classList.add('active');
+        currentActiveGarment.classList.add('inner-shadow'); // Add inner-shadow class to default garment
         setGarmentImageOpacity(currentActiveGarment, '1');
     }
 
@@ -787,7 +788,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             item.addEventListener('mouseenter', function() {
-                if (currentActiveGarment !== item) {
+                if (currentActiveGarment !== item && currentActiveThread !== item) {
                     imgs.forEach(img => {
                         img.style.opacity = '0.8';
                     });
@@ -795,7 +796,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             item.addEventListener('mouseleave', function() {
-                if (currentActiveGarment !== item) {
+                if (currentActiveGarment !== item && currentActiveThread !== item) {
                     imgs.forEach(img => {
                         img.style.opacity = '0.5';
                     });
