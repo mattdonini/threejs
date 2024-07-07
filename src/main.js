@@ -818,33 +818,36 @@ document.addEventListener('DOMContentLoaded', function() {
       null, // No corner wrap for threads_img
       false // Disable inner shadow
     );
-    // Add event listeners to the divs for image switching
-document.querySelectorAll('.threads_trigger-item').forEach((element) => {
-    element.addEventListener('click', () => {
-        const threadsId = element.getAttribute('data-threads-id'); // Read the data-threads-id attribute
-        const imgIndex = parseInt(threadsId.split('_').pop()) - 1; // Convert to zero-based index
+    // Funzione per nascondere tutte le immagini inizialmente
+const hideAllImages = () => {
+    document.querySelectorAll('.image-item .gallery-image').forEach((img) => {
+        img.style.display = 'none';
+    });
+};
 
-        // Loop through each image-item to display the correct image
-        document.querySelectorAll('.image-item').forEach((item) => {
-            const images = item.querySelectorAll('img'); // Adjust the selector to match your gallery images
-            images.forEach((img, index) => {
-                img.style.display = (index === imgIndex) ? 'block' : 'none';
-            });
+// Funzione per mostrare l'immagine corretta
+const showImageByIndex = (index) => {
+    document.querySelectorAll('.image-item').forEach((item) => {
+        const images = item.querySelectorAll('.gallery-image');
+        images.forEach((img, imgIndex) => {
+            img.style.display = (imgIndex === index) ? 'block' : 'none';
         });
     });
-});
+};
 
-// Hide all images initially
-document.querySelectorAll('.image-item img').forEach((img) => {
-    img.style.display = 'none';
-});
+// Nascondi tutte le immagini inizialmente
+hideAllImages();
 
-// Show the first image of each image-item by default
-document.querySelectorAll('.image-item').forEach((item) => {
-    const images = item.querySelectorAll('img');
-    if (images.length > 0) {
-        images[0].style.display = 'block'; // Show the first image
-    }
+// Mostra la prima immagine per default
+showImageByIndex(0);
+
+// Aggiungi event listeners ai trigger
+document.querySelectorAll('.threads_trigger-item').forEach((element) => {
+    element.addEventListener('click', () => {
+        const threadsId = element.getAttribute('data-threads-id');
+        const imgIndex = parseInt(threadsId.split('_').pop()) - 1; // Convert to zero-based index
+        showImageByIndex(imgIndex);
+    });
 });
 
 });
