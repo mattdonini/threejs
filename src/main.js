@@ -570,11 +570,11 @@ const easeInOutQuad = (t) => {
 
 // Define durations for each shader effect
 const shaderDurations = {
-    pixelation: 550,
-    noise: 500,
-    glitch: 750,
-    blinds: 400,
-    diffuse: 500,
+    pixelation: 350,
+    noise: 350,
+    glitch: 350,
+    blinds: 350,
+    diffuse: 350,
 };
 
 // Animation loop
