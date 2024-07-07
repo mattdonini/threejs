@@ -707,6 +707,7 @@ function displayGarmentImages(index) {
     const garmentClass = `.img.is-garment${index === 0 ? '' : '-' + (index + 1)}`;
     document.querySelectorAll(garmentClass).forEach(selectedImg => {
         selectedImg.style.display = 'block';
+        selectedImg.style.opacity = '1'; // Set opacity to 1 for the visible images
     });
 }
 
@@ -718,7 +719,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Garment items functionality
     handleItemSelection(
         '.garment_item',
-        '.img.is-garment',
+        '.img.is-garment, .img.is-garment-2, .img.is-garment-3',
         '.garment_corner-wrap',
         true // Enable inner shadow
     );
@@ -759,13 +760,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (activeDiv) {
-            document.querySelectorAll(imgSelector).forEach(img => {
-                img.style.opacity = '1';
-            });
+            const firstImg = activeDiv.querySelector(imgSelector);
+            if (firstImg) {
+                firstImg.style.opacity = '1';
+            }
             if (enableShadow) {
-                document.querySelectorAll(itemSelector).forEach(div => {
-                    div.classList.add('inner-shadow');
-                });
+                activeDiv.classList.add('inner-shadow');
             }
             activeDiv.classList.add('active');
             if (cornerWrap) {
@@ -784,34 +784,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
             div.addEventListener('mouseenter', function() {
                 if (activeDiv !== div) {
-                    document.querySelectorAll(imgSelector).forEach(img => {
-                        img.style.opacity = '0.8';
-                    });
+                    img.style.opacity = '0.8';
                 }
             });
 
             div.addEventListener('mouseleave', function() {
                 if (activeDiv !== div) {
-                    document.querySelectorAll(imgSelector).forEach(img => {
-                        img.style.opacity = '0.5';
-                    });
+                    img.style.opacity = '0.5';
                 }
             });
 
             div.addEventListener('click', function() {
                 divs.forEach(d => {
-                    document.querySelectorAll(imgSelector).forEach(otherImg => {
+                    const otherImg = d.querySelector(imgSelector);
+                    if (otherImg) {
                         otherImg.style.opacity = '0.5';
-                    });
+                    }
                     if (enableShadow) {
                         d.classList.remove('inner-shadow');
                     }
                     d.classList.remove('active');
                 });
 
-                document.querySelectorAll(imgSelector).forEach(img => {
-                    img.style.opacity = '1';
-                });
+                img.style.opacity = '1';
                 if (enableShadow) {
                     div.classList.add('inner-shadow');
                 }
