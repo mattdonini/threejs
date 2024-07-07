@@ -694,7 +694,7 @@ document.querySelectorAll('[data-threads-id]').forEach((element) => {
     });
 });
 
-let currentActiveGarmentIndex = 0;
+let currentActiveGarmentId = 0;
 
 // Add event listeners to the divs for texture switching
 document.querySelectorAll('[data-threads-id]').forEach((element, index) => {
@@ -720,10 +720,17 @@ function displayGarmentImages(index) {
 
     // Show the selected garment image based on the index for all garments
     const garmentClass = `.img.is-garment${index === 0 ? '' : '-' + (index + 1)}`;
-    document.querySelectorAll(garmentClass).forEach((selectedImg, idx) => {
+    document.querySelectorAll(garmentClass).forEach(selectedImg => {
         selectedImg.style.display = 'block';
-        selectedImg.style.opacity = idx === currentActiveGarmentIndex ? '1' : '0.5'; // Set opacity to 1 for the active image, 0.5 for others
     });
+
+    // Set the opacity of the active garment
+    const activeGarment = document.querySelector(`[data-garment-id="${currentActiveGarmentId}"]`);
+    if (activeGarment) {
+        activeGarment.querySelectorAll(garmentClass).forEach(img => {
+            img.style.opacity = '1';
+        });
+    }
 }
 
 // Handling switching between garments and textures
@@ -747,7 +754,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function handleItemSelection(itemSelector, imgSelector, cornerWrapSelector, enableShadow, onlyUpdateTop = false) {
         const divs = document.querySelectorAll(itemSelector);
-        let activeDiv = divs[currentActiveGarmentIndex]; // Initialize with the first div
+        let activeDiv = divs[0]; // Initialize with the first div
         const cornerWrap = cornerWrapSelector ? document.querySelector(cornerWrapSelector) : null;
         let activeParagraph; // Variable to store the active paragraph
 
@@ -830,7 +837,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 div.classList.add('active');
                 activeDiv = div;
-                currentActiveGarmentIndex = Array.from(divs).indexOf(div); // Update current active garment index
+                currentActiveGarmentId = div.getAttribute('data-garment-id'); // Update current active garment ID
 
                 if (cornerWrap) {
                     positionCornerWrap(activeDiv);
