@@ -694,6 +694,8 @@ document.querySelectorAll('[data-threads-id]').forEach((element) => {
     });
 });
 
+let currentActiveGarmentIndex = 0;
+
 // Add event listeners to the divs for texture switching
 document.querySelectorAll('[data-threads-id]').forEach((element, index) => {
     element.addEventListener('click', () => {
@@ -720,7 +722,7 @@ function displayGarmentImages(index) {
     const garmentClass = `.img.is-garment${index === 0 ? '' : '-' + (index + 1)}`;
     document.querySelectorAll(garmentClass).forEach((selectedImg, idx) => {
         selectedImg.style.display = 'block';
-        selectedImg.style.opacity = idx === 0 ? '1' : '0.5'; // Set opacity to 1 for the first image, 0.5 for others
+        selectedImg.style.opacity = idx === currentActiveGarmentIndex ? '1' : '0.5'; // Set opacity to 1 for the active image, 0.5 for others
     });
 }
 
@@ -745,7 +747,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function handleItemSelection(itemSelector, imgSelector, cornerWrapSelector, enableShadow, onlyUpdateTop = false) {
         const divs = document.querySelectorAll(itemSelector);
-        let activeDiv = divs[0]; // Initialize with the first div
+        let activeDiv = divs[currentActiveGarmentIndex]; // Initialize with the first div
         const cornerWrap = cornerWrapSelector ? document.querySelector(cornerWrapSelector) : null;
         let activeParagraph; // Variable to store the active paragraph
 
@@ -828,6 +830,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 div.classList.add('active');
                 activeDiv = div;
+                currentActiveGarmentIndex = Array.from(divs).indexOf(div); // Update current active garment index
 
                 if (cornerWrap) {
                     positionCornerWrap(activeDiv);
