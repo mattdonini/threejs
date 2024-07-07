@@ -756,22 +756,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function handleItemSelection(itemSelector, imgSelector, cornerWrapSelector, enableShadow, onlyUpdateTop = false) {
-        const divs = document.querySelectorAll(itemSelector);
-        let activeDiv = divs[0]; // Initialize with the first div
+        const items = document.querySelectorAll(itemSelector);
         const cornerWrap = cornerWrapSelector ? document.querySelector(cornerWrapSelector) : null;
-        let activeParagraph; // Variable to store the active paragraph
+        let activeParagraph = null; // Variable to store the active paragraph
 
-        function positionCornerWrap(targetDiv) {
-            const rect = targetDiv.getBoundingClientRect();
-            const parentRect = targetDiv.offsetParent.getBoundingClientRect();
+        function positionCornerWrap(targetItem) {
+            const rect = targetItem.getBoundingClientRect();
+            const parentRect = targetItem.offsetParent.getBoundingClientRect();
             cornerWrap.style.top = `${rect.top - parentRect.top - 0.25 * window.innerWidth / 100}px`;
             if (!onlyUpdateTop) {
                 cornerWrap.style.left = `${rect.left - parentRect.left - 0.25 * window.innerWidth / 100}px`;
             }
         }
 
-        function updateParagraphIndicator(targetDiv) {
-            const paragraph = targetDiv.querySelector('.paragraph.is-support-medium');
+        function updateParagraphIndicator(targetItem) {
+            const paragraph = targetItem.querySelector('.paragraph.is-support-medium');
             if (paragraph && paragraph !== activeParagraph) {
                 if (activeParagraph) {
                     activeParagraph.classList.remove('active');
@@ -781,65 +780,60 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        if (activeDiv) {
-            const firstImg = activeDiv.querySelector(imgSelector);
-            if (firstImg) {
-                firstImg.style.opacity = '1';
-            }
-            if (enableShadow) {
-                activeDiv.classList.add('inner-shadow');
-            }
-            activeDiv.classList.add('active');
-            if (cornerWrap) {
-                positionCornerWrap(activeDiv);
-                cornerWrap.classList.add('inner-shadow'); // Add inner shadow to the corner wrap
-            }
-            updateParagraphIndicator(activeDiv);
-        }
-
-        divs.forEach(div => {
-            const img = div.querySelector(imgSelector);
-            if (!img) {
-                console.error(`Image with class ${imgSelector} not found in div`, div);
+        items.forEach(item => {
+            const imgs = item.querySelectorAll(imgSelector);
+            if (imgs.length === 0) {
+                console.error(`Image with class ${imgSelector} not found in item`, item);
                 return;
             }
 
-            div.addEventListener('mouseenter', function() {
-                if (activeDiv !== div) {
-                    img.style.opacity = '0.8';
+            item.addEventListener('mouseenter', function() {
+                if (currentActiveGarment !== item && currentActiveThread !== item) {
+                    imgs.forEach(img => {
+                        img.style.opacity = '0.8';
+                    });
                 }
             });
 
-            div.addEventListener('mouseleave', function() {
-                if (activeDiv !== div) {
-                    img.style.opacity = '0.5';
+            item.addEventListener('mouseleave', function() {
+                if (currentActiveGarment !== item && currentActiveThread !== item) {
+                    imgs.forEach(img => {
+                        img.style.opacity = '0.5';
+                    });
                 }
             });
 
-            div.addEventListener('click', function() {
-                divs.forEach(d => {
-                    const otherImg = d.querySelector(imgSelector);
-                    if (otherImg) {
+            item.addEventListener('click', function() {
+                items.forEach(d => {
+                    const otherImgs = d.querySelectorAll(imgSelector);
+                    otherImgs.forEach(otherImg => {
                         otherImg.style.opacity = '0.5';
-                    }
+                    });
                     if (enableShadow) {
                         d.classList.remove('inner-shadow');
                     }
                     d.classList.remove('active');
                 });
 
-                img.style.opacity = '1';
+                imgs.forEach(img => {
+                    img.style.opacity = '1';
+                });
                 if (enableShadow) {
-                    div.classList.add('inner-shadow');
+                    item.classList.add('inner-shadow');
                 }
-                div.classList.add('active');
-                activeDiv = div;
+                item.classList.add('active');
+
+                if (itemSelector === '.garment_item') {
+                    currentActiveGarment = item;
+                } else {
+                    currentActiveThread = item;
+                }
 
                 if (cornerWrap) {
-                    positionCornerWrap(activeDiv);
+                    positionCornerWrap(item);
                     cornerWrap.classList.add('inner-shadow'); // Add inner shadow to the corner wrap
                 }
-                updateParagraphIndicator(activeDiv);
+                updateParagraphIndicator(item);
             });
         });
 
