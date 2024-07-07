@@ -681,142 +681,190 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
         }
     });
 });
+let currentActiveGarment = null;
+let currentActiveThread = null;
 
-// Add event listeners to the divs for texture switching
-document.querySelectorAll('[data-threads-id]').forEach((element) => {
-    element.addEventListener('click', () => {
-        const textureUrl = element.getAttribute('data-texture-url');
-        if (textureUrl) {
-            updateModelTexture(textureUrl);
-        } else {
-            console.error('No texture URL found for this element');
-        }
-    });
-});
-
-
-// Handling switching between garments and textures
 document.addEventListener('DOMContentLoaded', function() {
-    // Garment items functionality
-    handleItemSelection(
-      '.garment_item',
-      '.img.is-garment',
-      '.garment_corner-wrap',
-      true // Enable inner shadow
-    );
-
-    // Threads items functionality
-    handleItemSelection(
-      '.threads_trigger-item',
-      '.img.is-threads',
-      '.threads_corner',
-      false, // Disable inner shadow on items
-      true // Only update the top position
-    );
-
-    function handleItemSelection(itemSelector, imgSelector, cornerWrapSelector, enableShadow, onlyUpdateTop = false) {
-      const divs = document.querySelectorAll(itemSelector);
-      let activeDiv = divs[0]; // Initialize with the first div
-      const cornerWrap = cornerWrapSelector ? document.querySelector(cornerWrapSelector) : null;
-      let activeParagraph; // Variable to store the active paragraph
-
-      function positionCornerWrap(targetDiv) {
-        const rect = targetDiv.getBoundingClientRect();
-        const parentRect = targetDiv.offsetParent.getBoundingClientRect();
-        cornerWrap.style.top = `${rect.top - parentRect.top - 0.25 * window.innerWidth / 100}px`;
-        if (!onlyUpdateTop) {
-          cornerWrap.style.left = `${rect.left - parentRect.left - 0.25 * window.innerWidth / 100}px`;
-        }
-      }
-
-      function updateParagraphIndicator(targetDiv) {
-        const paragraph = targetDiv.querySelector('.paragraph.is-support-medium');
-        if (paragraph && paragraph !== activeParagraph) {
-          if (activeParagraph) {
-            activeParagraph.classList.remove('active');
-          }
-          paragraph.classList.add('active');
-          activeParagraph = paragraph;
-        }
-      }
-
-      if (activeDiv) {
-        const firstImg = activeDiv.querySelector(imgSelector);
-        if (firstImg) {
-          firstImg.style.opacity = '1';
-        }
-        if (enableShadow) {
-          activeDiv.classList.add('inner-shadow');
-        }
-        activeDiv.classList.add('active');
-        if (cornerWrap) {
-          positionCornerWrap(activeDiv);
-          cornerWrap.classList.add('inner-shadow'); // Add inner shadow to the corner wrap
-        }
-        updateParagraphIndicator(activeDiv);
-      }
-
-      divs.forEach(div => {
-        const img = div.querySelector(imgSelector);
-        if (!img) {
-          console.error(`Image with class ${imgSelector} not found in div`, div);
-          return;
-        }
-
-        div.addEventListener('mouseenter', function() {
-          if (activeDiv !== div) {
-            img.style.opacity = '0.8';
-          }
-        });
-
-        div.addEventListener('mouseleave', function() {
-          if (activeDiv !== div) {
-            img.style.opacity = '0.5';
-          }
-        });
-
-        div.addEventListener('click', function() {
-          divs.forEach(d => {
-            const otherImg = d.querySelector(imgSelector);
-            if (otherImg) {
-              otherImg.style.opacity = '0.5';
-            }
-            if (enableShadow) {
-              d.classList.remove('inner-shadow');
-            }
-            d.classList.remove('active');
-          });
-
-          img.style.opacity = '1';
-          if (enableShadow) {
-            div.classList.add('inner-shadow');
-          }
-          div.classList.add('active');
-          activeDiv = div;
-
-          if (cornerWrap) {
-            positionCornerWrap(activeDiv);
-            cornerWrap.classList.add('inner-shadow'); // Add inner shadow to the corner wrap
-          }
-          updateParagraphIndicator(activeDiv);
-        });
-      });
-
-      // Ensure the active paragraph remains active even when clicking outside
-      document.addEventListener('click', function(event) {
-        const isThreadItem = event.target.closest(itemSelector);
-        if (!isThreadItem && activeParagraph) {
-          activeParagraph.classList.add('active');
-        }
-      });
+    // Initialize the first garment as active by default
+    const defaultGarment = document.querySelector('.garment_item');
+    if (defaultGarment) {
+        currentActiveGarment = defaultGarment;
+        currentActiveGarment.classList.add('active');
+        currentActiveGarment.classList.add('inner-shadow'); // Add inner-shadow class to default garment
+        setGarmentImageOpacity(currentActiveGarment, '1');
     }
 
-    // Add the same functionality for threads_img elements
     handleItemSelection(
-      '.threads_img',
-      '.img.is-threads',
-      null, // No corner wrap for threads_img
-      false // Disable inner shadow
+        '.garment_item',
+        '.img.is-garment, .img.is-garment-2, .img.is-garment-3',
+        '.garment_corner-wrap',
+        true // Enable inner shadow
     );
-    
+
+    handleItemSelection(
+        '.threads_trigger-item',
+        '.img.is-threads',
+        '.threads_corner',
+        false, // Disable inner shadow on items
+        true // Only update the top position
+    );
+
+    handleItemSelection(
+        '.threads_img',
+        '.img.is-threads',
+        null, // No corner wrap for threads_img
+        false // Disable inner shadow
+    );
+
+    // Add event listeners to the divs for texture switching
+    document.querySelectorAll('[data-threads-id]').forEach((element, index) => {
+        element.addEventListener('click', () => {
+            const textureUrl = element.getAttribute('data-texture-url');
+            if (textureUrl) {
+                updateModelTexture(textureUrl);
+            } else {
+                console.error('No texture URL found for this element');
+            }
+
+            // Handle showing the appropriate garment images
+            displayGarmentImages(index);
+        });
+    });
+
+    function setGarmentImageOpacity(garmentDiv, opacity) {
+        garmentDiv.querySelectorAll('.img.is-garment, .img.is-garment-2, .img.is-garment-3').forEach(img => {
+            img.style.opacity = opacity;
+        });
+    }
+
+    function displayGarmentImages(index) {
+        // Hide all garment images first
+        document.querySelectorAll('.img.is-garment, .img.is-garment-2, .img.is-garment-3').forEach(img => {
+            img.style.display = 'none';
+        });
+
+        // Show the selected garment image based on the index for all garments
+        const garmentClass = `.img.is-garment${index === 0 ? '' : '-' + (index + 1)}`;
+        document.querySelectorAll(garmentClass).forEach(selectedImg => {
+            selectedImg.style.display = 'block';
+        });
+
+        // Set the opacity of the active garment images
+        if (currentActiveGarment) {
+            setGarmentImageOpacity(currentActiveGarment, '1');
+        }
+    }
+
+    function handleItemSelection(itemSelector, imgSelector, cornerWrapSelector, enableShadow, onlyUpdateTop = false) {
+        const items = document.querySelectorAll(itemSelector);
+        const cornerWrap = cornerWrapSelector ? document.querySelector(cornerWrapSelector) : null;
+        let activeParagraph = null; // Variable to store the active paragraph
+
+        function positionCornerWrap(targetItem) {
+            if (cornerWrap) {
+                const rect = targetItem.getBoundingClientRect();
+                const parentRect = targetItem.offsetParent.getBoundingClientRect();
+                cornerWrap.style.top = `${rect.top - parentRect.top - 0.25 * window.innerWidth / 100}px`;
+                if (!onlyUpdateTop) {
+                    cornerWrap.style.left = `${rect.left - parentRect.left - 0.25 * window.innerWidth / 100}px`;
+                }
+            }
+        }
+
+        function updateParagraphIndicator(targetItem) {
+            const paragraph = targetItem.querySelector('.paragraph.is-support-medium');
+            if (paragraph && paragraph !== activeParagraph) {
+                if (activeParagraph) {
+                    activeParagraph.classList.remove('active');
+                }
+                paragraph.classList.add('active');
+                activeParagraph = paragraph;
+            }
+        }
+
+        items.forEach(item => {
+            const imgs = item.querySelectorAll(imgSelector);
+            if (imgs.length === 0) {
+                console.error(`Image with class ${imgSelector} not found in item`, item);
+                return;
+            }
+
+            item.addEventListener('mouseenter', function() {
+                if (itemSelector === '.garment_item' && currentActiveGarment !== item) {
+                    imgs.forEach(img => {
+                        img.style.opacity = '0.8';
+                    });
+                    item.classList.add('hover-inner-shadow'); // Add hover inner shadow for garments
+                } else if (itemSelector === '.threads_trigger-item' && currentActiveThread !== item) {
+                    imgs.forEach(img => {
+                        img.style.opacity = '0.8';
+                    });
+                }
+            });
+
+            item.addEventListener('mouseleave', function() {
+                if (itemSelector === '.garment_item' && currentActiveGarment !== item) {
+                    imgs.forEach(img => {
+                        img.style.opacity = '0.5';
+                    });
+                    item.classList.remove('hover-inner-shadow'); // Remove hover inner shadow for garments
+                } else if (itemSelector === '.threads_trigger-item' && currentActiveThread !== item) {
+                    imgs.forEach(img => {
+                        img.style.opacity = '0.5';
+                    });
+                }
+            });
+
+            item.addEventListener('click', function() {
+                items.forEach(d => {
+                    const otherImgs = d.querySelectorAll(imgSelector);
+                    otherImgs.forEach(otherImg => {
+                        otherImg.style.opacity = '0.5';
+                    });
+                    if (enableShadow) {
+                        d.classList.remove('inner-shadow');
+                    }
+                    d.classList.remove('hover-inner-shadow'); // Remove hover inner shadow when another item is clicked
+                    d.classList.remove('active');
+                });
+
+                imgs.forEach(img => {
+                    img.style.opacity = '1';
+                });
+                if (enableShadow) {
+                    item.classList.add('inner-shadow');
+                }
+                item.classList.add('active');
+
+                if (itemSelector === '.garment_item') {
+                    currentActiveGarment = item;
+                } else {
+                    currentActiveThread = item;
+                }
+
+                if (cornerWrap) {
+                    positionCornerWrap(item);
+                    cornerWrap.classList.add('inner-shadow'); // Add inner shadow to the corner wrap
+                }
+                updateParagraphIndicator(item);
+            });
+        });
+
+        // Ensure the active paragraph remains active even when clicking outside
+        document.addEventListener('click', function(event) {
+            const isItem = event.target.closest(itemSelector);
+            if (!isItem && activeParagraph) {
+                activeParagraph.classList.add('active');
+            }
+        });
+    }
+
+    // Display the first set of garment images by default after everything is set up
+    displayGarmentImages(0);
+
+    // Ensure the first garment image is set to full opacity by default
+    const firstGarmentImg = document.querySelector('.garment_item .img.is-garment');
+    if (firstGarmentImg) {
+        firstGarmentImg.style.opacity = '1';
+    }
 });
