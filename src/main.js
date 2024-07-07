@@ -761,13 +761,11 @@ document.addEventListener('DOMContentLoaded', function() {
         let activeParagraph = null; // Variable to store the active paragraph
 
         function positionCornerWrap(targetItem) {
-            if (cornerWrap) {
-                const rect = targetItem.getBoundingClientRect();
-                const parentRect = targetItem.offsetParent.getBoundingClientRect();
-                cornerWrap.style.top = `${rect.top - parentRect.top - 0.25 * window.innerWidth / 100}px`;
-                if (!onlyUpdateTop) {
-                    cornerWrap.style.left = `${rect.left - parentRect.left - 0.25 * window.innerWidth / 100}px`;
-                }
+            const rect = targetItem.getBoundingClientRect();
+            const parentRect = targetItem.offsetParent.getBoundingClientRect();
+            cornerWrap.style.top = `${rect.top - parentRect.top - 0.25 * window.innerWidth / 100}px`;
+            if (!onlyUpdateTop) {
+                cornerWrap.style.left = `${rect.left - parentRect.left - 0.25 * window.innerWidth / 100}px`;
             }
         }
 
@@ -790,12 +788,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             item.addEventListener('mouseenter', function() {
-                if (itemSelector === '.garment_item' && currentActiveGarment !== item) {
-                    imgs.forEach(img => {
-                        img.style.opacity = '0.8';
-                    });
-                    item.classList.add('hover-inner-shadow'); // Add hover inner shadow for garments
-                } else if (itemSelector === '.threads_trigger-item' && currentActiveThread !== item) {
+                if (currentActiveGarment !== item && currentActiveThread !== item) {
                     imgs.forEach(img => {
                         img.style.opacity = '0.8';
                     });
@@ -803,12 +796,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             item.addEventListener('mouseleave', function() {
-                if (itemSelector === '.garment_item' && currentActiveGarment !== item) {
-                    imgs.forEach(img => {
-                        img.style.opacity = '0.5';
-                    });
-                    item.classList.remove('hover-inner-shadow'); // Remove hover inner shadow for garments
-                } else if (itemSelector === '.threads_trigger-item' && currentActiveThread !== item) {
+                if (currentActiveGarment !== item && currentActiveThread !== item) {
                     imgs.forEach(img => {
                         img.style.opacity = '0.5';
                     });
@@ -824,7 +812,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (enableShadow) {
                         d.classList.remove('inner-shadow');
                     }
-                    d.classList.remove('hover-inner-shadow'); // Remove hover inner shadow when another item is clicked
                     d.classList.remove('active');
                 });
 
