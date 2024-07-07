@@ -683,7 +683,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
 });
 
 // Add event listeners to the divs for texture switching
-document.querySelectorAll('[data-threads-id]').forEach((element) => {
+document.querySelectorAll('[data-threads-id]').forEach((element, index) => {
     element.addEventListener('click', () => {
         const textureUrl = element.getAttribute('data-texture-url');
         if (textureUrl) {
@@ -691,153 +691,150 @@ document.querySelectorAll('[data-threads-id]').forEach((element) => {
         } else {
             console.error('No texture URL found for this element');
         }
+
+        // Handle showing the appropriate garment image
+        displayGarmentImage(index);
     });
 });
 
+function displayGarmentImage(index) {
+    // Hide all garment images first
+    document.querySelectorAll('.img.is-garment, .img.is-garment-2, .img.is-garment-3').forEach(img => {
+        img.style.display = 'none';
+    });
+
+    // Show the selected garment image based on the index
+    const garmentClass = `.img.is-garment${index === 0 ? '' : '-' + (index + 1)}`;
+    const selectedImg = document.querySelector(garmentClass);
+    if (selectedImg) {
+        selectedImg.style.display = 'block';
+    } else {
+        console.error(`Image with class ${garmentClass} not found`);
+    }
+}
 
 // Handling switching between garments and textures
 document.addEventListener('DOMContentLoaded', function() {
     // Garment items functionality
     handleItemSelection(
-      '.garment_item',
-      '.img.is-garment',
-      '.garment_corner-wrap',
-      true // Enable inner shadow
+        '.garment_item',
+        '.img.is-garment',
+        '.garment_corner-wrap',
+        true // Enable inner shadow
     );
 
     // Threads items functionality
     handleItemSelection(
-      '.threads_trigger-item',
-      '.img.is-threads',
-      '.threads_corner',
-      false, // Disable inner shadow on items
-      true // Only update the top position
+        '.threads_trigger-item',
+        '.img.is-threads',
+        '.threads_corner',
+        false, // Disable inner shadow on items
+        true // Only update the top position
     );
 
     function handleItemSelection(itemSelector, imgSelector, cornerWrapSelector, enableShadow, onlyUpdateTop = false) {
-      const divs = document.querySelectorAll(itemSelector);
-      let activeDiv = divs[0]; // Initialize with the first div
-      const cornerWrap = cornerWrapSelector ? document.querySelector(cornerWrapSelector) : null;
-      let activeParagraph; // Variable to store the active paragraph
+        const divs = document.querySelectorAll(itemSelector);
+        let activeDiv = divs[0]; // Initialize with the first div
+        const cornerWrap = cornerWrapSelector ? document.querySelector(cornerWrapSelector) : null;
+        let activeParagraph; // Variable to store the active paragraph
 
-      function positionCornerWrap(targetDiv) {
-        const rect = targetDiv.getBoundingClientRect();
-        const parentRect = targetDiv.offsetParent.getBoundingClientRect();
-        cornerWrap.style.top = `${rect.top - parentRect.top - 0.25 * window.innerWidth / 100}px`;
-        if (!onlyUpdateTop) {
-          cornerWrap.style.left = `${rect.left - parentRect.left - 0.25 * window.innerWidth / 100}px`;
-        }
-      }
-
-      function updateParagraphIndicator(targetDiv) {
-        const paragraph = targetDiv.querySelector('.paragraph.is-support-medium');
-        if (paragraph && paragraph !== activeParagraph) {
-          if (activeParagraph) {
-            activeParagraph.classList.remove('active');
-          }
-          paragraph.classList.add('active');
-          activeParagraph = paragraph;
-        }
-      }
-
-      if (activeDiv) {
-        const firstImg = activeDiv.querySelector(imgSelector);
-        if (firstImg) {
-          firstImg.style.opacity = '1';
-        }
-        if (enableShadow) {
-          activeDiv.classList.add('inner-shadow');
-        }
-        activeDiv.classList.add('active');
-        if (cornerWrap) {
-          positionCornerWrap(activeDiv);
-          cornerWrap.classList.add('inner-shadow'); // Add inner shadow to the corner wrap
-        }
-        updateParagraphIndicator(activeDiv);
-      }
-
-      divs.forEach(div => {
-        const img = div.querySelector(imgSelector);
-        if (!img) {
-          console.error(`Image with class ${imgSelector} not found in div`, div);
-          return;
+        function positionCornerWrap(targetDiv) {
+            const rect = targetDiv.getBoundingClientRect();
+            const parentRect = targetDiv.offsetParent.getBoundingClientRect();
+            cornerWrap.style.top = `${rect.top - parentRect.top - 0.25 * window.innerWidth / 100}px`;
+            if (!onlyUpdateTop) {
+                cornerWrap.style.left = `${rect.left - parentRect.left - 0.25 * window.innerWidth / 100}px`;
+            }
         }
 
-        div.addEventListener('mouseenter', function() {
-          if (activeDiv !== div) {
-            img.style.opacity = '0.8';
-          }
-        });
+        function updateParagraphIndicator(targetDiv) {
+            const paragraph = targetDiv.querySelector('.paragraph.is-support-medium');
+            if (paragraph && paragraph !== activeParagraph) {
+                if (activeParagraph) {
+                    activeParagraph.classList.remove('active');
+                }
+                paragraph.classList.add('active');
+                activeParagraph = paragraph;
+            }
+        }
 
-        div.addEventListener('mouseleave', function() {
-          if (activeDiv !== div) {
-            img.style.opacity = '0.5';
-          }
-        });
-
-        div.addEventListener('click', function() {
-          divs.forEach(d => {
-            const otherImg = d.querySelector(imgSelector);
-            if (otherImg) {
-              otherImg.style.opacity = '0.5';
+        if (activeDiv) {
+            const firstImg = activeDiv.querySelector(imgSelector);
+            if (firstImg) {
+                firstImg.style.opacity = '1';
             }
             if (enableShadow) {
-              d.classList.remove('inner-shadow');
+                activeDiv.classList.add('inner-shadow');
             }
-            d.classList.remove('active');
-          });
-
-          img.style.opacity = '1';
-          if (enableShadow) {
-            div.classList.add('inner-shadow');
-          }
-          div.classList.add('active');
-          activeDiv = div;
-
-          if (cornerWrap) {
-            positionCornerWrap(activeDiv);
-            cornerWrap.classList.add('inner-shadow'); // Add inner shadow to the corner wrap
-          }
-          updateParagraphIndicator(activeDiv);
-        });
-      });
-
-      // Ensure the active paragraph remains active even when clicking outside
-      document.addEventListener('click', function(event) {
-        const isThreadItem = event.target.closest(itemSelector);
-        if (!isThreadItem && activeParagraph) {
-          activeParagraph.classList.add('active');
+            activeDiv.classList.add('active');
+            if (cornerWrap) {
+                positionCornerWrap(activeDiv);
+                cornerWrap.classList.add('inner-shadow'); // Add inner shadow to the corner wrap
+            }
+            updateParagraphIndicator(activeDiv);
         }
-      });
+
+        divs.forEach(div => {
+            const img = div.querySelector(imgSelector);
+            if (!img) {
+                console.error(`Image with class ${imgSelector} not found in div`, div);
+                return;
+            }
+
+            div.addEventListener('mouseenter', function() {
+                if (activeDiv !== div) {
+                    img.style.opacity = '0.8';
+                }
+            });
+
+            div.addEventListener('mouseleave', function() {
+                if (activeDiv !== div) {
+                    img.style.opacity = '0.5';
+                }
+            });
+
+            div.addEventListener('click', function() {
+                divs.forEach(d => {
+                    const otherImg = d.querySelector(imgSelector);
+                    if (otherImg) {
+                        otherImg.style.opacity = '0.5';
+                    }
+                    if (enableShadow) {
+                        d.classList.remove('inner-shadow');
+                    }
+                    d.classList.remove('active');
+                });
+
+                img.style.opacity = '1';
+                if (enableShadow) {
+                    div.classList.add('inner-shadow');
+                }
+                div.classList.add('active');
+                activeDiv = div;
+
+                if (cornerWrap) {
+                    positionCornerWrap(activeDiv);
+                    cornerWrap.classList.add('inner-shadow'); // Add inner shadow to the corner wrap
+                }
+                updateParagraphIndicator(activeDiv);
+            });
+        });
+
+        // Ensure the active paragraph remains active even when clicking outside
+        document.addEventListener('click', function(event) {
+            const isThreadItem = event.target.closest(itemSelector);
+            if (!isThreadItem && activeParagraph) {
+                activeParagraph.classList.add('active');
+            }
+        });
     }
 
     // Add the same functionality for threads_img elements
     handleItemSelection(
-      '.threads_img',
-      '.img.is-threads',
-      null, // No corner wrap for threads_img
-      false // Disable inner shadow
+        '.threads_img',
+        '.img.is-threads',
+        null, // No corner wrap for threads_img
+        false // Disable inner shadow
     );
-    // Funzione per mostrare l'immagine corretta
-const showImageByIndex = (index) => {
-    console.log(`Showing image at index: ${index}`); // Debug
-    document.querySelectorAll('.image-item').forEach((item) => {
-        const images = item.querySelectorAll('img'); // Seleziona tutte le immagini all'interno di image-item
-        images.forEach((img, imgIndex) => {
-            img.style.display = (imgIndex === index) ? 'block' : 'none';
-            console.log(`Image at index ${imgIndex}: ${img.style.display}`); // Debug
-        });
-    });
-};
-
-// Aggiungi event listeners ai trigger
-document.querySelectorAll('.threads_trigger-item').forEach((element) => {
-    element.addEventListener('click', () => {
-        const threadsId = element.getAttribute('data-threads-id');
-        const imgIndex = parseInt(threadsId.split('_').pop()) - 1; // Convert to zero-based index
-        console.log(`Trigger clicked: ${threadsId}, index: ${imgIndex}`); // Debug
-        showImageByIndex(imgIndex);
-    });
-});
 
 });
