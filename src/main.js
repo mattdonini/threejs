@@ -818,25 +818,5 @@ document.addEventListener('DOMContentLoaded', function() {
       null, // No corner wrap for threads_img
       false // Disable inner shadow
     );
-    // Add event listeners to the divs for image switching
-document.querySelectorAll('.threads_trigger-item').forEach((element) => {
-    element.addEventListener('click', () => {
-        const threadsId = element.getAttribute('data-threads-id'); // Read the data-threads-id attribute
-
-        // Loop through each image-item to display the correct image
-        document.querySelectorAll('.image-item').forEach((item) => {
-            const images = item.querySelectorAll('.w-dyn-item img'); // Adjust the selector to match your gallery images
-            images.forEach((img, index) => {
-                // Show or hide the image based on the threadsId
-                img.style.display = (index + 1 == threadsId.split('_').pop()) ? 'block' : 'none';
-            });
-        });
-    });
-});
-
-// Hide all images initially
-document.querySelectorAll('.w-dyn-item img').forEach((img) => {
-    img.style.display = 'none';
-});
-
+    
 });
