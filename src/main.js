@@ -140,6 +140,7 @@ loadModel('https://uploads-ssl.webflow.com/6665a67f8e924fdecb7b36e5/6675c8cc5cc9
     updateModelTexture(currentTextureUrl);
 });
 
+
 // Mouse move event listener
 const mouse = { x: 0, y: 0 };
 window.addEventListener('mousemove', (event) => {
@@ -604,24 +605,6 @@ const animate = () => {
 };
 animate();
 
-// Add ScrollTrigger logic
-ScrollTrigger.create({
-    trigger: '.section.is-material',
-    start: 'top top',
-    endTrigger: '.section.is-garment',
-    end: 'top top',
-    onUpdate: (self) => {
-        // Animate the model based on scroll progress
-        const progress = self.progress;
-
-        // Adjust the model's position or other properties based on scroll progress
-        if (model) {
-            // Example: move the model vertically as you scroll
-            model.position.y = THREE.MathUtils.lerp(0, -2, progress);
-            model.position.z = THREE.MathUtils.lerp(2, 0, progress);
-        }
-    }
-});
 
 // Add event listeners to the divs for model switching
 document.querySelectorAll('[data-garment-id]').forEach((element) => {
