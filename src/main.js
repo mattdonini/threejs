@@ -874,7 +874,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const initialSection = document.querySelector('.section.is-material');
         const finalSection = document.querySelector('.webgl_wrapper');
     
-        // Move the canvas to the initial section on load
+        // Ensure the canvas is initially in the initial section
         initialSection.appendChild(canvas);
     
         const handleScroll = () => {
@@ -904,6 +904,7 @@ document.addEventListener('DOMContentLoaded', function() {
         window.addEventListener('resize', handleScroll); // Handle resizing of the window
         handleScroll(); // Initial call to position the canvas correctly
     });
+    
     
 
 
