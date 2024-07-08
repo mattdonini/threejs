@@ -4,6 +4,9 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+import ScrollMagic from 'scrollmagic';
+import { gsap } from 'gsap';
+import 'scrollmagic/scrollmagic/uncompressed/plugins/animation.gsap.js';
 
 // Canvas and Scene
 const canvas = document.querySelector('canvas.webgl');
@@ -136,6 +139,37 @@ loadModel('https://uploads-ssl.webflow.com/6665a67f8e924fdecb7b36e5/6675c8cc5cc9
     updateModelTexture(currentTextureUrl);
 });
 
+// ScrollMagic setup
+const controller = new ScrollMagic.Controller();
+
+const materialSection = document.querySelector('.section.is-material');
+const garmentSection = document.querySelector('.section.is-garment');
+
+// Scene for rotating the model in the material section
+const rotateScene = new ScrollMagic.Scene({
+    triggerElement: materialSection,
+    duration: materialSection.offsetHeight, // Duration of the animation
+    triggerHook: 0.5 // Start the animation when the section is in the middle of the viewport
+})
+.setTween(gsap.to(model.rotation, {
+    y: 2 * Math.PI, // Rotate 360 degrees
+    ease: "none",
+    onUpdate: () => {
+        renderer.render(scene, camera);
+    }
+}))
+.addTo(controller);
+
+// Scene for pinning the model in the garment section
+const pinScene = new ScrollMagic.Scene({
+    triggerElement: garmentSection,
+    triggerHook: 0, // Start pinning as soon as the section reaches the top of the viewport
+    duration: garmentSection.offsetHeight // Pin for the height of the section
+})
+.setPin(canvas) // Pin the canvas element containing the 3D model
+.addTo(controller);
+
+rotateScene.reverse(false); // Disable reverse for the rotation scene
 
 // Mouse move event listener
 const mouse = { x: 0, y: 0 };
@@ -152,15 +186,15 @@ let lastRotationX = 0, lastRotationY = 0;
 let rotationVelocityX = 0, rotationVelocityY = 0;
 
 // Post-processing shaders
-const vertexShader = `
+const vertexShader = 
 varying vec2 vUv;
 void main() {
     vUv = uv;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
-`;
+;
 
-const fragmentShader = `
+const fragmentShader = 
 uniform sampler2D tDiffuse;
 uniform vec2 rotationVelocity;
 varying vec2 vUv;
@@ -187,18 +221,18 @@ void main() {
 
     gl_FragColor = finalColor; // Use the final color with RGB effect
 }
-`;
+;
 
 // Pixelation Displacement Shader
-const pixelationVertexShader = `
+const pixelationVertexShader = 
 varying vec2 vUv;
 void main() {
     vUv = uv;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
-`;
+;
 
-const pixelationFragmentShader = `
+const pixelationFragmentShader = 
 uniform sampler2D tDiffuse;
 uniform float pixelSize;
 uniform vec2 resolution;
@@ -231,10 +265,10 @@ void main() {
     // Combine the RGB channels with the glitch effect
     gl_FragColor = vec4(colorR.r, colorG.g, colorB.b, color.a);
 }
-`;
+;
 
 // Noise Shader
-const noiseFragmentShader = `
+const noiseFragmentShader = 
 uniform sampler2D tDiffuse;
 uniform float time;
 uniform float noiseStrength;
@@ -250,18 +284,18 @@ void main() {
     color.rgb += noise * 0.15; // Adjust the multiplier for noise intensity
     gl_FragColor = color;
 }
-`;
+;
 
 // Glitch Shader
-const glitchVertexShader = `
+const glitchVertexShader = 
 varying vec2 vUv;
 void main() {
     vUv = uv;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
-`;
+;
 
-const glitchFragmentShader = `
+const glitchFragmentShader = 
 precision mediump float;
 varying vec2 vUv;
 uniform sampler2D tDiffuse;
@@ -298,18 +332,18 @@ void main() {
     color.b = texture(tDiffuse, vec2(uv.x + (glitchMod * offX * chromab + waveX), uv.y)).b;
     gl_FragColor = color;
 }
-`;
+;
 
 // Blinds Shader
-const blindsVertexShader = `
+const blindsVertexShader = 
 varying vec2 vUv;
 void main() {
     vUv = uv;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
-`;
+;
 
-const blindsFragmentShader = `
+const blindsFragmentShader = 
 precision mediump float;
 uniform sampler2D tDiffuse;
 uniform float uAmount;
@@ -375,18 +409,18 @@ vec4 blinds(vec2 st, float mDist) {
 void main() {
     gl_FragColor = blinds(vUv, 1.0);
 }
-`;
+;
 
 // Diffuse Shader
-const diffuseVertexShader = `
+const diffuseVertexShader = 
 varying vec2 vUv;
 void main() {
     vUv = uv;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
-`;
+;
 
-const diffuseFragmentShader = `
+const diffuseFragmentShader = 
 precision mediump float;
 
 varying vec2 vUv;
@@ -452,7 +486,7 @@ void main() {
     vec4 col = result;
     gl_FragColor = col;
 }
-`;
+;
 
 const composer = new EffectComposer(renderer);
 const renderPass = new RenderPass(scene, camera);
@@ -601,21 +635,6 @@ const animate = () => {
 };
 animate();
 
-const animate = () => {
-    requestAnimationFrame(animate);
-
-    if (isInSection2 && model) {
-        // Rotate the model 360 degrees based on the scroll position
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        const rotationProgress = (scrollTop - section2Top) / section2Height;
-        model.rotation.y = rotationProgress * Math.PI * 2;
-    }
-
-    composer.render();
-};
-animate();
-
-
 // Add event listeners to the divs for model switching
 document.querySelectorAll('[data-garment-id]').forEach((element) => {
     element.addEventListener('click', () => {
@@ -697,6 +716,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
         }
     });
 });
+
 
 let currentActiveGarment = null;
 let currentActiveThread = null;
@@ -885,37 +905,6 @@ document.addEventListener('DOMContentLoaded', function() {
         firstGarmentImg.style.opacity = '1';
     }
 
-    // Add scroll event listeners to track the scroll position and update the model accordingly
-    let lastScrollTop = 0;
-    let isInSection2 = false;
-    const section2 = document.querySelector('.section.is-garment');
-    const section2Top = section2.offsetTop;
-    const section2Height = section2.offsetHeight;
-    
-    window.addEventListener('scroll', () => {
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    
-        if (scrollTop >= section2Top && scrollTop < section2Top + section2Height) {
-            isInSection2 = true;
-            // Calculate the rotation based on the scroll position
-            const rotationProgress = (scrollTop - section2Top) / section2Height;
-            if (model) {
-                model.rotation.y = rotationProgress * Math.PI * 2; // 360 degrees rotation
-            }
-        } else {
-            isInSection2 = false;
-        }
-    
-        // Ensure the model stays in section 2
-        if (scrollTop < section2Top) {
-            model.position.y = 0; // Adjust as needed to keep the model in view
-        } else if (scrollTop >= section2Top) {
-            model.position.y = -0.5; // Adjust as needed to keep the model in view
-        }
-    
-        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
-    });
-    
-    
+
 
 });
