@@ -869,31 +869,43 @@ document.addEventListener('DOMContentLoaded', function() {
     if (firstGarmentImg) {
         firstGarmentImg.style.opacity = '1';
     }
-    const sectionMaterial = document.querySelector('.section.is-material');
+
+
+    cconst sectionMaterial = document.querySelector('.section.is-material');
 const sectionGarment = document.querySelector('.section.is-garment');
 const canvas = document.querySelector('.webgl');
 let isInSectionGarment = false;
 
 // Function to check scroll position
 const onScroll = () => {
-    const sectionMaterialBottom = sectionMaterial.getBoundingClientRect().bottom;
-    const sectionGarmentTop = sectionGarment.getBoundingClientRect().top;
-    const canvasVisible = sectionMaterialBottom > 0 || sectionGarmentTop < window.innerHeight;
+    const sectionMaterialRect = sectionMaterial.getBoundingClientRect();
+    const sectionGarmentRect = sectionGarment.getBoundingClientRect();
+    
+    const isInMaterialSection = sectionMaterialRect.bottom > 0 && sectionMaterialRect.top < window.innerHeight;
+    const isInGarmentSection = sectionGarmentRect.top < window.innerHeight && sectionGarmentRect.bottom > 0;
 
     // Show or hide the canvas based on scroll position
-    canvas.style.display = canvasVisible ? 'block' : 'none';
-
-    // Check if we're in the garment section
-    if (sectionMaterialBottom <= window.innerHeight && !isInSectionGarment) {
-        isInSectionGarment = true;
+    if (isInMaterialSection || isInGarmentSection) {
+        canvas.style.display = 'block';
+    } else {
+        canvas.style.display = 'none';
     }
 
-    if (isInSectionGarment && sectionGarmentTop <= 0) {
-        // Rotate the model while scrolling in section garment
-        const rotationProgress = Math.min(1, Math.abs(sectionGarmentTop) / window.innerHeight);
+    // Handle rotation in the garment section
+    if (isInGarmentSection) {
+        isInSectionGarment = true;
+        const rotationProgress = Math.min(1, Math.abs(sectionGarmentRect.top) / window.innerHeight);
         const rotationAngle = 260 * rotationProgress;
         if (model) {
             model.rotation.y = THREE.Math.degToRad(rotationAngle);
+        }
+    }
+
+    // Prevent rotation reset when scrolling back up to the material section
+    if (!isInGarmentSection && isInSectionGarment) {
+        // Keep the model at the final rotation angle of 260 degrees
+        if (model) {
+            model.rotation.y = THREE.Math.degToRad(260);
         }
     }
 };
@@ -904,5 +916,4 @@ window.addEventListener('scroll', onScroll);
 // Initial check
 onScroll();
 
-    
 });
