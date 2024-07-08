@@ -5,30 +5,12 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 
-// Renderer settings
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-renderer.setClearColor(0x000000, 0); // Set background to transparent
-renderer.setSize(sizes.width, sizes.height);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.outputEncoding = THREE.sRGBEncoding;
-renderer.shadowMap.enabled = true;
 
-// Texture loading
-const textureLoader = new THREE.TextureLoader();
-const texture = textureLoader.load('your_texture_url');
-texture.minFilter = THREE.LinearMipMapLinearFilter;
-texture.magFilter = THREE.LinearFilter;
-texture.encoding = THREE.sRGBEncoding;
 
-// Material setup
-model.traverse((child) => {
-    if (child.isMesh) {
-        child.material = new THREE.MeshMatcapMaterial({ matcap: texture, transparent: true, opacity: 1.0 });
-        child.material.needsUpdate = true; // Ensure material updates
-        child.castShadow = true;
-        child.receiveShadow = true;
-    }
-});
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 
 // Canvas and Scene
 const canvas = document.querySelector('canvas.webgl');
@@ -38,19 +20,52 @@ scene.background = null;
 // Sizes
 const sizes = { width: window.innerWidth, height: window.innerHeight };
 
-// Debounce function
-const debounce = (func, wait) => {
-    let timeout;
-    return (...args) => {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => {
-            requestAnimationFrame(() => func.apply(this, args));
-        }, wait);
-    };
-};
+// Camera
+const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100);
+camera.position.set(0, 0, 2);
+scene.add(camera);
 
-// Resize event handling
-window.addEventListener('resize', debounce(() => {
+// Renderer
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setClearColor(0x000000, 0);
+renderer.setSize(sizes.width, sizes.height);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.shadowMap.enabled = true;
+
+// Texture and Model Loading
+const loader = new GLTFLoader();
+const textureLoader = new THREE.TextureLoader();
+let model;
+
+loader.load('your_model_url', (gltf) => {
+    model = gltf.scene;
+    const texture = textureLoader.load('your_texture_url');
+    texture.minFilter = THREE.LinearMipMapLinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.encoding = THREE.sRGBEncoding;
+
+    model.traverse((child) => {
+        if (child.isMesh) {
+            child.material = new THREE.MeshMatcapMaterial({ matcap: texture, transparent: true, opacity: 1.0 });
+        }
+    });
+    scene.add(model);
+});
+
+// Effect Composer
+const composer = new EffectComposer(renderer);
+const renderPass = new RenderPass(scene, camera);
+composer.addPass(renderPass);
+
+const animate = () => {
+    requestAnimationFrame(animate);
+    composer.render();
+};
+animate();
+
+// Resize Event
+window.addEventListener('resize', () => {
     sizes.width = window.innerWidth;
     sizes.height = window.innerHeight;
 
@@ -59,21 +74,7 @@ window.addEventListener('resize', debounce(() => {
     renderer.setSize(sizes.width, sizes.height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     composer.setSize(sizes.width, sizes.height);
-    adjustModelScale();
-}, 100));
-
-// Camera
-const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100);
-camera.position.set(0, 0, 2);
-scene.add(camera);
-
-// Renderer
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-renderer.setClearColor(0x000000, 0); // Set background to transparent
-renderer.setSize(sizes.width, sizes.height);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.outputEncoding = THREE.sRGBEncoding;
-renderer.shadowMap.enabled = true;
+});
 
 // GLTFLoader and TextureLoader instances
 const loader = new GLTFLoader();
