@@ -869,5 +869,37 @@ document.addEventListener('DOMContentLoaded', function() {
     if (firstGarmentImg) {
         firstGarmentImg.style.opacity = '1';
     }
-
+    const sectionMaterial = document.querySelector('.section.is-material');
+    const sectionGarment = document.querySelector('.section.is-garment');
+    let isInSectionGarment = false;
+    
+    // Function to check scroll position
+    const onScroll = () => {
+        const sectionMaterialBottom = sectionMaterial.getBoundingClientRect().bottom;
+        const sectionGarmentTop = sectionGarment.getBoundingClientRect().top;
+    
+        if (sectionMaterialBottom <= window.innerHeight && !isInSectionGarment) {
+            isInSectionGarment = true;
+            // Keep the model fixed at section garment position
+            // Update any necessary styles or classes
+        }
+    
+        if (isInSectionGarment) {
+            if (sectionGarmentTop <= 0) {
+                // Rotate the model while scrolling in section garment
+                const rotationProgress = Math.min(1, Math.abs(sectionGarmentTop) / window.innerHeight);
+                const rotationAngle = 260 * rotationProgress;
+                if (model) {
+                    model.rotation.y = THREE.Math.degToRad(rotationAngle);
+                }
+            }
+        }
+    };
+    
+    // Event listener for scroll
+    window.addEventListener('scroll', onScroll);
+    
+    // Initial check
+    onScroll();
+    
 });
