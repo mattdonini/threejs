@@ -868,14 +868,13 @@ document.addEventListener('DOMContentLoaded', function() {
     if (firstGarmentImg) {
         firstGarmentImg.style.opacity = '1';
     }
-    // JavaScript to handle scrolling and transitioning of the 3D model
 
-document.addEventListener('DOMContentLoaded', () => {
+   document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.querySelector('canvas.webgl');
     const initialSection = document.querySelector('.section.is-material');
     const finalSection = document.querySelector('.webgl_wrapper');
 
-    // Initial setup: place the canvas in the initial section
+    // Move the canvas to the initial section on load
     initialSection.appendChild(canvas);
 
     const handleScroll = () => {
@@ -883,12 +882,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const finalSectionTop = finalSection.offsetTop;
         const finalSectionHeight = finalSection.offsetHeight;
 
+        console.log('Scroll Y:', scrollY);
+        console.log('Final Section Top:', finalSectionTop);
+
         if (scrollY >= finalSectionTop - window.innerHeight && scrollY < finalSectionTop + finalSectionHeight) {
             // Move the canvas to the final section
-            finalSection.appendChild(canvas);
+            if (canvas.parentElement !== finalSection) {
+                finalSection.appendChild(canvas);
+                console.log('Canvas moved to final section');
+            }
         } else if (scrollY < finalSectionTop - window.innerHeight) {
             // Keep the canvas in the initial section
-            initialSection.appendChild(canvas);
+            if (canvas.parentElement !== initialSection) {
+                initialSection.appendChild(canvas);
+                console.log('Canvas moved to initial section');
+            }
         }
     };
 
@@ -896,5 +904,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', handleScroll); // Handle resizing of the window
     handleScroll(); // Initial call to position the canvas correctly
 });
+
 
 });
