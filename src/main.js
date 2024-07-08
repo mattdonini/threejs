@@ -869,6 +869,36 @@ document.addEventListener('DOMContentLoaded', function() {
         firstGarmentImg.style.opacity = '1';
     }
 
-
+    const canvas = document.querySelector('.webgl');
+    const initialSection = document.querySelector('.section.is-material');
+    const finalSection = document.querySelector('.webgl_wrapper');
+    
+    let transitionCompleted = false;
+    
+    const updateCanvasPosition = () => {
+        const initialRect = initialSection.getBoundingClientRect();
+        const finalRect = finalSection.getBoundingClientRect();
+    
+        if (!transitionCompleted) {
+            // Check if the user has scrolled past the initial section
+            if (initialRect.bottom > 0 && initialRect.top < window.innerHeight) {
+                // Position canvas relative to the initial section
+                canvas.style.top = `${initialRect.top}px`;
+            } else if (finalRect.top < window.innerHeight && finalRect.bottom > 0) {
+                // Position canvas relative to the final section
+                canvas.style.top = `${finalRect.top}px`;
+                transitionCompleted = true; // Mark the transition as completed
+            }
+        } else {
+            // Keep the canvas in the final section after the transition
+            canvas.style.top = `${finalRect.top}px`;
+        }
+    };
+    
+    window.addEventListener('scroll', updateCanvasPosition);
+    window.addEventListener('resize', updateCanvasPosition);
+    
+    updateCanvasPosition(); // Initial call to set position correctly
+    
 
 });
