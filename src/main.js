@@ -869,41 +869,38 @@ document.addEventListener('DOMContentLoaded', function() {
     if (firstGarmentImg) {
         firstGarmentImg.style.opacity = '1';
     }
-// Ensure the document is fully loaded before running the script
-document.addEventListener('DOMContentLoaded', () => {
-    // Select the garment_3D-wrap element
-    const garment3DWrap = document.querySelector('.garment_3D-wrap');
-    const nextSection = garment3DWrap.nextElementSibling;
-
-    // Function to handle the scroll event
-    const onScroll = () => {
-        // Get the scroll position
-        const scrollPosition = window.scrollY || document.documentElement.scrollTop;
-
-        // Get the window height
-        const windowHeight = window.innerHeight;
-
-        // Calculate the new top position
-        let newTop = -115 + (scrollPosition / windowHeight) * 115;
-
-        // Check if we have reached the next section
-        const nextSectionOffset = nextSection.offsetTop;
-        if (scrollPosition >= nextSectionOffset) {
-            newTop = 0;
-        } else {
-            // Limit the top position to 0 (so it doesn't go below 0)
-            newTop = Math.min(newTop, 0);
+    document.addEventListener('DOMContentLoaded', () => {
+        // Select the garment_3D-wrap element
+        const garment3DWrap = document.querySelector('.garment_3D-wrap');
+        const nextSection = garment3DWrap.nextElementSibling;
+    
+        if (!garment3DWrap || !nextSection) {
+            console.error('garment_3D-wrap or the next section is not found.');
+            return;
         }
-
-        // Apply the new top position to the garment_3D-wrap element
-        garment3DWrap.style.top = `${newTop}vh`;
-    };
-
-    // Add the scroll event listener
-    window.addEventListener('scroll', onScroll);
-
-    // Initial call to position the element correctly if the page is already scrolled
-    onScroll();
-});
-
+    
+        // Function to handle the scroll event
+        const onScroll = () => {
+            // Get the scroll position
+            const scrollPosition = window.scrollY || document.documentElement.scrollTop;
+    
+            // Calculate the new top position
+            const nextSectionTop = nextSection.offsetTop;
+    
+            if (scrollPosition < nextSectionTop) {
+                const percentageScrolled = scrollPosition / nextSectionTop;
+                const newTop = -115 + percentageScrolled * 115;
+                garment3DWrap.style.top = `${newTop}vh`;
+            } else {
+                garment3DWrap.style.top = '0';
+            }
+        };
+    
+        // Add the scroll event listener
+        window.addEventListener('scroll', onScroll);
+    
+        // Initial call to position the element correctly if the page is already scrolled
+        onScroll();
+    });
+    
 });
