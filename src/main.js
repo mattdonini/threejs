@@ -601,6 +601,25 @@ const animate = () => {
 };
 animate();
 
+const animate = () => {
+    requestAnimationFrame(animate);
+
+    if (isInSection2) {
+        // Additional logic if needed
+    }
+
+    customPass.uniforms.rotationVelocity.value.set(rotationVelocityY, rotationVelocityX);
+
+    noisePass.uniforms.time.value += 0.05; 
+    glitchPass.uniforms.uTime.value += 0.05; 
+    blindsPass.uniforms.uTime.value += 0.05; 
+    diffusePass.uniforms.uTime.value += 0.05; 
+
+    composer.render();
+};
+animate();
+
+
 // Add event listeners to the divs for model switching
 document.querySelectorAll('[data-garment-id]').forEach((element) => {
     element.addEventListener('click', () => {
@@ -870,6 +889,36 @@ document.addEventListener('DOMContentLoaded', function() {
         firstGarmentImg.style.opacity = '1';
     }
 
-
+    // Add scroll event listeners to track the scroll position and update the model accordingly
+    let lastScrollTop = 0;
+    let isInSection2 = false;
+    const section2 = document.querySelector('.section.is-garment');
+    const section2Top = section2.offsetTop;
+    const section2Height = section2.offsetHeight;
+    
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    
+        if (scrollTop >= section2Top && scrollTop < section2Top + section2Height) {
+            isInSection2 = true;
+            // Calculate the rotation based on the scroll position
+            const rotationProgress = (scrollTop - section2Top) / section2Height;
+            if (model) {
+                model.rotation.y = rotationProgress * Math.PI * 2; // 360 degrees rotation
+            }
+        } else {
+            isInSection2 = false;
+        }
+    
+        // Ensure the model stays in section 2
+        if (scrollTop < section2Top) {
+            model.position.y = 0; // Adjust as needed to keep the model in view
+        } else if (scrollTop >= section2Top) {
+            model.position.y = -0.5; // Adjust as needed to keep the model in view
+        }
+    
+        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+    });
+    
 
 });
