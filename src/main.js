@@ -604,16 +604,12 @@ animate();
 const animate = () => {
     requestAnimationFrame(animate);
 
-    if (isInSection2) {
-        // Additional logic if needed
+    if (isInSection2 && model) {
+        // Rotate the model 360 degrees based on the scroll position
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const rotationProgress = (scrollTop - section2Top) / section2Height;
+        model.rotation.y = rotationProgress * Math.PI * 2;
     }
-
-    customPass.uniforms.rotationVelocity.value.set(rotationVelocityY, rotationVelocityX);
-
-    noisePass.uniforms.time.value += 0.05; 
-    glitchPass.uniforms.uTime.value += 0.05; 
-    blindsPass.uniforms.uTime.value += 0.05; 
-    diffusePass.uniforms.uTime.value += 0.05; 
 
     composer.render();
 };
@@ -919,6 +915,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
         lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
     });
+    
     
 
 });
