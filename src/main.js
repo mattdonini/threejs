@@ -681,6 +681,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
         }
     });
 });
+
 let currentActiveGarment = null;
 let currentActiveThread = null;
 
@@ -867,4 +868,33 @@ document.addEventListener('DOMContentLoaded', function() {
     if (firstGarmentImg) {
         firstGarmentImg.style.opacity = '1';
     }
+    // JavaScript to handle scrolling and transitioning of the 3D model
+
+document.addEventListener('DOMContentLoaded', () => {
+    const canvas = document.querySelector('canvas.webgl');
+    const initialSection = document.querySelector('.section.is-material');
+    const finalSection = document.querySelector('.webgl_wrapper');
+
+    // Initial setup: place the canvas in the initial section
+    initialSection.appendChild(canvas);
+
+    const handleScroll = () => {
+        const scrollY = window.scrollY;
+        const finalSectionTop = finalSection.offsetTop;
+        const finalSectionHeight = finalSection.offsetHeight;
+
+        if (scrollY >= finalSectionTop - window.innerHeight && scrollY < finalSectionTop + finalSectionHeight) {
+            // Move the canvas to the final section
+            finalSection.appendChild(canvas);
+        } else if (scrollY < finalSectionTop - window.innerHeight) {
+            // Keep the canvas in the initial section
+            initialSection.appendChild(canvas);
+        }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('resize', handleScroll); // Handle resizing of the window
+    handleScroll(); // Initial call to position the canvas correctly
+});
+
 });
