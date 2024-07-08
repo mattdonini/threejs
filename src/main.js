@@ -4,7 +4,8 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
-import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader.js';
+
+
 
 // Canvas and Scene
 const canvas = document.querySelector('canvas.webgl');
@@ -50,14 +51,6 @@ renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.shadowMap.enabled = true;
-
-// Post-processing
-const composer = new EffectComposer(renderer);
-composer.addPass(new RenderPass(scene, camera));
-
-const fxaaPass = new ShaderPass(FXAAShader);
-fxaaPass.uniforms['resolution'].value.set(1 / sizes.width, 1 / sizes.height);
-composer.addPass(fxaaPass);
 
 // GLTFLoader and TextureLoader instances
 const loader = new GLTFLoader();
@@ -128,8 +121,6 @@ const updateModelTexture = (textureUrl) => {
     if (model && textureUrl) {
         const texture = textureCache[textureUrl] || textureLoader.load(textureUrl);
         texture.encoding = THREE.sRGBEncoding;
-        texture.minFilter = THREE.LinearFilter;
-        texture.magFilter = THREE.LinearFilter;
         model.traverse((child) => {
             if (child.isMesh) {
                 child.material = new THREE.MeshMatcapMaterial({ matcap: texture, transparent: true, opacity: 1.0 });
@@ -146,15 +137,6 @@ loadModel('https://uploads-ssl.webflow.com/6665a67f8e924fdecb7b36e5/6675c8cc5cc9
     currentTextureUrl = 'https://uploads-ssl.webflow.com/6665a67f8e924fdecb7b36e5/6675a742ad653905eaedaea8_holographic-texture.webp';
     updateModelTexture(currentTextureUrl);
 });
-
-// Animation loop
-const tick = () => {
-    requestAnimationFrame(tick);
-    composer.render();
-};
-
-tick();
-
 
 // Mouse move event listener
 const mouse = { x: 0, y: 0 };
