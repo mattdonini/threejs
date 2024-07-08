@@ -869,41 +869,42 @@ document.addEventListener('DOMContentLoaded', function() {
         firstGarmentImg.style.opacity = '1';
     }
 
-   document.addEventListener('DOMContentLoaded', () => {
-    const canvas = document.querySelector('canvas.webgl');
-    const initialSection = document.querySelector('.section.is-material');
-    const finalSection = document.querySelector('.webgl_wrapper');
-
-    // Move the canvas to the initial section on load
-    initialSection.appendChild(canvas);
-
-    const handleScroll = () => {
-        const scrollY = window.scrollY;
-        const finalSectionTop = finalSection.offsetTop;
-        const finalSectionHeight = finalSection.offsetHeight;
-
-        console.log('Scroll Y:', scrollY);
-        console.log('Final Section Top:', finalSectionTop);
-
-        if (scrollY >= finalSectionTop - window.innerHeight && scrollY < finalSectionTop + finalSectionHeight) {
-            // Move the canvas to the final section
-            if (canvas.parentElement !== finalSection) {
-                finalSection.appendChild(canvas);
-                console.log('Canvas moved to final section');
+    document.addEventListener('DOMContentLoaded', () => {
+        const canvas = document.querySelector('canvas.webgl');
+        const initialSection = document.querySelector('.section.is-material');
+        const finalSection = document.querySelector('.webgl_wrapper');
+    
+        // Move the canvas to the initial section on load
+        initialSection.appendChild(canvas);
+    
+        const handleScroll = () => {
+            const scrollY = window.scrollY;
+            const finalSectionTop = finalSection.offsetTop;
+            const finalSectionHeight = finalSection.offsetHeight;
+    
+            console.log('Scroll Y:', scrollY);
+            console.log('Final Section Top:', finalSectionTop);
+    
+            if (scrollY >= finalSectionTop - window.innerHeight && scrollY < finalSectionTop + finalSectionHeight) {
+                // Move the canvas to the final section
+                if (canvas.parentElement !== finalSection) {
+                    finalSection.appendChild(canvas);
+                    console.log('Canvas moved to final section');
+                }
+            } else if (scrollY < finalSectionTop - window.innerHeight) {
+                // Keep the canvas in the initial section
+                if (canvas.parentElement !== initialSection) {
+                    initialSection.appendChild(canvas);
+                    console.log('Canvas moved to initial section');
+                }
             }
-        } else if (scrollY < finalSectionTop - window.innerHeight) {
-            // Keep the canvas in the initial section
-            if (canvas.parentElement !== initialSection) {
-                initialSection.appendChild(canvas);
-                console.log('Canvas moved to initial section');
-            }
-        }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    window.addEventListener('resize', handleScroll); // Handle resizing of the window
-    handleScroll(); // Initial call to position the canvas correctly
-});
+        };
+    
+        window.addEventListener('scroll', handleScroll);
+        window.addEventListener('resize', handleScroll); // Handle resizing of the window
+        handleScroll(); // Initial call to position the canvas correctly
+    });
+    
 
 
 });
