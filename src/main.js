@@ -4,13 +4,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
-
-
-
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader.js';
 
 // Canvas and Scene
 const canvas = document.querySelector('canvas.webgl');
@@ -20,52 +14,19 @@ scene.background = null;
 // Sizes
 const sizes = { width: window.innerWidth, height: window.innerHeight };
 
-// Camera
-const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100);
-camera.position.set(0, 0, 2);
-scene.add(camera);
-
-// Renderer
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-renderer.setClearColor(0x000000, 0);
-renderer.setSize(sizes.width, sizes.height);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.outputEncoding = THREE.sRGBEncoding;
-renderer.shadowMap.enabled = true;
-
-// Texture and Model Loading
-const loader = new GLTFLoader();
-const textureLoader = new THREE.TextureLoader();
-let model;
-
-loader.load('your_model_url', (gltf) => {
-    model = gltf.scene;
-    const texture = textureLoader.load('your_texture_url');
-    texture.minFilter = THREE.LinearMipMapLinearFilter;
-    texture.magFilter = THREE.LinearFilter;
-    texture.encoding = THREE.sRGBEncoding;
-
-    model.traverse((child) => {
-        if (child.isMesh) {
-            child.material = new THREE.MeshMatcapMaterial({ matcap: texture, transparent: true, opacity: 1.0 });
-        }
-    });
-    scene.add(model);
-});
-
-// Effect Composer
-const composer = new EffectComposer(renderer);
-const renderPass = new RenderPass(scene, camera);
-composer.addPass(renderPass);
-
-const animate = () => {
-    requestAnimationFrame(animate);
-    composer.render();
+// Debounce function
+const debounce = (func, wait) => {
+    let timeout;
+    return (...args) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            requestAnimationFrame(() => func.apply(this, args));
+        }, wait);
+    };
 };
-animate();
 
-// Resize Event
-window.addEventListener('resize', () => {
+// Resize event handling
+window.addEventListener('resize', debounce(() => {
     sizes.width = window.innerWidth;
     sizes.height = window.innerHeight;
 
@@ -74,7 +35,29 @@ window.addEventListener('resize', () => {
     renderer.setSize(sizes.width, sizes.height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     composer.setSize(sizes.width, sizes.height);
-});
+    adjustModelScale();
+}, 100));
+
+// Camera
+const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100);
+camera.position.set(0, 0, 2);
+scene.add(camera);
+
+// Renderer
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setClearColor(0x000000, 0); // Set background to transparent
+renderer.setSize(sizes.width, sizes.height);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.shadowMap.enabled = true;
+
+// Post-processing
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+
+const fxaaPass = new ShaderPass(FXAAShader);
+fxaaPass.uniforms['resolution'].value.set(1 / sizes.width, 1 / sizes.height);
+composer.addPass(fxaaPass);
 
 // GLTFLoader and TextureLoader instances
 const loader = new GLTFLoader();
@@ -145,6 +128,8 @@ const updateModelTexture = (textureUrl) => {
     if (model && textureUrl) {
         const texture = textureCache[textureUrl] || textureLoader.load(textureUrl);
         texture.encoding = THREE.sRGBEncoding;
+        texture.minFilter = THREE.LinearFilter;
+        texture.magFilter = THREE.LinearFilter;
         model.traverse((child) => {
             if (child.isMesh) {
                 child.material = new THREE.MeshMatcapMaterial({ matcap: texture, transparent: true, opacity: 1.0 });
@@ -161,6 +146,15 @@ loadModel('https://uploads-ssl.webflow.com/6665a67f8e924fdecb7b36e5/6675c8cc5cc9
     currentTextureUrl = 'https://uploads-ssl.webflow.com/6665a67f8e924fdecb7b36e5/6675a742ad653905eaedaea8_holographic-texture.webp';
     updateModelTexture(currentTextureUrl);
 });
+
+// Animation loop
+const tick = () => {
+    requestAnimationFrame(tick);
+    composer.render();
+};
+
+tick();
+
 
 // Mouse move event listener
 const mouse = { x: 0, y: 0 };
