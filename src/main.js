@@ -869,35 +869,5 @@ document.addEventListener('DOMContentLoaded', function() {
     if (firstGarmentImg) {
         firstGarmentImg.style.opacity = '1';
     }
-    document.addEventListener('DOMContentLoaded', () => {
-        const garment3DWrap = document.querySelector('.garment_3D-wrap');
-        const nextSection = garment3DWrap.nextElementSibling;
-    
-        if (!garment3DWrap || !nextSection) {
-            console.error('garment_3D-wrap or the next section is not found.');
-            return;
-        }
-    
-        const garmentWrapHeight = garment3DWrap.offsetHeight;
-    
-        const onScroll = () => {
-            const scrollPosition = window.scrollY || document.documentElement.scrollTop;
-            const nextSectionTop = nextSection.offsetTop;
-            const windowHeight = window.innerHeight;
-    
-            let newTop = -115 + ((scrollPosition / (nextSectionTop - windowHeight)) * 115);
-    
-            if (scrollPosition >= nextSectionTop - windowHeight) {
-                newTop = 0;
-            }
-    
-            garment3DWrap.style.top = `${newTop}vh`;
-        };
-    
-        window.addEventListener('scroll', onScroll);
-    
-        // Initial call to position the element correctly if the page is already scrolled
-        onScroll();
-    });
-    
+
 });
