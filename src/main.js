@@ -870,7 +870,6 @@ document.addEventListener('DOMContentLoaded', function() {
         firstGarmentImg.style.opacity = '1';
     }
     document.addEventListener('DOMContentLoaded', () => {
-        // Select the garment_3D-wrap element
         const garment3DWrap = document.querySelector('.garment_3D-wrap');
         const nextSection = garment3DWrap.nextElementSibling;
     
@@ -879,24 +878,22 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
     
-        // Function to handle the scroll event
+        const garmentWrapHeight = garment3DWrap.offsetHeight;
+    
         const onScroll = () => {
-            // Get the scroll position
             const scrollPosition = window.scrollY || document.documentElement.scrollTop;
-    
-            // Calculate the new top position
             const nextSectionTop = nextSection.offsetTop;
+            const windowHeight = window.innerHeight;
     
-            if (scrollPosition < nextSectionTop) {
-                const percentageScrolled = scrollPosition / nextSectionTop;
-                const newTop = -115 + percentageScrolled * 115;
-                garment3DWrap.style.top = `${newTop}vh`;
-            } else {
-                garment3DWrap.style.top = '0';
+            let newTop = -115 + ((scrollPosition / (nextSectionTop - windowHeight)) * 115);
+    
+            if (scrollPosition >= nextSectionTop - windowHeight) {
+                newTop = 0;
             }
+    
+            garment3DWrap.style.top = `${newTop}vh`;
         };
     
-        // Add the scroll event listener
         window.addEventListener('scroll', onScroll);
     
         // Initial call to position the element correctly if the page is already scrolled
