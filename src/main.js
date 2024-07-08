@@ -5,6 +5,11 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 
+import { gsap } from 'gsap';
+import ScrollTrigger from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
+
 // Canvas and Scene
 const canvas = document.querySelector('canvas.webgl');
 const scene = new THREE.Scene();
@@ -49,6 +54,26 @@ renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Set pixel ratio
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.shadowMap.enabled = true;
+
+ScrollTrigger.create({
+    trigger: '.section.is-material',
+    start: 'top top',
+    endTrigger: '.section.is-garment',
+    end: 'bottom top',
+    pin: canvas,
+    pinSpacing: false,
+    scrub: true,
+    onUpdate: (self) => {
+        // Update the model's position or other properties based on scroll progress
+        // For example, you can rotate the model based on scroll progress
+        if (model) {
+            const progress = self.progress;
+            // You can update model properties based on progress, e.g., rotation
+            model.rotation.y = progress * Math.PI * 2; // Full rotation over scroll
+        }
+    },
+});
+
 
 // GLTFLoader and TextureLoader instances
 const loader = new GLTFLoader();
