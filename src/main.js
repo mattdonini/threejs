@@ -9,7 +9,6 @@ import { gsap } from 'gsap';
 import 'scrollmagic/scrollmagic/uncompressed/plugins/animation.gsap.js';
 
 
-
 // Canvas and Scene
 const canvas = document.querySelector('canvas.webgl');
 const scene = new THREE.Scene();
@@ -141,6 +140,38 @@ loadModel('https://uploads-ssl.webflow.com/6665a67f8e924fdecb7b36e5/6675c8cc5cc9
     updateModelTexture(currentTextureUrl);
 });
 
+// ScrollMagic setup
+const controller = new ScrollMagic.Controller();
+const materialSection = document.querySelector('.section.is-material');
+const garmentSection = document.querySelector('.section.is-garment');
+
+// Scene for rotating the model in the material section
+const rotateScene = new ScrollMagic.Scene({
+    triggerElement: materialSection,
+    duration: materialSection.offsetHeight, // Duration of the animation
+    triggerHook: 0.5 // Start the animation when the section is in the middle of the viewport
+})
+.setTween(gsap.to({}, {
+    onUpdate: () => {
+        if (model) {
+            model.rotation.y += 0.01;
+            renderer.render(scene, camera);
+        }
+    }
+}))
+.addTo(controller);
+
+// Scene for pinning the model from material section to garment section
+const pinScene = new ScrollMagic.Scene({
+    triggerElement: materialSection,
+    triggerHook: 0, // Start pinning as soon as the section reaches the top of the viewport
+    duration: materialSection.offsetHeight + garmentSection.offsetHeight // Pin for the combined height of both sections
+})
+.setPin(canvas) // Pin the canvas element containing the 3D model
+.addTo(controller);
+
+// Disable reverse for the rotation scene
+rotateScene.reverse(false);
 
 // Mouse move event listener
 const mouse = { x: 0, y: 0 };
@@ -606,7 +637,6 @@ const animate = () => {
 };
 animate();
 
-
 // Add event listeners to the divs for model switching
 document.querySelectorAll('[data-garment-id]').forEach((element) => {
     element.addEventListener('click', () => {
@@ -688,6 +718,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
         }
     });
 });
+
 
 let currentActiveGarment = null;
 let currentActiveThread = null;
