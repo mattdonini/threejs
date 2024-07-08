@@ -5,6 +5,21 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 
+// Texture filtering
+const textureLoader = new THREE.TextureLoader();
+const texture = textureLoader.load('your_texture_url');
+texture.minFilter = THREE.LinearMipMapLinearFilter;
+texture.magFilter = THREE.LinearFilter;
+texture.encoding = THREE.sRGBEncoding;
+
+// Renderer settings
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setClearColor(0x000000, 0); // Set background to transparent
+renderer.setSize(sizes.width, sizes.height);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.shadowMap.enabled = true;
+
 // Canvas and Scene
 const canvas = document.querySelector('canvas.webgl');
 const scene = new THREE.Scene();
