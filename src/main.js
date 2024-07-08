@@ -4,9 +4,6 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
-import ScrollMagic from 'scrollmagic';
-import { gsap } from 'gsap';
-import 'scrollmagic/scrollmagic/uncompressed/plugins/animation.gsap.js';
 
 // Canvas and Scene
 const canvas = document.querySelector('canvas.webgl');
@@ -139,6 +136,7 @@ loadModel('https://uploads-ssl.webflow.com/6665a67f8e924fdecb7b36e5/6675c8cc5cc9
     updateModelTexture(currentTextureUrl);
 });
 
+
 // Mouse move event listener
 const mouse = { x: 0, y: 0 };
 window.addEventListener('mousemove', (event) => {
@@ -147,7 +145,7 @@ window.addEventListener('mousemove', (event) => {
 });
 
 // Smooth interpolation function
-const lerp = (start, end, amount) => (1 - amount) * start + amount;
+const lerp = (start, end, amount) => (1 - amount) * start + amount * end;
 
 // Variables to track model rotation velocity
 let lastRotationX = 0, lastRotationY = 0;
@@ -603,33 +601,6 @@ const animate = () => {
 };
 animate();
 
-// ScrollMagic and GSAP setup
-const controller = new ScrollMagic.Controller();
-
-const rotateTween = gsap.to(model.rotation, {
-    duration: 1,
-    y: "+=6.28319", // 360 degrees in radians
-    ease: "none",
-    paused: true
-});
-
-const sectionMaterial = document.querySelector('.section.is-material');
-const sectionGarment = document.querySelector('.section.is-garment');
-
-const scene1 = new ScrollMagic.Scene({
-    triggerElement: sectionMaterial,
-    duration: sectionMaterial.offsetHeight + sectionGarment.offsetHeight
-})
-    .setTween(rotateTween)
-    .addTo(controller);
-
-const scene2 = new ScrollMagic.Scene({
-    triggerElement: sectionMaterial,
-    triggerHook: 0,
-    duration: sectionMaterial.offsetHeight + sectionGarment.offsetHeight
-})
-    .setPin(canvas)
-    .addTo(controller);
 
 // Add event listeners to the divs for model switching
 document.querySelectorAll('[data-garment-id]').forEach((element) => {
@@ -712,7 +683,6 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
         }
     });
 });
-
 
 let currentActiveGarment = null;
 let currentActiveThread = null;
