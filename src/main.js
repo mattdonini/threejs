@@ -4,6 +4,11 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+import ScrollMagic from 'scrollmagic';
+import { gsap } from 'gsap';
+import 'scrollmagic/scrollmagic/uncompressed/plugins/animation.gsap.js';
+
+const controller = new ScrollMagic.Controller();
 
 // Canvas and Scene
 const canvas = document.querySelector('canvas.webgl');
@@ -453,6 +458,41 @@ void main() {
     gl_FragColor = col;
 }
 `;
+const materialSection = document.querySelector('.section.is-material');
+const garmentSection = document.querySelector('.section.is-garment');
+
+// Scene for rotating the model in the material section
+const rotateScene = new ScrollMagic.Scene({
+    triggerElement: materialSection,
+    duration: materialSection.offsetHeight, // Duration of the animation
+    triggerHook: 0.5 // Start the animation when the section is in the middle of the viewport
+})
+.setTween(gsap.to({}, {
+    onUpdate: () => {
+        if (model) {
+            model.rotation.y += 0.01;
+            renderer.render(scene, camera);
+        }
+    }
+}))
+.addTo(controller);
+
+// Scene for pinning the model in the garment section
+const pinScene = new ScrollMagic.Scene({
+    triggerElement: garmentSection,
+    triggerHook: 0, // Start pinning as soon as the section reaches the top of the viewport
+    duration: garmentSection.offsetHeight // Pin for the height of the section
+})
+.setPin(canvas) // Pin the canvas element containing the 3D model
+.addTo(controller);
+
+// Disable reverse for the rotation scene
+rotateScene.reverse(false);
+rotateScene.on("enter", () => console.log("Entering rotate scene"));
+rotateScene.on("leave", () => console.log("Leaving rotate scene"));
+pinScene.on("enter", () => console.log("Entering pin scene"));
+pinScene.on("leave", () => console.log("Leaving pin scene"));
+
 
 const composer = new EffectComposer(renderer);
 const renderPass = new RenderPass(scene, camera);
