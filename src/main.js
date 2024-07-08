@@ -140,6 +140,7 @@ loadModel('https://uploads-ssl.webflow.com/6665a67f8e924fdecb7b36e5/6675c8cc5cc9
     updateModelTexture(currentTextureUrl);
 });
 
+
 // Mouse move event listener
 const mouse = { x: 0, y: 0 };
 window.addEventListener('mousemove', (event) => {
@@ -604,24 +605,6 @@ const animate = () => {
 };
 animate();
 
-// Set up ScrollTrigger for pinning and unpinning the canvas
-ScrollTrigger.create({
-    trigger: '.section.is-material',
-    start: 'top top',
-    endTrigger: '.section.is-garment',
-    end: 'bottom top',
-    pin: canvas,
-    pinSpacing: false,
-    scrub: true,
-    onUpdate: (self) => {
-        // Update the model's position or other properties based on scroll progress
-        if (model) {
-            const progress = self.progress;
-            // Update model properties based on progress, e.g., rotation
-            model.rotation.y = progress * Math.PI * 2; // Full rotation over scroll
-        }
-    },
-});
 
 // Add event listeners to the divs for model switching
 document.querySelectorAll('[data-garment-id]').forEach((element) => {
