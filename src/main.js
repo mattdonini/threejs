@@ -870,17 +870,44 @@ document.addEventListener('DOMContentLoaded', function() {
         firstGarmentImg.style.opacity = '1';
     }
 
+    
+    
     const sectionMaterial = document.querySelector('.section.is-material');
     const sectionGarment = document.querySelector('.section.is-garment');
     const canvas = document.querySelector('.webgl');
+    let model = null;
     let isInSectionGarment = false;
     let modelRotationComplete = false;
     
-    // Function to check scroll position
+    // Initialize Three.js scene
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0, 0, 2);
+    scene.add(camera);
+    
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    
+    const loader = new GLTFLoader();
+    
+    loader.load('path_to_your_model.gltf', (gltf) => {
+        model = gltf.scene;
+        scene.add(model);
+        animate();
+    });
+    
+    const animate = () => {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+    };
+    
+    // Function to check scroll position and handle visibility and rotation
     const onScroll = () => {
         const sectionMaterialRect = sectionMaterial.getBoundingClientRect();
         const sectionGarmentRect = sectionGarment.getBoundingClientRect();
-        
+    
         const isInMaterialSection = sectionMaterialRect.bottom > 0 && sectionMaterialRect.top < window.innerHeight;
         const isInGarmentSection = sectionGarmentRect.top < window.innerHeight && sectionGarmentRect.bottom > 0;
     
@@ -892,23 +919,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     
         // Handle rotation in the garment section
-        if (isInGarmentSection && !modelRotationComplete) {
+        if (isInGarmentSection && model) {
             isInSectionGarment = true;
             const rotationProgress = Math.min(1, Math.abs(sectionGarmentRect.top) / window.innerHeight);
             const rotationAngle = 260 * rotationProgress;
-            if (model) {
-                model.rotation.y = THREE.Math.degToRad(rotationAngle);
-            }
-            if (rotationProgress === 1) {
-                modelRotationComplete = true;
-            }
+            model.rotation.y = THREE.Math.degToRad(rotationAngle);
         }
     
         // Prevent rotation reset when scrolling back up to the material section
-        if (!isInGarmentSection && isInSectionGarment) {
-            if (model) {
-                model.rotation.y = THREE.Math.degToRad(260);
-            }
+        if (!isInGarmentSection && isInSectionGarment && model) {
+            model.rotation.y = THREE.Math.degToRad(260);
         }
     };
     
@@ -918,30 +938,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initial check
     onScroll();
     
-    // Three.js initialization and model loading
-    // Make sure to set up your Three.js scene, camera, renderer, and load the model
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
-    const renderer = new THREE.WebGLRenderer({ canvas });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
-    
-    const loader = new THREE.GLTFLoader();
-    let model;
-    
-    loader.load('path_to_your_model.gltf', (gltf) => {
-        model = gltf.scene;
-        scene.add(model);
-        animate();
+    // Adjust renderer and camera on window resize
+    window.addEventListener('resize', () => {
+        const sizes = { width: window.innerWidth, height: window.innerHeight };
+        camera.aspect = sizes.width / sizes.height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(sizes.width, sizes.height);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     });
     
-    // Animation loop
-    const animate = () => {
-        requestAnimationFrame(animate);
-        renderer.render(scene, camera);
-    };
-    
-    animate();
-    
+
 
 });
