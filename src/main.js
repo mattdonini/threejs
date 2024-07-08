@@ -4,9 +4,6 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
-import ScrollMagic from 'scrollmagic';
-import { gsap } from 'gsap';
-import 'scrollmagic/scrollmagic/uncompressed/plugins/animation.gsap.js';
 
 // Canvas and Scene
 const canvas = document.querySelector('canvas.webgl');
@@ -138,6 +135,7 @@ loadModel('https://uploads-ssl.webflow.com/6665a67f8e924fdecb7b36e5/6675c8cc5cc9
     currentTextureUrl = 'https://uploads-ssl.webflow.com/6665a67f8e924fdecb7b36e5/6675a742ad653905eaedaea8_holographic-texture.webp';
     updateModelTexture(currentTextureUrl);
 });
+
 
 // Mouse move event listener
 const mouse = { x: 0, y: 0 };
@@ -603,31 +601,7 @@ const animate = () => {
 };
 animate();
 
-// ScrollMagic and GSAP setup
-const controller = new ScrollMagic.Controller();
 
-const rotateTween = gsap.to(model.rotation, {
-    duration: 1,
-    y: "+=6.28319", // 360 degrees in radians
-    ease: "none",
-    paused: true
-});
-
-const scene1 = new ScrollMagic.Scene({
-    triggerElement: ".section.is-material",
-    duration: document.querySelector('.section.is-material').offsetHeight
-})
-    .setTween(rotateTween)
-    .addTo(controller);
-
-const scene2 = new ScrollMagic.Scene({
-    triggerElement: ".section.is-garment",
-    triggerHook: 0.5,
-    duration: '100%'
-})
-    .setPin(canvas)
-    .addTo(controller);
-    
 // Add event listeners to the divs for model switching
 document.querySelectorAll('[data-garment-id]').forEach((element) => {
     element.addEventListener('click', () => {
@@ -709,7 +683,6 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
         }
     });
 });
-
 
 let currentActiveGarment = null;
 let currentActiveThread = null;
