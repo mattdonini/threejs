@@ -161,7 +161,6 @@ loadModel('https://uploads-ssl.webflow.com/6665a67f8e924fdecb7b36e5/6675c8cc5cc9
     updateModelTexture(currentTextureUrl);
 });
 
-
 // Mouse move event listener
 const mouse = { x: 0, y: 0 };
 window.addEventListener('mousemove', (event) => {
@@ -605,12 +604,8 @@ const animate = () => {
         const rotationFactorX = 0.2;
         const rotationFactorY = 0.2;
 
-        // Combine scroll-based rotation with mouse-based rotation
-        const targetRotationX = mouse.y * rotationFactorX;
-        const targetRotationY = (model.userData.scrollRotationY || 0) + mouse.x * rotationFactorY;
-
-        model.rotation.x = lerp(model.rotation.x, targetRotationX, 0.1);
-        model.rotation.y = lerp(model.rotation.y, targetRotationY, 0.1);
+        model.rotation.x = lerp(model.rotation.x, mouse.y * rotationFactorX, 0.1);
+        model.rotation.y = lerp(model.rotation.y, mouse.x * rotationFactorY, 0.1);
 
         rotationVelocityX = model.rotation.x - lastRotationX;
         rotationVelocityY = model.rotation.y - lastRotationY;
@@ -629,23 +624,6 @@ const animate = () => {
     composer.render();
 };
 animate();
-
-// Handle scroll events from Lenis
-function handleScroll(e) {
-  if (model) {
-    // Update the model's position based on the scroll event
-    const scrollY = window.scrollY;
-    const maxScroll = document.body.scrollHeight - window.innerHeight;
-    const scrollProgress = scrollY / maxScroll;
-
-    // Adjust the model's position based on the scroll progress
-    model.position.y = THREE.MathUtils.lerp(0, -2, scrollProgress);
-
-    // Set the rotation based on scroll progress
-    model.userData.scrollRotationY = THREE.MathUtils.lerp(0, 2 * Math.PI, scrollProgress); // 360 degrees rotation
-  }
-}
-
 
 // Add event listeners to the divs for model switching
 document.querySelectorAll('[data-garment-id]').forEach((element) => {
@@ -728,6 +706,7 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
         }
     });
 });
+let currentActiveGarment = null;
 let currentActiveGarment = null;
 let currentActiveThread = null;
 
@@ -915,3 +894,19 @@ document.addEventListener('DOMContentLoaded', function() {
     firstGarmentImg.style.opacity = '1';
   }
 });
+
+// Handle scroll events from Lenis
+function handleScroll(e) {
+  if (model) {
+    // Update the model's position based on the scroll event
+    const scrollY = window.scrollY;
+    const maxScroll = document.body.scrollHeight - window.innerHeight;
+    const scrollProgress = scrollY / maxScroll;
+
+    // Adjust the model's position based on the scroll progress
+    model.position.y = THREE.MathUtils.lerp(0, -2, scrollProgress);
+
+    // Set the rotation based on scroll progress
+    model.userData.scrollRotationY = THREE.MathUtils.lerp(0, 2 * Math.PI, scrollProgress); // 360 degrees rotation
+  }
+}
