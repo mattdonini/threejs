@@ -613,6 +613,7 @@ function handleScroll(e) {
     const maxScroll = document.body.scrollHeight - window.innerHeight;
     const scrollProgress = scrollY / maxScroll;
 
+<<<<<<< HEAD
     // Adjust the model's position based on the scroll progress
     model.position.y = THREE.MathUtils.lerp(0, -2, scrollProgress);
 
@@ -620,6 +621,22 @@ function handleScroll(e) {
     model.userData.scrollRotationY = THREE.MathUtils.lerp(0, 2 * Math.PI, scrollProgress); // 360 degrees rotation
   }
 }
+=======
+    if (isInSection2) {
+        // Additional logic if needed
+    }
+
+    customPass.uniforms.rotationVelocity.value.set(rotationVelocityY, rotationVelocityX);
+
+    noisePass.uniforms.time.value += 0.05; 
+    glitchPass.uniforms.uTime.value += 0.05; 
+    blindsPass.uniforms.uTime.value += 0.05; 
+    diffusePass.uniforms.uTime.value += 0.05; 
+
+    composer.render();
+};
+animate();
+>>>>>>> parent of e7b1f39 (main.js)
 
 
 // Add event listeners to the divs for model switching
@@ -864,6 +881,20 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
           currentActiveThread = item;
         }
+<<<<<<< HEAD
+=======
+    
+        // Ensure the model stays in section 2
+        if (scrollTop < section2Top) {
+            model.position.y = 0; // Adjust as needed to keep the model in view
+        } else if (scrollTop >= section2Top) {
+            model.position.y = -0.5; // Adjust as needed to keep the model in view
+        }
+    
+        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+    });
+    
+>>>>>>> parent of e7b1f39 (main.js)
 
         if (cornerWrap) {
           positionCornerWrap(item);
