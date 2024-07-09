@@ -1,4 +1,4 @@
-mport './styles/style.css';
+import './styles/style.css';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
@@ -683,6 +683,8 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
         }
     });
 });
+
+
 let currentActiveGarment = null;
 let currentActiveThread = null;
 
@@ -869,4 +871,58 @@ document.addEventListener('DOMContentLoaded', function() {
   if (firstGarmentImg) {
     firstGarmentImg.style.opacity = '1';
   }
+
+  // GSAP and ScrollTrigger code
+  gsap.registerPlugin(ScrollTrigger);
+
+  // Initial blur-in effect when entering the viewport
+  gsap.fromTo("#canvas3d", {
+    filter: "blur(20px)",
+  }, {
+    filter: "blur(0px)", // End with no blur
+    duration: 2, // Adjust duration as needed
+    ease: "power2.out", // Easing for the blur-in effect
+    delay: 0.5, // Add a delay before starting the blur-in
+    scrollTrigger: {
+      trigger: "#stickyWrap",
+      start: "top bottom", // Start when the top of #stickyWrap enters the bottom of the viewport
+      end: "top top", // End when the top of #stickyWrap reaches the top of the viewport
+      once: true // Ensure this animation only runs once
+    }
+  });
+
+  // Create a timeline for the y movement animation
+  const tl = gsap.timeline({
+    scrollTrigger: {
+      trigger: "#stickyWrap",
+      start: "top top",
+      end: "bottom bottom", // Ensures the animation spans the entire scroll distance
+      scrub: true,
+    }
+  });
+
+  // Add the y animation to the timeline
+  tl.to("#canvas3d", {
+    y: "100vh",
+    ease: "power2.inOut", // Power2 easing for the scroll movement
+    scrollTrigger: {
+      trigger: "#stickyWrap",
+      start: "top top",
+      end: "bottom bottom", // Ensures the animation spans the entire scroll distance
+      scrub: true,
+      onUpdate: (self) => {
+        if (self.progress === 1) {
+          gsap.set("#canvas3d", { y: "100vh", immediateRender: false });
+          ScrollTrigger.getById("canvas3dScrollTrigger").disable();
+        }
+      },
+      onLeave: () => {
+        gsap.set("#canvas3d", { y: "100vh" });
+      },
+      onLeaveBack: () => {
+        gsap.set("#canvas3d", { y: "0" }); // Reset position when scrolling back
+      },
+      id: "canvas3dScrollTrigger"
+    }
+  });
 });
