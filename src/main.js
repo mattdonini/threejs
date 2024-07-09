@@ -925,4 +925,33 @@ document.addEventListener('DOMContentLoaded', function() {
       id: "canvas3dScrollTrigger"
     }
   });
+
+  // Lenis for smooth scrolling and 360-degree rotation
+  const lenis = new Lenis({
+    duration: 1.2,
+    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    direction: 'vertical',
+    smooth: true,
+  });
+
+  function raf(time) {
+    lenis.raf(time);
+    requestAnimationFrame(raf);
+  }
+
+  requestAnimationFrame(raf);
+
+  // 360-degree rotation within #stickyWrap
+  ScrollTrigger.create({
+    trigger: "#stickyWrap",
+    start: "top top",
+    end: "bottom bottom",
+    scrub: true,
+    onUpdate: (self) => {
+      const rotation = self.progress * 360;
+      if (model) {
+        model.rotation.y = THREE.MathUtils.degToRad(rotation);
+      }
+    }
+  });
 });
