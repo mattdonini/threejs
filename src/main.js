@@ -4,7 +4,6 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
-import Lenis from '@studio-freight/lenis';
 
 // Canvas and Scene
 const canvas = document.querySelector('canvas.webgl');
@@ -870,39 +869,4 @@ document.addEventListener('DOMContentLoaded', function() {
   if (firstGarmentImg) {
     firstGarmentImg.style.opacity = '1';
   }
-
-  // Initialize Lenis
-  const lenis = new Lenis({
-    duration: 1.2,
-    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-    smooth: true,
-    direction: 'vertical',
-    gestureDirection: 'vertical',
-    smoothTouch: false,
-    touchMultiplier: 2,
-    infinite: false,
-  });
-
-  // Update scroll position
-  lenis.on('scroll', ({ scroll }) => {
-    const stickyWrap = document.querySelector('#stickyWrap');
-    const stickyWrapRect = stickyWrap.getBoundingClientRect();
-    const windowHeight = window.innerHeight;
-
-    // Calculate the scroll progress within the stickyWrap container
-    const start = stickyWrapRect.top - windowHeight / 2;
-    const end = stickyWrapRect.bottom - windowHeight;
-    const scrollProgress = Math.min(Math.max((scroll - start) / (end - start), 0), 1);
-
-    if (model) {
-      model.rotation.y = scrollProgress * 2 * Math.PI; // Rotate 360 degrees
-    }
-  });
-
-  // Start Lenis
-  function raf(time) {
-    lenis.raf(time);
-    requestAnimationFrame(raf);
-  }
-  requestAnimationFrame(raf);
 });
