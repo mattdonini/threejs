@@ -140,7 +140,6 @@ loadModel('https://uploads-ssl.webflow.com/6665a67f8e924fdecb7b36e5/6675c8cc5cc9
     updateModelTexture(currentTextureUrl);
 });
 
-
 // Mouse move event listener
 const mouse = { x: 0, y: 0 };
 window.addEventListener('mousemove', (event) => {
@@ -167,6 +166,13 @@ ScrollTrigger.create({
             model.rotation.y = progress * Math.PI * 2; // Full rotation over scroll
         }
     },
+<<<<<<< HEAD
+=======
+    onEnter: () => console.log('Entered .section.is-material'),
+    onLeave: () => console.log('Left .section.is-material'),
+    onEnterBack: () => console.log('Entered back .section.is-material'),
+    onLeaveBack: () => console.log('Left back .section.is-material')
+>>>>>>> parent of 06343ec (main.js)
 });
 
 // Add event listeners to the divs for model switching
