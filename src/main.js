@@ -914,6 +914,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (self.progress === 1) {
           gsap.set("#canvas3d", { y: "100vh", immediateRender: false });
           ScrollTrigger.getById("canvas3dScrollTrigger").disable();
+          rotationTrigger.disable(); // Disable rotation trigger when canvas is locked
         }
       },
       onLeave: () => {
@@ -921,6 +922,7 @@ document.addEventListener('DOMContentLoaded', function() {
       },
       onLeaveBack: () => {
         gsap.set("#canvas3d", { y: "0" }); // Reset position when scrolling back
+        rotationTrigger.enable(); // Re-enable rotation trigger when scrolling back
       },
       id: "canvas3dScrollTrigger"
     }
@@ -941,17 +943,32 @@ document.addEventListener('DOMContentLoaded', function() {
 
   requestAnimationFrame(raf);
 
+  // Flag to disable mouse movement updates during scroll
+  let isScrolling = false;
+
   // 360-degree rotation within #stickyWrap
-  ScrollTrigger.create({
+  const rotationTrigger = ScrollTrigger.create({
     trigger: "#stickyWrap",
     start: "top top",
     end: "bottom bottom",
     scrub: true,
     onUpdate: (self) => {
-      const rotation = self.progress * 360;
+      isScrolling = true;
+      const rotation = -self.progress * 360; // Rotate in the opposite direction
       if (model) {
         model.rotation.y = THREE.MathUtils.degToRad(rotation);
       }
+    },
+    onScrubComplete: () => {
+      isScrolling = false;
+    }
+  });
+
+  // Mouse move event listener
+  window.addEventListener('mousemove', (event) => {
+    if (!isScrolling) {
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = (event.clientY / window.innerHeight) * 2 - 1;
     }
   });
 });
