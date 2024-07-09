@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+import Lenis from '@studio-freight/lenis';
 
 // Canvas and Scene
 const canvas = document.querySelector('canvas.webgl');
@@ -569,6 +570,33 @@ const easeInOutQuad = (t) => {
     return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 };
 
+// Initialize Lenis
+const lenis = new Lenis({
+  duration: 1.2,
+  easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+  smooth: true,
+  direction: 'vertical',
+  gestureDirection: 'vertical',
+  smoothTouch: false,
+  touchMultiplier: 2,
+  infinite: false,
+});
+
+// Update scroll position
+lenis.on('scroll', ({ scroll }) => {
+  const scrollProgress = scroll / (document.body.scrollHeight - window.innerHeight);
+  if (model) {
+    model.rotation.y = scrollProgress * 2 * Math.PI; // Rotate 360 degrees
+  }
+});
+
+// Start Lenis
+function raf(time) {
+  lenis.raf(time);
+  requestAnimationFrame(raf);
+}
+requestAnimationFrame(raf);
+
 // Animation loop
 const animate = () => {
     requestAnimationFrame(animate);
@@ -683,8 +711,6 @@ document.querySelectorAll('[data-garment-id]').forEach((element) => {
         }
     });
 });
-
-
 let currentActiveGarment = null;
 let currentActiveThread = null;
 
