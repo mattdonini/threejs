@@ -8,19 +8,6 @@ import Lenis from '@studio-freight/lenis';
 
 const lenis = new Lenis();
 
-// Attach a scroll event listener to Lenis
-lenis.on('scroll', (e) => {
-  console.log(e);
-  handleScroll(e);
-});
-
-function raf(time) {
-  lenis.raf(time);
-  requestAnimationFrame(raf);
-}
-
-requestAnimationFrame(raf);
-
 // Canvas and Scene
 const canvas = document.querySelector('canvas.webgl');
 const scene = new THREE.Scene();
