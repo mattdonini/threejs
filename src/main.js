@@ -173,29 +173,6 @@ const lerp = (start, end, amount) => (1 - amount) * start + amount * end;
 let lastRotationX = 0, lastRotationY = 0;
 let rotationVelocityX = 0, rotationVelocityY = 0;
 
-// Higher damping factor for smoother rotation
-const dampingFactor = 0.05;
-
-// Variables to store target scroll-based rotation
-let targetScrollRotationY = 0;
-let currentScrollRotationY = 0;
-
-// Handle scroll events from Lenis
-function handleScroll(e) {
-  if (model) {
-    // Update the model's position based on the scroll event
-    const scrollY = window.scrollY;
-    const maxScroll = document.body.scrollHeight - window.innerHeight;
-    const scrollProgress = scrollY / maxScroll;
-
-    // Adjust the model's position based on the scroll progress
-    model.position.y = THREE.MathUtils.lerp(0, -2, scrollProgress);
-
-    // Set the target rotation based on scroll progress
-    targetScrollRotationY = THREE.MathUtils.lerp(0, 2 * Math.PI, scrollProgress); // 360 degrees rotation
-  }
-}
-
 // Post-processing shaders
 const vertexShader = `
 varying vec2 vUv;
@@ -619,20 +596,13 @@ const animate = () => {
 
     // Combine scroll-based rotation with mouse-based rotation
     const targetRotationX = mouse.y * rotationFactorX;
-    const targetRotationY = currentScrollRotationY + mouse.x * rotationFactorY;
+    const targetRotationY = (model.userData.scrollRotationY || 0) + mouse.x * rotationFactorY;
 
-    // Smoothly interpolate the scroll-based rotation
-    currentScrollRotationY += (targetScrollRotationY - currentScrollRotationY) * dampingFactor;
+    model.rotation.x = lerp(model.rotation.x, targetRotationX, 0.1);
+    model.rotation.y = lerp(model.rotation.y, targetRotationY, 0.1);
 
-    // Calculate rotation velocity before updating the rotation
-    rotationVelocityX = (targetRotationX - model.rotation.x) * dampingFactor;
-    rotationVelocityY = (targetRotationY - model.rotation.y) * dampingFactor;
-
-    // Smoothly interpolate the rotation using a damping factor
-    model.rotation.x += rotationVelocityX;
-    model.rotation.y += rotationVelocityY;
-
-    // Update last rotation values to match current rotation
+    rotationVelocityX = model.rotation.x - lastRotationX;
+    rotationVelocityY = model.rotation.y - lastRotationY;
     lastRotationX = model.rotation.x;
     lastRotationY = model.rotation.y;
   }
@@ -648,6 +618,23 @@ const animate = () => {
   composer.render();
 };
 animate();
+
+// Handle scroll events from Lenis
+function handleScroll(e) {
+  if (model) {
+    // Update the model's position based on the scroll event
+    const scrollY = window.scrollY;
+    const maxScroll = document.body.scrollHeight - window.innerHeight;
+    const scrollProgress = scrollY / maxScroll;
+
+    // Adjust the model's position based on the scroll progress
+    model.position.y = THREE.MathUtils.lerp(0, -2, scrollProgress);
+
+    // Set the rotation based on scroll progress
+    model.userData.scrollRotationY = THREE.MathUtils.lerp(0, 2 * Math.PI, scrollProgress); // 360 degrees rotation
+  }
+}
+
 
 // Add event listeners to the divs for model switching
 document.querySelectorAll('[data-garment-id]').forEach((element) => {
@@ -918,4 +905,3 @@ document.addEventListener('DOMContentLoaded', function() {
     firstGarmentImg.style.opacity = '1';
   }
 });
-
