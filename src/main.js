@@ -4,6 +4,31 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+import Lenis from '@studio-freight/lenis';
+
+// Initialize Lenis
+const lenis = new Lenis({
+  duration: 1.2,
+  easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+  smooth: true,
+  direction: 'vertical',
+  gestureDirection: 'vertical',
+  smoothTouch: false,
+  touchMultiplier: 2,
+  infinite: false,
+});
+
+// Attach a scroll event listener to Lenis
+lenis.on('scroll', (e) => {
+  handleScroll(e);
+});
+
+function raf(time) {
+  lenis.raf(time);
+  requestAnimationFrame(raf);
+}
+
+requestAnimationFrame(raf);
 
 // Canvas and Scene
 const canvas = document.querySelector('canvas.webgl');
@@ -580,8 +605,12 @@ const animate = () => {
         const rotationFactorX = 0.2;
         const rotationFactorY = 0.2;
 
-        model.rotation.x = lerp(model.rotation.x, mouse.y * rotationFactorX, 0.1);
-        model.rotation.y = lerp(model.rotation.y, mouse.x * rotationFactorY, 0.1);
+        // Combine scroll-based rotation with mouse-based rotation
+        const targetRotationX = mouse.y * rotationFactorX;
+        const targetRotationY = (model.userData.scrollRotationY || 0) + mouse.x * rotationFactorY;
+
+        model.rotation.x = lerp(model.rotation.x, targetRotationX, 0.1);
+        model.rotation.y = lerp(model.rotation.y, targetRotationY, 0.1);
 
         rotationVelocityX = model.rotation.x - lastRotationX;
         rotationVelocityY = model.rotation.y - lastRotationY;
@@ -600,6 +629,22 @@ const animate = () => {
     composer.render();
 };
 animate();
+
+// Handle scroll events from Lenis
+function handleScroll(e) {
+  if (model) {
+    // Update the model's position based on the scroll event
+    const scrollY = window.scrollY;
+    const maxScroll = document.body.scrollHeight - window.innerHeight;
+    const scrollProgress = scrollY / maxScroll;
+
+    // Adjust the model's position based on the scroll progress
+    model.position.y = THREE.MathUtils.lerp(0, -2, scrollProgress);
+
+    // Set the rotation based on scroll progress
+    model.userData.scrollRotationY = THREE.MathUtils.lerp(0, 2 * Math.PI, scrollProgress); // 360 degrees rotation
+  }
+}
 
 
 // Add event listeners to the divs for model switching
