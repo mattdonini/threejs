@@ -936,4 +936,20 @@ document.addEventListener('DOMContentLoaded', function() {
       id: "canvas3dScrollTrigger"
     }
   });
+
+  // Create a GSAP timeline for the rotation
+  const rotationTimeline = gsap.timeline({
+    scrollTrigger: {
+      trigger: "#stickyWrap",
+      start: "top top",
+      end: "bottom top", // Adjust as needed
+      scrub: true,
+    }
+  });
+
+  // Add rotation animation to the timeline
+  rotationTimeline.to(model.rotation, {
+    y: THREE.MathUtils.degToRad(360), // Rotate 360 degrees
+    ease: "none"
+  });
 });
