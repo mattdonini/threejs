@@ -140,12 +140,49 @@ loadModel('https://uploads-ssl.webflow.com/6665a67f8e924fdecb7b36e5/6675c8cc5cc9
     updateModelTexture(currentTextureUrl);
 });
 
+// Lenis for smooth scrolling and 360-degree rotation
+const lenis = new Lenis({
+    duration: 1.2,
+    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    direction: 'vertical',
+    smooth: true,
+});
+
+function raf(time) {
+    lenis.raf(time);
+    requestAnimationFrame(raf);
+}
+
+requestAnimationFrame(raf);
+
+// Flag to disable mouse movement updates during scroll
+let isScrolling = false;
+
+// 360-degree rotation within #stickyWrap
+const rotationTrigger = ScrollTrigger.create({
+    trigger: "#stickyWrap",
+    start: "top top",
+    end: "bottom bottom",
+    scrub: true,
+    onUpdate: (self) => {
+        isScrolling = true;
+        const rotation = -self.progress * 360; // Rotate in the opposite direction
+        if (model) {
+            model.rotation.y = THREE.MathUtils.degToRad(rotation);
+        }
+    },
+    onScrubComplete: () => {
+        isScrolling = false;
+    }
+});
 
 // Mouse move event listener
 const mouse = { x: 0, y: 0 };
 window.addEventListener('mousemove', (event) => {
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = (event.clientY / window.innerHeight) * 2 - 1;
+    if (!isScrolling) {
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = (event.clientY / window.innerHeight) * 2 - 1;
+    }
 });
 
 // Smooth interpolation function
