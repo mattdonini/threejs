@@ -134,17 +134,6 @@ const updateModelTexture = (textureUrl) => {
 loadModel('https://uploads-ssl.webflow.com/6665a67f8e924fdecb7b36e5/6675c8cc5cc9e9c9c8156f5d_holographic_hodie.gltf.txt', () => {
     currentTextureUrl = 'https://uploads-ssl.webflow.com/6665a67f8e924fdecb7b36e5/6675a742ad653905eaedaea8_holographic-texture.webp';
     updateModelTexture(currentTextureUrl);
-
-    // Get the height of the stickyWrap container
-    const stickyWrap = document.getElementById('stickyWrap');
-    const stickyWrapHeight = stickyWrap.offsetHeight;
-
-    // Add a scroll event listener
-    window.addEventListener('scroll', () => {
-        const scrollY = window.scrollY;
-        const rotation = (scrollY / stickyWrapHeight) * 360; // Calculate rotation based on scroll position
-        model.rotation.y = THREE.MathUtils.degToRad(rotation); // Apply rotation
-    });
 });
 
 
@@ -902,8 +891,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  let isCanvasLocked = false;
-
   // Create a timeline for the y movement animation
   const tl = gsap.timeline({
     scrollTrigger: {
@@ -926,46 +913,16 @@ document.addEventListener('DOMContentLoaded', function() {
       onUpdate: (self) => {
         if (self.progress === 1) {
           gsap.set("#canvas3d", { y: "100vh", immediateRender: false });
-          isCanvasLocked = true;
           ScrollTrigger.getById("canvas3dScrollTrigger").disable();
         }
       },
       onLeave: () => {
         gsap.set("#canvas3d", { y: "100vh" });
-        isCanvasLocked = true;
       },
       onLeaveBack: () => {
         gsap.set("#canvas3d", { y: "0" }); // Reset position when scrolling back
-        isCanvasLocked = false;
       },
       id: "canvas3dScrollTrigger"
-    }
-  });
-
-  // Create a timeline for the rotation animation
-  const rotationTl = gsap.timeline({
-    scrollTrigger: {
-      trigger: "#stickyWrap",
-      start: "top top",
-      end: "bottom bottom", // Ensures the animation spans the entire scroll distance
-      scrub: true,
-      onUpdate: (self) => {
-        if (!isCanvasLocked) {
-          model.rotation.y = gsap.utils.interpolate(0, 2 * Math.PI, self.progress);
-        }
-      },
-      onLeave: () => {
-        // Ensure the rotation stops when the canvas locks
-        model.rotation.y = 2 * Math.PI;
-        isCanvasLocked = true;
-        ScrollTrigger.getById("modelRotationScrollTrigger").disable();
-      },
-      onLeaveBack: () => {
-        // Reset rotation when scrolling back
-        model.rotation.y = 0;
-        isCanvasLocked = false;
-      },
-      id: "modelRotationScrollTrigger"
     }
   });
 });
