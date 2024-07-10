@@ -902,31 +902,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Create a timeline for the y movement animation and model rotation
+  // Create a timeline for the y movement animation
   const tl = gsap.timeline({
     scrollTrigger: {
       trigger: "#stickyWrap",
       start: "top top",
       end: "bottom bottom", // Ensures the animation spans the entire scroll distance
       scrub: true,
-      onEnter: () => {
-        // Disable mouse movement during rotation
-        window.removeEventListener('mousemove', onMouseMove);
-      },
-      onLeave: () => {
-        // Re-enable mouse movement after rotation
-        window.addEventListener('mousemove', onMouseMove);
-      },
-      onLeaveBack: () => {
-        // Re-enable mouse movement if scrolling back
-        window.addEventListener('mousemove', onMouseMove);
-      },
-      onUpdate: (self) => {
-        if (self.progress === 1) {
-          // Ensure the model does not rotate after the end
-          window.addEventListener('mousemove', onMouseMove);
-        }
-      }
     }
   });
 
@@ -934,57 +916,40 @@ document.addEventListener('DOMContentLoaded', function() {
   tl.to("#canvas3d", {
     y: "100vh",
     ease: "power2.inOut", // Power2 easing for the scroll movement
-    onUpdate: (self) => {
-      // Calculate the rotation based on the progress of the y animation
-      const rotation = -360 * self.progress; // Rotate 360 degrees in the opposite direction
-      model.rotation.y = THREE.MathUtils.degToRad(rotation);
+    scrollTrigger: {
+      trigger: "#stickyWrap",
+      start: "top top",
+      end: "bottom bottom", // Ensures the animation spans the entire scroll distance
+      scrub: true,
+      onUpdate: (self) => {
+        if (self.progress === 1) {
+          gsap.set("#canvas3d", { y: "100vh", immediateRender: false });
+          ScrollTrigger.getById("canvas3dScrollTrigger").disable();
+        }
+      },
+      onLeave: () => {
+        gsap.set("#canvas3d", { y: "100vh" });
+      },
+      onLeaveBack: () => {
+        gsap.set("#canvas3d", { y: "0" }); // Reset position when scrolling back
+      },
+      id: "canvas3dScrollTrigger"
     }
   });
 
-  // Mouse move event listener
-  const mouse = { x: 0, y: 0 };
-  const onMouseMove = (event) => {
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = (event.clientY / window.innerHeight) * 2 - 1;
-  };
-  window.addEventListener('mousemove', onMouseMove);
-
-  // Smooth interpolation function
-  const lerp = (start, end, amount) => (1 - amount) * start + amount * end;
-
-  // Variables to track model rotation velocity
-  let lastRotationX = 0, lastRotationY = 0;
-  let rotationVelocityX = 0, rotationVelocityY = 0;
-
-  // Animation loop
-  const animate = () => {
-    requestAnimationFrame(animate);
-
-    if (model) {
-      model.position.set(0, 0, 0);
-
-      // Increase the factors to make the rotation more noticeable
-      const rotationFactorX = 0.2;
-      const rotationFactorY = 0.2;
-
-      model.rotation.x = lerp(model.rotation.x, mouse.y * rotationFactorX, 0.1);
-      model.rotation.y = lerp(model.rotation.y, mouse.x * rotationFactorY, 0.1);
-
-      rotationVelocityX = model.rotation.x - lastRotationX;
-      rotationVelocityY = model.rotation.y - lastRotationY;
-      lastRotationX = model.rotation.x;
-      lastRotationY = model.rotation.y;
+  // Create a GSAP timeline for the rotation
+  const rotationTimeline = gsap.timeline({
+    scrollTrigger: {
+      trigger: "#stickyWrap",
+      start: "top top",
+      end: "bottom top", // Adjust as needed
+      scrub: true,
     }
+  });
 
-    customPass.uniforms.rotationVelocity.value.set(rotationVelocityY, rotationVelocityX);
-
-    // Update noise effect parameters
-    noisePass.uniforms.time.value += 0.05; // Adjust the speed of the noise effect
-    glitchPass.uniforms.uTime.value += 0.05; // Update time for glitch effect
-    blindsPass.uniforms.uTime.value += 0.05; // Update time for blinds effect
-    diffusePass.uniforms.uTime.value += 0.05; // Update time for diffuse effect
-
-    composer.render();
-  };
-  animate();
+  // Add rotation animation to the timeline
+  rotationTimeline.to(model.rotation, {
+    y: THREE.MathUtils.degToRad(360), // Rotate 360 degrees
+    ease: "none"
+  });
 });
