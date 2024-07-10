@@ -4,6 +4,8 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+import gsap from 'gsap';
+import ScrollTrigger from 'gsap/ScrollTrigger';
 
 // Canvas and Scene
 const canvas = document.querySelector('canvas.webgl');
@@ -569,6 +571,36 @@ const easeInOutQuad = (t) => {
     return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 };
 
+// Register GSAP ScrollTrigger plugin
+gsap.registerPlugin(ScrollTrigger);
+
+// Variables to track scroll position and model rotation
+let rotationY = 0;
+
+// Update model rotation based on scroll position
+const updateModelRotation = (progress) => {
+    if (model) {
+        const scrollFactor = 360; // Full rotation
+        rotationY = progress * scrollFactor;
+        model.rotation.y = THREE.MathUtils.degToRad(rotationY);
+    }
+};
+
+// Create a ScrollTrigger instance for the #stickyWrap section
+ScrollTrigger.create({
+    trigger: "#stickyWrap",
+    start: "top top",
+    end: "bottom bottom",
+    scrub: true,
+    onUpdate: (self) => {
+        updateModelRotation(self.progress);
+    }
+});
+
+// Initial call to set the rotation based on the initial scroll position
+ScrollTrigger.refresh(); // Ensure ScrollTrigger is up-to-date
+updateModelRotation(ScrollTrigger.getById("stickyWrap").progress);
+
 // Animation loop
 const animate = () => {
     requestAnimationFrame(animate);
@@ -578,8 +610,8 @@ const animate = () => {
 
         // Increase the factors to make the rotation more noticeable
         const rotationFactorX = 0.2;
-        const rotationFactorY = 0.2;
 
+        // Only update the X rotation based on mouse movement
         model.rotation.x = lerp(model.rotation.x, mouse.y * rotationFactorX, 0.1);
         model.rotation.y = lerp(model.rotation.y, mouse.x * rotationFactorY, 0.1);
 
