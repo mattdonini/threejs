@@ -620,6 +620,18 @@ const tl = gsap.timeline({
         start: "top top",
         end: "bottom bottom", // Ensures the animation spans the entire scroll distance
         scrub: true,
+        onUpdate: (self) => {
+            const progress = self.progress;
+            const rotation = progress * Math.PI * 2; // Calculate rotation based on scroll progress
+            customPass.uniforms.modelRotation.value = rotation; // Update the model rotation uniform
+        },
+        onLeave: () => {
+            gsap.set("#canvas3d", { y: "100vh" });
+        },
+        onLeaveBack: () => {
+            gsap.set("#canvas3d", { y: "0" }); // Reset position when scrolling back
+        },
+        id: "canvas3dScrollTrigger"
     }
 });
 
@@ -645,18 +657,6 @@ tl.to("#canvas3d", {
             gsap.set("#canvas3d", { y: "0" }); // Reset position when scrolling back
         },
         id: "canvas3dScrollTrigger"
-    }
-});
-
-// Add the rotation animation to the timeline
-tl.to(customPass.uniforms.modelRotation, {
-    value: Math.PI * 2, // Rotate 360 degrees
-    ease: "none", // Linear easing for constant rotation speed
-    scrollTrigger: {
-        trigger: "#stickyWrap",
-        start: "top top",
-        end: "bottom bottom", // Ensures the animation spans the entire scroll distance
-        scrub: true,
     }
 });
 
@@ -981,18 +981,6 @@ document.addEventListener('DOMContentLoaded', function() {
         gsap.set("#canvas3d", { y: "0" }); // Reset position when scrolling back
       },
       id: "canvas3dScrollTrigger"
-    }
-  });
-
-  // Add the rotation animation to the timeline
-  tl.to(customPass.uniforms.modelRotation, {
-    value: Math.PI * 2, // Rotate 360 degrees
-    ease: "none", // Linear easing for constant rotation speed
-    scrollTrigger: {
-      trigger: "#stickyWrap",
-      start: "top top",
-      end: "bottom bottom", // Ensures the animation spans the entire scroll distance
-      scrub: true,
     }
   });
 });
