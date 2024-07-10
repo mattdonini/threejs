@@ -600,10 +600,9 @@ const animate = () => {
 
         // Increase the factors to make the rotation more noticeable
         const rotationFactorX = 0.2;
-        const rotationFactorY = 0.2;
 
+        // Only update the X rotation based on mouse movement
         model.rotation.x = lerp(model.rotation.x, mouse.y * rotationFactorX, 0.1);
-        model.rotation.y = lerp(model.rotation.y, mouse.x * rotationFactorY, 0.1);
 
         rotationVelocityX = model.rotation.x - lastRotationX;
         rotationVelocityY = model.rotation.y - lastRotationY;
