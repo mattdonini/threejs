@@ -136,33 +136,12 @@ loadModel('https://uploads-ssl.webflow.com/6665a67f8e924fdecb7b36e5/6675c8cc5cc9
     updateModelTexture(currentTextureUrl);
 });
 
-// Flag to disable mouse movement updates during scroll
-let isScrolling = false;
-
-// 360-degree rotation within #stickyWrap
-const rotationTrigger = ScrollTrigger.create({
-    trigger: "#stickyWrap",
-    start: "top top",
-    end: "bottom bottom",
-    scrub: true,
-    onUpdate: (self) => {
-        isScrolling = true;
-        const rotation = -self.progress * 360; // Rotate in the opposite direction
-        if (model) {
-            model.rotation.y = THREE.MathUtils.degToRad(rotation);
-        }
-    },
-    onScrubComplete: () => {
-        isScrolling = false;
-    }
-});
 
 // Mouse move event listener
+const mouse = { x: 0, y: 0 };
 window.addEventListener('mousemove', (event) => {
-    if (!isScrolling) {
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = (event.clientY / window.innerHeight) * 2 - 1;
-    }
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = (event.clientY / window.innerHeight) * 2 - 1;
 });
 
 // Smooth interpolation function
@@ -595,37 +574,30 @@ const animate = () => {
     requestAnimationFrame(animate);
 
     if (model) {
-        if (!isScrolling) {
-            model.position.set(0, 0, 0);
+        model.position.set(0, 0, 0);
 
-            // Increase the factors to make the rotation more noticeable
-            const rotationFactorX = 0.2;
-            const rotationFactorY = 0.2;
+        // Increase the factors to make the rotation more noticeable
+        const rotationFactorX = 0.2;
+        const rotationFactorY = 0.2;
 
-            // Update model rotation based on mouse movement
-            model.rotation.x = lerp(model.rotation.x, mouse.y * rotationFactorX, 0.1);
-            model.rotation.y = lerp(model.rotation.y, mouse.x * rotationFactorY, 0.1);
+        model.rotation.x = lerp(model.rotation.x, mouse.y * rotationFactorX, 0.1);
+        model.rotation.y = lerp(model.rotation.y, mouse.x * rotationFactorY, 0.1);
 
-            rotationVelocityX = model.rotation.x - lastRotationX;
-            rotationVelocityY = model.rotation.y - lastRotationY;
-            lastRotationX = model.rotation.x;
-            lastRotationY = model.rotation.y;
-        } else {
-            // Ensure the model's rotation remains at the scroll position
-            const rotation = -ScrollTrigger.getById("canvas3dScrollTrigger").progress * 360;
-            model.rotation.y = THREE.MathUtils.degToRad(rotation);
-        }
-
-        customPass.uniforms.rotationVelocity.value.set(rotationVelocityY, rotationVelocityX);
-
-        // Update noise effect parameters
-        noisePass.uniforms.time.value += 0.05; // Adjust the speed of the noise effect
-        glitchPass.uniforms.uTime.value += 0.05; // Update time for glitch effect
-        blindsPass.uniforms.uTime.value += 0.05; // Update time for blinds effect
-        diffusePass.uniforms.uTime.value += 0.05; // Update time for diffuse effect
-
-        composer.render();
+        rotationVelocityX = model.rotation.x - lastRotationX;
+        rotationVelocityY = model.rotation.y - lastRotationY;
+        lastRotationX = model.rotation.x;
+        lastRotationY = model.rotation.y;
     }
+
+    customPass.uniforms.rotationVelocity.value.set(rotationVelocityY, rotationVelocityX);
+
+    // Update noise effect parameters
+    noisePass.uniforms.time.value += 0.05; // Adjust the speed of the noise effect
+    glitchPass.uniforms.uTime.value += 0.05; // Update time for glitch effect
+    blindsPass.uniforms.uTime.value += 0.05; // Update time for blinds effect
+    diffusePass.uniforms.uTime.value += 0.05; // Update time for diffuse effect
+
+    composer.render();
 };
 animate();
 
@@ -1012,7 +984,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const rotationFactorX = 0.2;
         const rotationFactorY = 0.2;
 
-        // Update model rotation based on mouse movement
         model.rotation.x = lerp(model.rotation.x, mouse.y * rotationFactorX, 0.1);
         model.rotation.y = lerp(model.rotation.y, mouse.x * rotationFactorY, 0.1);
 
