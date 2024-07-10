@@ -612,88 +612,6 @@ const animate = () => {
 };
 animate();
 
-// GSAP and ScrollTrigger code
-gsap.registerPlugin(ScrollTrigger);
-
-// Initial blur-in effect when entering the viewport
-gsap.fromTo("#canvas3d", {
-    filter: "blur(20px)",
-}, {
-    filter: "blur(0px)", // End with no blur
-    duration: 2, // Adjust duration as needed
-    ease: "power2.out", // Easing for the blur-in effect
-    delay: 0.5, // Add a delay before starting the blur-in
-    scrollTrigger: {
-        trigger: "#stickyWrap",
-        start: "top bottom", // Start when the top of #stickyWrap enters the bottom of the viewport
-        end: "top top", // End when the top of #stickyWrap reaches the top of the viewport
-        once: true // Ensure this animation only runs once
-    }
-});
-
-// Create a timeline for the y movement animation
-const tl = gsap.timeline({
-    scrollTrigger: {
-        trigger: "#stickyWrap",
-        start: "top top",
-        end: "bottom bottom", // Ensures the animation spans the entire scroll distance
-        scrub: true,
-    }
-});
-
-// Add the y animation to the timeline
-tl.to("#canvas3d", {
-    y: "100vh",
-    ease: "power2.inOut", // Power2 easing for the scroll movement
-    scrollTrigger: {
-        trigger: "#stickyWrap",
-        start: "top top",
-        end: "bottom bottom", // Ensures the animation spans the entire scroll distance
-        scrub: true,
-        onUpdate: (self) => {
-            if (self.progress === 1) {
-                gsap.set("#canvas3d", { y: "100vh", immediateRender: false });
-                ScrollTrigger.getById("canvas3dScrollTrigger").disable();
-            }
-        },
-        onLeave: () => {
-            gsap.set("#canvas3d", { y: "100vh" });
-        },
-        onLeaveBack: () => {
-            gsap.set("#canvas3d", { y: "0" }); // Reset position when scrolling back
-        },
-        id: "canvas3dScrollTrigger"
-    }
-});
-
-let isCanvasLocked = false;
-
-// Create a timeline for the rotation animation
-const rotationTl = gsap.timeline({
-    scrollTrigger: {
-        trigger: "#stickyWrap",
-        start: "top top",
-        end: "bottom bottom", // Ensures the animation spans the entire scroll distance
-        scrub: true,
-        onUpdate: (self) => {
-            if (!isCanvasLocked) {
-                model.rotation.y = gsap.utils.interpolate(0, 2 * Math.PI, self.progress);
-            }
-        },
-        onLeave: () => {
-            // Ensure the rotation stops when the canvas locks
-            model.rotation.y = 2 * Math.PI;
-            isCanvasLocked = true;
-            ScrollTrigger.getById("modelRotationScrollTrigger").disable();
-        },
-        onLeaveBack: () => {
-            // Reset rotation when scrolling back
-            model.rotation.y = 0;
-            isCanvasLocked = false;
-        },
-        id: "modelRotationScrollTrigger"
-    }
-});
 
 // Add event listeners to the divs for model switching
 document.querySelectorAll('[data-garment-id]').forEach((element) => {
@@ -984,6 +902,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
+  let isCanvasLocked = false;
+
   // Create a timeline for the y movement animation
   const tl = gsap.timeline({
     scrollTrigger: {
@@ -1006,20 +926,21 @@ document.addEventListener('DOMContentLoaded', function() {
       onUpdate: (self) => {
         if (self.progress === 1) {
           gsap.set("#canvas3d", { y: "100vh", immediateRender: false });
+          isCanvasLocked = true;
           ScrollTrigger.getById("canvas3dScrollTrigger").disable();
         }
       },
       onLeave: () => {
         gsap.set("#canvas3d", { y: "100vh" });
+        isCanvasLocked = true;
       },
       onLeaveBack: () => {
         gsap.set("#canvas3d", { y: "0" }); // Reset position when scrolling back
+        isCanvasLocked = false;
       },
       id: "canvas3dScrollTrigger"
     }
   });
-
-  let isCanvasLocked = false;
 
   // Create a timeline for the rotation animation
   const rotationTl = gsap.timeline({
