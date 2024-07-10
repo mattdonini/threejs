@@ -4,8 +4,6 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 // Canvas and Scene
 const canvas = document.querySelector('canvas.webgl');
@@ -926,21 +924,5 @@ document.addEventListener('DOMContentLoaded', function() {
       },
       id: "canvas3dScrollTrigger"
     }
-  });
-
-  // Add a new timeline for the 360 spin animation
-  const spinTimeline = gsap.timeline({
-    scrollTrigger: {
-      trigger: "#stickyWrap",
-      start: "top top",
-      end: "bottom bottom",
-      scrub: true,
-    }
-  });
-
-  // Add the rotation animation to the timeline
-  spinTimeline.to(model.rotation, {
-    y: 2 * Math.PI, // 360 degrees in radians
-    ease: "none", // Linear easing for constant speed
   });
 });
