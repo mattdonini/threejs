@@ -137,6 +137,27 @@ loadModel('https://uploads-ssl.webflow.com/6665a67f8e924fdecb7b36e5/6675c8cc5cc9
     updateModelTexture(currentTextureUrl);
 });
 
+// Flag to disable mouse movement updates during scroll
+let isScrolling = false;
+
+// 360-degree rotation within #stickyWrap
+const rotationTrigger = ScrollTrigger.create({
+    trigger: "#stickyWrap",
+    start: "top top",
+    end: "bottom bottom",
+    scrub: true,
+    onUpdate: (self) => {
+        isScrolling = true;
+        const rotation = -self.progress * 360; // Rotate in the opposite direction
+        if (model) {
+            model.rotation.y = THREE.MathUtils.degToRad(rotation);
+        }
+    },
+    onScrubComplete: () => {
+        isScrolling = false;
+        console.log('Scroll complete, re-enabling mouse movement');
+    }
+});
 
 // Mouse move event listener
 const mouse = { x: 0, y: 0 };
@@ -573,28 +594,6 @@ const easeInOutQuad = (t) => {
     return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 };
 
-// Flag to disable mouse movement updates during scroll
-let isScrolling = false;
-
-// 360-degree rotation within #stickyWrap
-const rotationTrigger = ScrollTrigger.create({
-    trigger: "#stickyWrap",
-    start: "top top",
-    end: "bottom bottom",
-    scrub: true,
-    onUpdate: (self) => {
-        isScrolling = true;
-        const rotation = -self.progress * 360; // Rotate in the opposite direction
-        if (model) {
-            model.rotation.y = THREE.MathUtils.degToRad(rotation);
-        }
-    },
-    onScrubComplete: () => {
-        isScrolling = false;
-        console.log('Scroll complete, re-enabling mouse movement');
-    }
-});
-
 // Animation loop
 const animate = () => {
     requestAnimationFrame(animate);
@@ -1011,6 +1010,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Smooth interpolation function
   const lerp = (start, end, amount) => (1 - amount) * start + amount * end;
+
+  // Variables to track model rotation velocity
+  let lastRotationX = 0, lastRotationY = 0;
+  let rotationVelocityX = 0, rotationVelocityY = 0;
 
   // Animation loop
   const animate = () => {
