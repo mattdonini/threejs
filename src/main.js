@@ -735,6 +735,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
+  // Set the first threads_img to 100% opacity by default
+  const firstThreadImg = document.querySelector('.threads_img .img.is-threads');
+  if (firstThreadImg) {
+    firstThreadImg.style.opacity = '1';
+  }
+
   function setGarmentImageOpacity(garmentDiv, opacity) {
     garmentDiv.querySelectorAll('.img.is-garment, .img.is-garment-2, .img.is-garment-3').forEach(img => {
       img.style.opacity = opacity;
