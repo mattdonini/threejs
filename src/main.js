@@ -569,6 +569,28 @@ const easeInOutQuad = (t) => {
     return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 };
 
+// Variables to track scroll position and model rotation
+let scrollY = 0;
+let rotationY = 0;
+
+// Update model rotation based on scroll position
+const updateModelRotation = () => {
+    if (model) {
+        const scrollFactor = 360 / document.body.scrollHeight; // Adjust the factor to control rotation speed
+        rotationY = scrollY * scrollFactor;
+        model.rotation.y = THREE.MathUtils.degToRad(rotationY);
+    }
+};
+
+// Scroll event listener
+window.addEventListener('scroll', () => {
+    scrollY = window.scrollY;
+    updateModelRotation();
+});
+
+// Initial call to set the rotation based on the initial scroll position
+updateModelRotation();
+
 // Animation loop
 const animate = () => {
     requestAnimationFrame(animate);
