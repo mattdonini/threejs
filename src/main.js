@@ -4,6 +4,8 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+import gsap from 'gsap';
+import ScrollTrigger from 'gsap/ScrollTrigger';
 
 // Canvas and Scene
 const canvas = document.querySelector('canvas.webgl');
@@ -134,6 +136,17 @@ const updateModelTexture = (textureUrl) => {
 loadModel('https://uploads-ssl.webflow.com/6665a67f8e924fdecb7b36e5/6675c8cc5cc9e9c9c8156f5d_holographic_hodie.gltf.txt', () => {
     currentTextureUrl = 'https://uploads-ssl.webflow.com/6665a67f8e924fdecb7b36e5/6675a742ad653905eaedaea8_holographic-texture.webp';
     updateModelTexture(currentTextureUrl);
+
+    // Get the height of the stickyWrap container
+    const stickyWrap = document.getElementById('stickyWrap');
+    const stickyWrapHeight = stickyWrap.offsetHeight;
+
+    // Add a scroll event listener
+    window.addEventListener('scroll', () => {
+        const scrollY = window.scrollY;
+        const rotation = (scrollY / stickyWrapHeight) * 360; // Calculate rotation based on scroll position
+        model.rotation.y = THREE.MathUtils.degToRad(rotation); // Apply rotation
+    });
 });
 
 
@@ -601,6 +614,94 @@ const animate = () => {
 };
 animate();
 
+// GSAP and ScrollTrigger code
+gsap.registerPlugin(ScrollTrigger);
+
+// Initial blur-in effect when entering the viewport
+gsap.fromTo("#canvas3d", {
+    filter: "blur(20px)",
+}, {
+    filter: "blur(0px)", // End with no blur
+    duration: 2, // Adjust duration as needed
+    ease: "power2.out", // Easing for the blur-in effect
+    delay: 0.5, // Add a delay before starting the blur-in
+    scrollTrigger: {
+        trigger: "#stickyWrap",
+        start: "top bottom", // Start when the top of #stickyWrap enters the bottom of the viewport
+        end: "top top", // End when the top of #stickyWrap reaches the top of the viewport
+        once: true // Ensure this animation only runs once
+    }
+});
+
+// Create a timeline for the y movement animation
+const tl = gsap.timeline({
+    scrollTrigger: {
+        trigger: "#stickyWrap",
+        start: "top top",
+        end: "bottom bottom", // Ensures the animation spans the entire scroll distance
+        scrub: true,
+    }
+});
+
+// Add the y animation to the timeline
+tl.to("#canvas3d", {
+    y: "100vh",
+    ease: "power2.inOut", // Power2 easing for the scroll movement
+    scrollTrigger: {
+        trigger: "#stickyWrap",
+        start: "top top",
+        end: "bottom bottom", // Ensures the animation spans the entire scroll distance
+        scrub: true,
+        onUpdate: (self) => {
+            if (self.progress === 1) {
+                gsap.set("#canvas3d", { y: "100vh", immediateRender: false });
+                ScrollTrigger.getById("canvas3dScrollTrigger").disable();
+            }
+        },
+        onLeave: () => {
+            gsap.set("#canvas3d", { y: "100vh" });
+        },
+        onLeaveBack: () => {
+            gsap.set("#canvas3d", { y: "0" }); // Reset position when scrolling back
+        },
+        id: "canvas3dScrollTrigger"
+    }
+});
+
+// Create a timeline for the rotation animation
+const rotationTl = gsap.timeline({
+    scrollTrigger: {
+        trigger: "#stickyWrap",
+        start: "top top",
+        end: "bottom bottom", // Ensures the animation spans the entire scroll distance
+        scrub: true,
+    }
+});
+
+// Add the rotation animation to the timeline
+rotationTl.to(model.rotation, {
+    y: 2 * Math.PI, // Rotate 360 degrees
+    ease: "power2.inOut", // Power2 easing for the rotation
+    scrollTrigger: {
+        trigger: "#stickyWrap",
+        start: "top top",
+        end: "bottom bottom", // Ensures the animation spans the entire scroll distance
+        scrub: true,
+        onUpdate: (self) => {
+            if (self.progress === 1) {
+                gsap.set(model.rotation, { y: 2 * Math.PI, immediateRender: false });
+                ScrollTrigger.getById("modelRotationScrollTrigger").disable();
+            }
+        },
+        onLeave: () => {
+            gsap.set(model.rotation, { y: 2 * Math.PI });
+        },
+        onLeaveBack: () => {
+            gsap.set(model.rotation, { y: 0 }); // Reset rotation when scrolling back
+        },
+        id: "modelRotationScrollTrigger"
+    }
+});
 
 // Add event listeners to the divs for model switching
 document.querySelectorAll('[data-garment-id]').forEach((element) => {
@@ -923,6 +1024,41 @@ document.addEventListener('DOMContentLoaded', function() {
         gsap.set("#canvas3d", { y: "0" }); // Reset position when scrolling back
       },
       id: "canvas3dScrollTrigger"
+    }
+  });
+
+  // Create a timeline for the rotation animation
+  const rotationTl = gsap.timeline({
+    scrollTrigger: {
+      trigger: "#stickyWrap",
+      start: "top top",
+      end: "bottom bottom", // Ensures the animation spans the entire scroll distance
+      scrub: true,
+    }
+  });
+
+  // Add the rotation animation to the timeline
+  rotationTl.to(model.rotation, {
+    y: 2 * Math.PI, // Rotate 360 degrees
+    ease: "power2.inOut", // Power2 easing for the rotation
+    scrollTrigger: {
+      trigger: "#stickyWrap",
+      start: "top top",
+      end: "bottom bottom", // Ensures the animation spans the entire scroll distance
+      scrub: true,
+      onUpdate: (self) => {
+        if (self.progress === 1) {
+          gsap.set(model.rotation, { y: 2 * Math.PI, immediateRender: false });
+          ScrollTrigger.getById("modelRotationScrollTrigger").disable();
+        }
+      },
+      onLeave: () => {
+        gsap.set(model.rotation, { y: 2 * Math.PI });
+      },
+      onLeaveBack: () => {
+        gsap.set(model.rotation, { y: 0 }); // Reset rotation when scrolling back
+      },
+      id: "modelRotationScrollTrigger"
     }
   });
 });
