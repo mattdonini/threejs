@@ -134,17 +134,6 @@ const updateModelTexture = (textureUrl) => {
 loadModel('https://uploads-ssl.webflow.com/6665a67f8e924fdecb7b36e5/6675c8cc5cc9e9c9c8156f5d_holographic_hodie.gltf.txt', () => {
     currentTextureUrl = 'https://uploads-ssl.webflow.com/6665a67f8e924fdecb7b36e5/6675a742ad653905eaedaea8_holographic-texture.webp';
     updateModelTexture(currentTextureUrl);
-
-    // Get the height of the stickyWrap container
-    const stickyWrap = document.getElementById('stickyWrap');
-    const stickyWrapHeight = stickyWrap.offsetHeight;
-
-    // Add a scroll event listener
-    window.addEventListener('scroll', () => {
-        const scrollY = window.scrollY;
-        const rotation = (scrollY / stickyWrapHeight) * 360; // Calculate rotation based on scroll position
-        model.rotation.y = THREE.MathUtils.degToRad(rotation); // Apply rotation
-    });
 });
 
 
@@ -935,21 +924,5 @@ document.addEventListener('DOMContentLoaded', function() {
       },
       id: "canvas3dScrollTrigger"
     }
-  });
-
-  // Create a GSAP timeline for the rotation
-  const rotationTimeline = gsap.timeline({
-    scrollTrigger: {
-      trigger: "#stickyWrap",
-      start: "top top",
-      end: "bottom top", // Adjust as needed
-      scrub: true,
-    }
-  });
-
-  // Add rotation animation to the timeline
-  rotationTimeline.to(model.rotation, {
-    y: THREE.MathUtils.degToRad(360), // Rotate 360 degrees
-    ease: "none"
   });
 });
