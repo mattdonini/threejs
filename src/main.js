@@ -991,6 +991,10 @@ document.addEventListener('DOMContentLoaded', function() {
         rotationVelocityY = model.rotation.y - lastRotationY;
         lastRotationX = model.rotation.x;
         lastRotationY = model.rotation.y;
+      } else {
+        // Ensure the model's rotation remains at the scroll position
+        const rotation = -ScrollTrigger.getById("canvas3dScrollTrigger").progress * 360;
+        model.rotation.y = THREE.MathUtils.degToRad(rotation);
       }
 
       customPass.uniforms.rotationVelocity.value.set(rotationVelocityY, rotationVelocityX);
