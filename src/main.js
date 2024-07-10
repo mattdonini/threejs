@@ -1,13 +1,9 @@
-
 import './styles/style.css';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import Lenis from '@studio-freight/lenis';
 
 // Canvas and Scene
 const canvas = document.querySelector('canvas.webgl');
@@ -140,49 +136,12 @@ loadModel('https://uploads-ssl.webflow.com/6665a67f8e924fdecb7b36e5/6675c8cc5cc9
     updateModelTexture(currentTextureUrl);
 });
 
-// Lenis for smooth scrolling and 360-degree rotation
-const lenis = new Lenis({
-    duration: 1.2,
-    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-    direction: 'vertical',
-    smooth: true,
-});
-
-function raf(time) {
-    lenis.raf(time);
-    requestAnimationFrame(raf);
-}
-
-requestAnimationFrame(raf);
-
-// Flag to disable mouse movement updates during scroll
-let isScrolling = false;
-
-// 360-degree rotation within #stickyWrap
-const rotationTrigger = ScrollTrigger.create({
-    trigger: "#stickyWrap",
-    start: "top top",
-    end: "bottom bottom",
-    scrub: true,
-    onUpdate: (self) => {
-        isScrolling = true;
-        const rotation = -self.progress * 360; // Rotate in the opposite direction
-        if (model) {
-            model.rotation.y = THREE.MathUtils.degToRad(rotation);
-        }
-    },
-    onScrubComplete: () => {
-        isScrolling = false;
-    }
-});
 
 // Mouse move event listener
 const mouse = { x: 0, y: 0 };
 window.addEventListener('mousemove', (event) => {
-    if (!isScrolling) {
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = (event.clientY / window.innerHeight) * 2 - 1;
-    }
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = (event.clientY / window.innerHeight) * 2 - 1;
 });
 
 // Smooth interpolation function
@@ -615,36 +574,30 @@ const animate = () => {
     requestAnimationFrame(animate);
 
     if (model) {
-        if (!isScrolling) {
-            model.position.set(0, 0, 0);
+        model.position.set(0, 0, 0);
 
-            // Increase the factors to make the rotation more noticeable
-            const rotationFactorX = 0.2;
-            const rotationFactorY = 0.2;
+        // Increase the factors to make the rotation more noticeable
+        const rotationFactorX = 0.2;
+        const rotationFactorY = 0.2;
 
-            model.rotation.x = lerp(model.rotation.x, mouse.y * rotationFactorX, 0.1);
-            model.rotation.y = lerp(model.rotation.y, mouse.x * rotationFactorY, 0.1);
+        model.rotation.x = lerp(model.rotation.x, mouse.y * rotationFactorX, 0.1);
+        model.rotation.y = lerp(model.rotation.y, mouse.x * rotationFactorY, 0.1);
 
-            rotationVelocityX = model.rotation.x - lastRotationX;
-            rotationVelocityY = model.rotation.y - lastRotationY;
-            lastRotationX = model.rotation.x;
-            lastRotationY = model.rotation.y;
-        } else {
-            // Ensure the model's rotation remains at the scroll position
-            const rotation = -ScrollTrigger.getById("canvas3dScrollTrigger").progress * 360;
-            model.rotation.y = THREE.MathUtils.degToRad(rotation);
-        }
-
-        customPass.uniforms.rotationVelocity.value.set(rotationVelocityY, rotationVelocityX);
-
-        // Update noise effect parameters
-        noisePass.uniforms.time.value += 0.05; // Adjust the speed of the noise effect
-        glitchPass.uniforms.uTime.value += 0.05; // Update time for glitch effect
-        blindsPass.uniforms.uTime.value += 0.05; // Update time for blinds effect
-        diffusePass.uniforms.uTime.value += 0.05; // Update time for diffuse effect
-
-        composer.render();
+        rotationVelocityX = model.rotation.x - lastRotationX;
+        rotationVelocityY = model.rotation.y - lastRotationY;
+        lastRotationX = model.rotation.x;
+        lastRotationY = model.rotation.y;
     }
+
+    customPass.uniforms.rotationVelocity.value.set(rotationVelocityY, rotationVelocityX);
+
+    // Update noise effect parameters
+    noisePass.uniforms.time.value += 0.05; // Adjust the speed of the noise effect
+    glitchPass.uniforms.uTime.value += 0.05; // Update time for glitch effect
+    blindsPass.uniforms.uTime.value += 0.05; // Update time for blinds effect
+    diffusePass.uniforms.uTime.value += 0.05; // Update time for diffuse effect
+
+    composer.render();
 };
 animate();
 
@@ -961,7 +914,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (self.progress === 1) {
           gsap.set("#canvas3d", { y: "100vh", immediateRender: false });
           ScrollTrigger.getById("canvas3dScrollTrigger").disable();
-          rotationTrigger.disable(); // Disable rotation trigger when canvas is locked
         }
       },
       onLeave: () => {
@@ -969,107 +921,8 @@ document.addEventListener('DOMContentLoaded', function() {
       },
       onLeaveBack: () => {
         gsap.set("#canvas3d", { y: "0" }); // Reset position when scrolling back
-        rotationTrigger.enable(); // Re-enable rotation trigger when scrolling back
       },
       id: "canvas3dScrollTrigger"
     }
   });
-
-  // Create a timeline for the 360-degree rotation animation
-  const rotationTl = gsap.timeline({
-    scrollTrigger: {
-      trigger: "#stickyWrap",
-      start: "50% top", // Start the rotation at 50% of the stickyWrap
-      end: "100% top", // End the rotation at 100% of the stickyWrap
-      scrub: true,
-    }
-  });
-
-  // Add the rotation animation to the timeline
-  rotationTl.to(model.rotation, {
-    y: "+=6.28319", // 360 degrees in radians (2 * Math.PI)
-    ease: "none" // Linear easing for smooth rotation
-  });
-
-  // Lenis for smooth scrolling and 360-degree rotation
-  const lenis = new Lenis({
-    duration: 1.2,
-    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-    direction: 'vertical',
-    smooth: true,
-  });
-
-  function raf(time) {
-    lenis.raf(time);
-    requestAnimationFrame(raf);
-  }
-
-  requestAnimationFrame(raf);
-
-  // Flag to disable mouse movement updates during scroll
-  let isScrolling = false;
-
-  // 360-degree rotation within #stickyWrap
-  const rotationTrigger = ScrollTrigger.create({
-    trigger: "#stickyWrap",
-    start: "top top",
-    end: "bottom bottom",
-    scrub: true,
-    onUpdate: (self) => {
-      isScrolling = true;
-      const rotation = -self.progress * 360; // Rotate in the opposite direction
-      if (model) {
-        model.rotation.y = THREE.MathUtils.degToRad(rotation);
-      }
-    },
-    onScrubComplete: () => {
-      isScrolling = false;
-    }
-  });
-
-  // Mouse move event listener
-  window.addEventListener('mousemove', (event) => {
-    if (!isScrolling) {
-      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-      mouse.y = (event.clientY / window.innerHeight) * 2 - 1;
-    }
-  });
-
-  // Animation loop
-  const animate = () => {
-    requestAnimationFrame(animate);
-
-    if (model) {
-      if (!isScrolling) {
-        model.position.set(0, 0, 0);
-
-        // Increase the factors to make the rotation more noticeable
-        const rotationFactorX = 0.2;
-        const rotationFactorY = 0.2;
-
-        model.rotation.x = lerp(model.rotation.x, mouse.y * rotationFactorX, 0.1);
-        model.rotation.y = lerp(model.rotation.y, mouse.x * rotationFactorY, 0.1);
-
-        rotationVelocityX = model.rotation.x - lastRotationX;
-        rotationVelocityY = model.rotation.y - lastRotationY;
-        lastRotationX = model.rotation.x;
-        lastRotationY = model.rotation.y;
-      } else {
-        // Ensure the model's rotation remains at the scroll position
-        const rotation = -ScrollTrigger.getById("canvas3dScrollTrigger").progress * 360;
-        model.rotation.y = THREE.MathUtils.degToRad(rotation);
-      }
-
-      customPass.uniforms.rotationVelocity.value.set(rotationVelocityY, rotationVelocityX);
-
-      // Update noise effect parameters
-      noisePass.uniforms.time.value += 0.05; // Adjust the speed of the noise effect
-      glitchPass.uniforms.uTime.value += 0.05; // Update time for glitch effect
-      blindsPass.uniforms.uTime.value += 0.05; // Update time for blinds effect
-      diffusePass.uniforms.uTime.value += 0.05; // Update time for diffuse effect
-
-      composer.render();
-    }
-  };
-  animate();
 });
