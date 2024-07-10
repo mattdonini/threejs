@@ -4,6 +4,8 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+import gsap from 'gsap';
+import ScrollTrigger from 'gsap/ScrollTrigger';
 
 // Canvas and Scene
 const canvas = document.querySelector('canvas.webgl');
@@ -569,27 +571,34 @@ const easeInOutQuad = (t) => {
     return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 };
 
+// Register GSAP ScrollTrigger plugin
+gsap.registerPlugin(ScrollTrigger);
+
 // Variables to track scroll position and model rotation
-let scrollY = 0;
 let rotationY = 0;
 
 // Update model rotation based on scroll position
-const updateModelRotation = () => {
+const updateModelRotation = (progress) => {
     if (model) {
-        const scrollFactor = 360 / document.body.scrollHeight; // Adjust the factor to control rotation speed
-        rotationY = scrollY * scrollFactor;
+        const scrollFactor = 360; // Full rotation
+        rotationY = progress * scrollFactor;
         model.rotation.y = THREE.MathUtils.degToRad(rotationY);
     }
 };
 
-// Scroll event listener
-window.addEventListener('scroll', () => {
-    scrollY = window.scrollY;
-    updateModelRotation();
+// Create a ScrollTrigger instance for the #stickyWrap section
+ScrollTrigger.create({
+    trigger: "#stickyWrap",
+    start: "top top",
+    end: "bottom bottom",
+    scrub: true,
+    onUpdate: (self) => {
+        updateModelRotation(self.progress);
+    }
 });
 
 // Initial call to set the rotation based on the initial scroll position
-updateModelRotation();
+updateModelRotation(ScrollTrigger.getById("stickyWrap").progress);
 
 // Animation loop
 const animate = () => {
