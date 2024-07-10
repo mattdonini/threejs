@@ -602,6 +602,7 @@ const animate = () => {
     }
 
     customPass.uniforms.rotationVelocity.value.set(rotationVelocityY, rotationVelocityX);
+    customPass.uniforms.modelRotation.value = model.rotation.y; // Update the model rotation uniform
 
     // Update noise effect parameters
     noisePass.uniforms.time.value += 0.05; // Adjust the speed of the noise effect
@@ -613,6 +614,52 @@ const animate = () => {
 };
 animate();
 
+// Create a timeline for the y movement animation
+const tl = gsap.timeline({
+    scrollTrigger: {
+        trigger: "#stickyWrap",
+        start: "top top",
+        end: "bottom bottom", // Ensures the animation spans the entire scroll distance
+        scrub: true,
+        onUpdate: (self) => {
+            const progress = self.progress;
+            const rotation = progress * Math.PI * 2; // Calculate rotation based on scroll progress
+            model.rotation.y = rotation; // Update the model rotation
+        },
+        onLeave: () => {
+            gsap.set("#canvas3d", { y: "100vh" });
+        },
+        onLeaveBack: () => {
+            gsap.set("#canvas3d", { y: "0" }); // Reset position when scrolling back
+        },
+        id: "canvas3dScrollTrigger"
+    }
+});
+
+// Add the y animation to the timeline
+tl.to("#canvas3d", {
+    y: "100vh",
+    ease: "power2.inOut", // Power2 easing for the scroll movement
+    scrollTrigger: {
+        trigger: "#stickyWrap",
+        start: "top top",
+        end: "bottom bottom", // Ensures the animation spans the entire scroll distance
+        scrub: true,
+        onUpdate: (self) => {
+            if (self.progress === 1) {
+                gsap.set("#canvas3d", { y: "100vh", immediateRender: false });
+                ScrollTrigger.getById("canvas3dScrollTrigger").disable();
+            }
+        },
+        onLeave: () => {
+            gsap.set("#canvas3d", { y: "100vh" });
+        },
+        onLeaveBack: () => {
+            gsap.set("#canvas3d", { y: "0" }); // Reset position when scrolling back
+        },
+        id: "canvas3dScrollTrigger"
+    }
+});
 
 // Add event listeners to the divs for model switching
 document.querySelectorAll('[data-garment-id]').forEach((element) => {
