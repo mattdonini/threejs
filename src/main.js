@@ -941,28 +941,15 @@ document.addEventListener('DOMContentLoaded', function() {
   const rotationTimeline = gsap.timeline({
     scrollTrigger: {
       trigger: "#stickyWrap",
-      start: "top 50%", // Start rotation when the top of #stickyWrap reaches 50% of the viewport
-      end: "bottom top", // End rotation when the bottom of #stickyWrap reaches the top of the viewport
+      start: "top top",
+      end: "bottom top", // Adjust as needed
       scrub: true,
     }
   });
 
   // Add rotation animation to the timeline
   rotationTimeline.to(model.rotation, {
-    y: THREE.MathUtils.degToRad(-360), // Rotate 360 degrees in the opposite direction
+    y: THREE.MathUtils.degToRad(360), // Rotate 360 degrees
     ease: "none"
-  });
-
-  // Disable mouse movement during rotation
-  rotationTimeline.eventCallback("onStart", () => {
-    window.removeEventListener("mousemove", onMouseMove);
-  });
-
-  rotationTimeline.eventCallback("onComplete", () => {
-    window.addEventListener("mousemove", onMouseMove);
-  });
-
-  rotationTimeline.eventCallback("onReverseComplete", () => {
-    window.addEventListener("mousemove", onMouseMove);
   });
 });
