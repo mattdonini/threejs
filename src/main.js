@@ -961,6 +961,18 @@ document.addEventListener('DOMContentLoaded', function() {
     },
     onScrubComplete: () => {
       isScrolling = false;
+      // Add easing to the final rotation
+      if (model) {
+        gsap.to(model.rotation, {
+          y: THREE.MathUtils.degToRad(-ScrollTrigger.getById("canvas3dScrollTrigger").progress * 360),
+          ease: "power2.out",
+          duration: 0.5,
+          onComplete: () => {
+            // Re-enable mouse movement after easing completes
+            isScrolling = false;
+          }
+        });
+      }
     }
   });
 
