@@ -622,21 +622,10 @@ const animate = () => {
         noisePass.uniforms.time.value += 0.05; // Adjust the speed of the noise effect
         glitchPass.uniforms.uTime.value += 0.05; // Update time for glitch effect
         blindsPass.uniforms.uTime.value += 0.05; // Update time for blinds effect
-        rotationVelocityX = model.rotation.x - lastRotationX;
-        rotationVelocityY = model.rotation.y - lastRotationY;
-        lastRotationX = model.rotation.x;
-        lastRotationY = model.rotation.y;
+        diffusePass.uniforms.uTime.value += 0.05; // Update time for diffuse effect
+
+        composer.render();
     }
-
-    customPass.uniforms.rotationVelocity.value.set(rotationVelocityY, rotationVelocityX);
-
-    // Update noise effect parameters
-    noisePass.uniforms.time.value += 0.05; // Adjust the speed of the noise effect
-    glitchPass.uniforms.uTime.value += 0.05; // Update time for glitch effect
-    blindsPass.uniforms.uTime.value += 0.05; // Update time for blinds effect
-    diffusePass.uniforms.uTime.value += 0.05; // Update time for diffuse effect
-
-    composer.render();
 };
 animate();
 
@@ -1023,6 +1012,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const rotationFactorX = 0.2;
         const rotationFactorY = 0.2;
 
+        // Update model rotation based on mouse movement
         model.rotation.x = lerp(model.rotation.x, mouse.y * rotationFactorX, 0.1);
         model.rotation.y = lerp(model.rotation.y, mouse.x * rotationFactorY, 0.1);
 
