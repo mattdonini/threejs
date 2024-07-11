@@ -846,6 +846,10 @@ document.addEventListener('DOMContentLoaded', function() {
       });
 
       item.addEventListener('click', function() {
+        if (item.classList.contains('active')) {
+          return; // Do nothing if the item is already active
+        }
+
         items.forEach(d => {
           const otherImgs = d.querySelectorAll(imgSelector);
           otherImgs.forEach(otherImg => {
