@@ -776,7 +776,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateParagraphIndicator(targetItem) {
-      const paragraph = targetItem.querySelector('.paragraph.is-support-medium.is-scramble');
+      const paragraph = targetItem.querySelector('.paragraph.is-support-medium.is-selector.is-scramble');
       if (paragraph && paragraph !== activeParagraph) {
         if (activeParagraph) {
           activeParagraph.classList.remove('active');
