@@ -698,6 +698,15 @@ document.addEventListener('DOMContentLoaded', function() {
     setGarmentImageOpacity(currentActiveGarment, '1');
   }
 
+  // Initialize the first threads selector item as active by default
+  const defaultThread = document.querySelector('.threads_trigger-item');
+  if (defaultThread) {
+    currentActiveThread = defaultThread;
+    currentActiveThread.classList.add('active');
+    setThreadImageOpacity(defaultThread, '1');
+    setThreadParagraphOpacity(defaultThread, '1');
+  }
+
   handleItemSelection(
     '.garment_item',
     '.img.is-garment, .img.is-garment-2, .img.is-garment-3',
@@ -739,6 +748,19 @@ document.addEventListener('DOMContentLoaded', function() {
     garmentDiv.querySelectorAll('.img.is-garment, .img.is-garment-2, .img.is-garment-3').forEach(img => {
       img.style.opacity = opacity;
     });
+  }
+
+  function setThreadImageOpacity(threadDiv, opacity) {
+    threadDiv.querySelectorAll('.img.is-threads').forEach(img => {
+      img.style.opacity = opacity;
+    });
+  }
+
+  function setThreadParagraphOpacity(threadDiv, opacity) {
+    const paragraph = threadDiv.querySelector('.paragraph.is-support-medium.is-selector.is-scramble');
+    if (paragraph) {
+      paragraph.style.opacity = opacity;
+    }
   }
 
   function displayGarmentImages(index) {
