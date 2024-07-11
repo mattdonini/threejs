@@ -704,7 +704,7 @@ document.addEventListener('DOMContentLoaded', function() {
     currentActiveThread = defaultThread;
     currentActiveThread.classList.add('active');
     setThreadImageOpacity(defaultThread, '1');
-    setThreadParagraphOpacity(defaultThread, '1');
+    setThreadParagraphActive(defaultThread, true);
   }
 
   handleItemSelection(
@@ -756,10 +756,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  function setThreadParagraphOpacity(threadDiv, opacity) {
+  function setThreadParagraphActive(threadDiv, isActive) {
     const paragraph = threadDiv.querySelector('.paragraph.is-support-medium.is-selector.is-scramble');
     if (paragraph) {
-      paragraph.style.opacity = opacity;
+      if (isActive) {
+        paragraph.classList.add('active');
+      } else {
+        paragraph.classList.remove('active');
+      }
     }
   }
 
@@ -852,6 +856,7 @@ document.addEventListener('DOMContentLoaded', function() {
           }
           d.classList.remove('hover-inner-shadow'); // Remove hover inner shadow when another item is clicked
           d.classList.remove('active');
+          setThreadParagraphActive(d, false); // Set paragraph to inactive
         });
 
         imgs.forEach(img => {
@@ -861,6 +866,7 @@ document.addEventListener('DOMContentLoaded', function() {
           item.classList.add('inner-shadow');
         }
         item.classList.add('active');
+        setThreadParagraphActive(item, true); // Set paragraph to active
 
         if (itemSelector === '.garment_item') {
           currentActiveGarment = item;
