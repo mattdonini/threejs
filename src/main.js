@@ -957,4 +957,16 @@ document.addEventListener('DOMContentLoaded', function() {
       id: "canvas3dScrollTrigger"
     }
   });
+
+  // Add the class to the elements
+  const garmentCornerWrap = document.querySelector('.garment_corner-wrap');
+  const threadsCorner = document.querySelector('.threads_corner');
+
+  if (garmentCornerWrap) {
+    garmentCornerWrap.classList.add('garment_corner-wrap');
+  }
+
+  if (threadsCorner) {
+    threadsCorner.classList.add('threads_corner');
+  }
 });
