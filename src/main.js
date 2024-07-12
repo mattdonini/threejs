@@ -1,3 +1,4 @@
+
 import './styles/style.css';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -698,15 +699,6 @@ document.addEventListener('DOMContentLoaded', function() {
     setGarmentImageOpacity(currentActiveGarment, '1');
   }
 
-  // Initialize the first threads selector item as active by default
-  const defaultThread = document.querySelector('.threads_trigger-item');
-  if (defaultThread) {
-    currentActiveThread = defaultThread;
-    currentActiveThread.classList.add('active');
-    setThreadImageOpacity(defaultThread, '1');
-    setThreadParagraphActive(defaultThread, true);
-  }
-
   handleItemSelection(
     '.garment_item',
     '.img.is-garment, .img.is-garment-2, .img.is-garment-3',
@@ -744,27 +736,17 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
+  // Set the first threads_img to 100% opacity by default and simulate a click
+  const firstThreadImg = document.querySelector('.threads_img .img.is-threads');
+  if (firstThreadImg) {
+    firstThreadImg.style.opacity = '1';
+    firstThreadImg.closest('.threads_img').click(); // Simulate a click on the first threads_img
+  }
+
   function setGarmentImageOpacity(garmentDiv, opacity) {
     garmentDiv.querySelectorAll('.img.is-garment, .img.is-garment-2, .img.is-garment-3').forEach(img => {
       img.style.opacity = opacity;
     });
-  }
-
-  function setThreadImageOpacity(threadDiv, opacity) {
-    threadDiv.querySelectorAll('.img.is-threads').forEach(img => {
-      img.style.opacity = opacity;
-    });
-  }
-
-  function setThreadParagraphActive(threadDiv, isActive) {
-    const paragraph = threadDiv.querySelector('.paragraph.is-support-medium.is-selector.is-scramble');
-    if (paragraph) {
-      if (isActive) {
-        paragraph.classList.add('active');
-      } else {
-        paragraph.classList.remove('active');
-      }
-    }
   }
 
   function displayGarmentImages(index) {
@@ -802,7 +784,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateParagraphIndicator(targetItem) {
-      const paragraph = targetItem.querySelector('.paragraph.is-support-medium.is-selector.is-scramble');
+      const paragraph = targetItem.querySelector('.paragraph.is-support-medium');
       if (paragraph && paragraph !== activeParagraph) {
         if (activeParagraph) {
           activeParagraph.classList.remove('active');
@@ -846,10 +828,6 @@ document.addEventListener('DOMContentLoaded', function() {
       });
 
       item.addEventListener('click', function() {
-        if (item.classList.contains('active')) {
-          return; // Do nothing if the item is already active
-        }
-
         items.forEach(d => {
           const otherImgs = d.querySelectorAll(imgSelector);
           otherImgs.forEach(otherImg => {
@@ -860,7 +838,6 @@ document.addEventListener('DOMContentLoaded', function() {
           }
           d.classList.remove('hover-inner-shadow'); // Remove hover inner shadow when another item is clicked
           d.classList.remove('active');
-          setThreadParagraphActive(d, false); // Set paragraph to inactive
         });
 
         imgs.forEach(img => {
@@ -870,7 +847,6 @@ document.addEventListener('DOMContentLoaded', function() {
           item.classList.add('inner-shadow');
         }
         item.classList.add('active');
-        setThreadParagraphActive(item, true); // Set paragraph to active
 
         if (itemSelector === '.garment_item') {
           currentActiveGarment = item;
