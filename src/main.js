@@ -794,17 +794,10 @@ document.addEventListener('DOMContentLoaded', function() {
       if (cornerWrap) {
         const rect = targetItem.getBoundingClientRect();
         const parentRect = targetItem.offsetParent.getBoundingClientRect();
-        
-        // Force reflow
-        cornerWrap.style.top; // Read a property to force reflow
-
-        // Apply new positions with a slight delay
-        setTimeout(() => {
-            cornerWrap.style.top = `${rect.top - parentRect.top - 0.25 * window.innerWidth / 100}px`;
-            if (!onlyUpdateTop) {
-                cornerWrap.style.left = `${rect.left - parentRect.left - 0.25 * window.innerWidth / 100}px`;
-            }
-        }, 10); // 10ms delay
+        cornerWrap.style.top = `${rect.top - parentRect.top - 0.25 * window.innerWidth / 100}px`;
+        if (!onlyUpdateTop) {
+          cornerWrap.style.left = `${rect.left - parentRect.left - 0.25 * window.innerWidth / 100}px`;
+        }
       }
     }
 
