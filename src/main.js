@@ -700,7 +700,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 const promise = new Promise((resolve, reject) => {
                     const preloadedImg = new Image();
                     preloadedImg.src = src;
-                    preloadedImg.onload = resolve;
+                    preloadedImg.onload = () => {
+                        // Ensure the image is cached
+                        img.src = preloadedImg.src;
+                        resolve();
+                    };
                     preloadedImg.onerror = reject;
                 });
                 promises.push(promise);
