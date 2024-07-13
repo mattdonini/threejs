@@ -689,272 +689,300 @@ let currentActiveGarment = null;
 let currentActiveThread = null;
 
 document.addEventListener('DOMContentLoaded', function() {
-  // Initialize the first garment as active by default
-  const defaultGarment = document.querySelector('.garment_item');
-  if (defaultGarment) {
-    currentActiveGarment = defaultGarment;
-    currentActiveGarment.classList.add('active');
-    currentActiveGarment.classList.add('inner-shadow'); // Add inner-shadow class to default garment
-    setGarmentImageOpacity(currentActiveGarment, '1');
-  }
+    // Function to preload images and return a promise
+    function preloadImages(imageSelectors) {
+        const images = document.querySelectorAll(imageSelectors);
+        const promises = [];
 
-  // Initialize the first threads selector item as active by default
-  const defaultThread = document.querySelector('.threads_trigger-item');
-  if (defaultThread) {
-    currentActiveThread = defaultThread;
-    currentActiveThread.classList.add('active');
-    setThreadImageOpacity(defaultThread, '1');
-    setThreadParagraphActive(defaultThread, true);
-  }
-
-  handleItemSelection(
-    '.garment_item',
-    '.img.is-garment, .img.is-garment-2, .img.is-garment-3',
-    '.garment_corner-wrap',
-    true // Enable inner shadow
-  );
-
-  handleItemSelection(
-    '.threads_trigger-item',
-    '.img.is-threads',
-    '.threads_corner',
-    false, // Disable inner shadow on items
-    true // Only update the top position
-  );
-
-  handleItemSelection(
-    '.threads_img',
-    '.img.is-threads',
-    null, // No corner wrap for threads_img
-    false // Disable inner shadow
-  );
-
-  // Add event listeners to the divs for texture switching
-  document.querySelectorAll('[data-threads-id]').forEach((element, index) => {
-    element.addEventListener('click', () => {
-      const textureUrl = element.getAttribute('data-texture-url');
-      if (textureUrl) {
-        updateModelTexture(textureUrl);
-      } else {
-        console.error('No texture URL found for this element');
-      }
-
-      // Handle showing the appropriate garment images
-      displayGarmentImages(index);
-    });
-  });
-
-  function setGarmentImageOpacity(garmentDiv, opacity) {
-    garmentDiv.querySelectorAll('.img.is-garment, .img.is-garment-2, .img.is-garment-3').forEach(img => {
-      img.style.opacity = opacity;
-    });
-  }
-
-  function setThreadImageOpacity(threadDiv, opacity) {
-    threadDiv.querySelectorAll('.img.is-threads').forEach(img => {
-      img.style.opacity = opacity;
-    });
-  }
-
-  function setThreadParagraphActive(threadDiv, isActive) {
-    const paragraph = threadDiv.querySelector('.paragraph.is-support-medium.is-selector.is-scramble');
-    if (paragraph) {
-      if (isActive) {
-        paragraph.classList.add('active');
-      } else {
-        paragraph.classList.remove('active');
-      }
-    }
-  }
-
-  function displayGarmentImages(index) {
-    // Hide all garment images first
-    document.querySelectorAll('.img.is-garment, .img.is-garment-2, .img.is-garment-3').forEach(img => {
-      img.style.display = 'none';
-    });
-
-    // Show the selected garment image based on the index for all garments
-    const garmentClass = `.img.is-garment${index === 0 ? '' : '-' + (index + 1)}`;
-    document.querySelectorAll(garmentClass).forEach(selectedImg => {
-      selectedImg.style.display = 'block';
-    });
-
-    // Set the opacity of the active garment images
-    if (currentActiveGarment) {
-      setGarmentImageOpacity(currentActiveGarment, '1');
-    }
-  }
-
-  function handleItemSelection(itemSelector, imgSelector, cornerWrapSelector, enableShadow, onlyUpdateTop = false) {
-    const items = document.querySelectorAll(itemSelector);
-    const cornerWrap = cornerWrapSelector ? document.querySelector(cornerWrapSelector) : null;
-    let activeParagraph = null; // Variable to store the active paragraph
-
-    function positionCornerWrap(targetItem) {
-      if (cornerWrap) {
-        const rect = targetItem.getBoundingClientRect();
-        const parentRect = targetItem.offsetParent.getBoundingClientRect();
-        cornerWrap.style.top = `${rect.top - parentRect.top - 0.25 * window.innerWidth / 100}px`;
-        if (!onlyUpdateTop) {
-          cornerWrap.style.left = `${rect.left - parentRect.left - 0.25 * window.innerWidth / 100}px`;
-        }
-      }
-    }
-
-    function updateParagraphIndicator(targetItem) {
-      const paragraph = targetItem.querySelector('.paragraph.is-support-medium.is-selector.is-scramble');
-      if (paragraph && paragraph !== activeParagraph) {
-        if (activeParagraph) {
-          activeParagraph.classList.remove('active');
-        }
-        paragraph.classList.add('active');
-        activeParagraph = paragraph;
-      }
-    }
-
-    items.forEach(item => {
-      const imgs = item.querySelectorAll(imgSelector);
-      if (imgs.length === 0) {
-        console.error(`Image with class ${imgSelector} not found in item`, item);
-        return;
-      }
-
-      item.addEventListener('mouseenter', function() {
-        if (itemSelector === '.garment_item' && currentActiveGarment !== item) {
-          imgs.forEach(img => {
-            img.style.opacity = '0.8';
-          });
-          item.classList.add('hover-inner-shadow'); // Add hover inner shadow for garments
-        } else if (itemSelector === '.threads_trigger-item' && currentActiveThread !== item) {
-          imgs.forEach(img => {
-            img.style.opacity = '0.8';
-          });
-        }
-      });
-
-      item.addEventListener('mouseleave', function() {
-        if (itemSelector === '.garment_item' && currentActiveGarment !== item) {
-          imgs.forEach(img => {
-            img.style.opacity = '0.5';
-          });
-          item.classList.remove('hover-inner-shadow'); // Remove hover inner shadow for garments
-        } else if (itemSelector === '.threads_trigger-item' && currentActiveThread !== item) {
-          imgs.forEach(img => {
-            img.style.opacity = '0.5';
-          });
-        }
-      });
-
-      item.addEventListener('click', function() {
-        if (item.classList.contains('active')) {
-          return; // Do nothing if the item is already active
-        }
-
-        items.forEach(d => {
-          const otherImgs = d.querySelectorAll(imgSelector);
-          otherImgs.forEach(otherImg => {
-            otherImg.style.opacity = '0.5';
-          });
-          if (enableShadow) {
-            d.classList.remove('inner-shadow');
-          }
-          d.classList.remove('hover-inner-shadow'); // Remove hover inner shadow when another item is clicked
-          d.classList.remove('active');
-          setThreadParagraphActive(d, false); // Set paragraph to inactive
+        images.forEach(img => {
+            const src = img.getAttribute('src');
+            if (src) {
+                const promise = new Promise((resolve, reject) => {
+                    const preloadedImg = new Image();
+                    preloadedImg.src = src;
+                    preloadedImg.onload = resolve;
+                    preloadedImg.onerror = reject;
+                });
+                promises.push(promise);
+            }
         });
 
-        imgs.forEach(img => {
-          img.style.opacity = '1';
+        return Promise.all(promises);
+    }
+
+    // Preload garment images
+    preloadImages('.img.is-garment, .img.is-garment-2, .img.is-garment-3').then(() => {
+        console.log('All garment images preloaded');
+
+        // Initialize the first garment as active by default
+        const defaultGarment = document.querySelector('.garment_item');
+        if (defaultGarment) {
+            currentActiveGarment = defaultGarment;
+            currentActiveGarment.classList.add('active');
+            currentActiveGarment.classList.add('inner-shadow'); // Add inner-shadow class to default garment
+            setGarmentImageOpacity(currentActiveGarment, '1');
+        }
+
+        // Initialize the first threads selector item as active by default
+        const defaultThread = document.querySelector('.threads_trigger-item');
+        if (defaultThread) {
+            currentActiveThread = defaultThread;
+            currentActiveThread.classList.add('active');
+            setThreadImageOpacity(defaultThread, '1');
+            setThreadParagraphActive(defaultThread, true);
+        }
+
+        handleItemSelection(
+            '.garment_item',
+            '.img.is-garment, .img.is-garment-2, .img.is-garment-3',
+            '.garment_corner-wrap',
+            true // Enable inner shadow
+        );
+
+        handleItemSelection(
+            '.threads_trigger-item',
+            '.img.is-threads',
+            '.threads_corner',
+            false, // Disable inner shadow on items
+            true // Only update the top position
+        );
+
+        handleItemSelection(
+            '.threads_img',
+            '.img.is-threads',
+            null, // No corner wrap for threads_img
+            false // Disable inner shadow
+        );
+
+        // Add event listeners to the divs for texture switching
+        document.querySelectorAll('[data-threads-id]').forEach((element, index) => {
+            element.addEventListener('click', () => {
+                const textureUrl = element.getAttribute('data-texture-url');
+                if (textureUrl) {
+                    updateModelTexture(textureUrl);
+                } else {
+                    console.error('No texture URL found for this element');
+                }
+
+                // Handle showing the appropriate garment images
+                displayGarmentImages(index);
+            });
         });
-        if (enableShadow) {
-          item.classList.add('inner-shadow');
-        }
-        item.classList.add('active');
-        setThreadParagraphActive(item, true); // Set paragraph to active
 
-        if (itemSelector === '.garment_item') {
-          currentActiveGarment = item;
-        } else {
-          currentActiveThread = item;
+        function setGarmentImageOpacity(garmentDiv, opacity) {
+            garmentDiv.querySelectorAll('.img.is-garment, .img.is-garment-2, .img.is-garment-3').forEach(img => {
+                img.style.opacity = opacity;
+            });
         }
 
-        if (cornerWrap) {
-          positionCornerWrap(item);
-          cornerWrap.classList.add('inner-shadow'); // Add inner shadow to the corner wrap
+        function setThreadImageOpacity(threadDiv, opacity) {
+            threadDiv.querySelectorAll('.img.is-threads').forEach(img => {
+                img.style.opacity = opacity;
+            });
         }
-        updateParagraphIndicator(item);
-      });
+
+        function setThreadParagraphActive(threadDiv, isActive) {
+            const paragraph = threadDiv.querySelector('.paragraph.is-support-medium.is-selector.is-scramble');
+            if (paragraph) {
+                if (isActive) {
+                    paragraph.classList.add('active');
+                } else {
+                    paragraph.classList.remove('active');
+                }
+            }
+        }
+
+        function displayGarmentImages(index) {
+            // Hide all garment images first
+            document.querySelectorAll('.img.is-garment, .img.is-garment-2, .img.is-garment-3').forEach(img => {
+                img.style.display = 'none';
+            });
+
+            // Show the selected garment image based on the index for all garments
+            const garmentClass = `.img.is-garment${index === 0 ? '' : '-' + (index + 1)}`;
+            document.querySelectorAll(garmentClass).forEach(selectedImg => {
+                selectedImg.style.display = 'block';
+            });
+
+            // Set the opacity of the active garment images
+            if (currentActiveGarment) {
+                setGarmentImageOpacity(currentActiveGarment, '1');
+            }
+        }
+
+        function handleItemSelection(itemSelector, imgSelector, cornerWrapSelector, enableShadow, onlyUpdateTop = false) {
+            const items = document.querySelectorAll(itemSelector);
+            const cornerWrap = cornerWrapSelector ? document.querySelector(cornerWrapSelector) : null;
+            let activeParagraph = null; // Variable to store the active paragraph
+
+            function positionCornerWrap(targetItem) {
+                if (cornerWrap) {
+                    const rect = targetItem.getBoundingClientRect();
+                    const parentRect = targetItem.offsetParent.getBoundingClientRect();
+                    cornerWrap.style.top = `${rect.top - parentRect.top - 0.25 * window.innerWidth / 100}px`;
+                    if (!onlyUpdateTop) {
+                        cornerWrap.style.left = `${rect.left - parentRect.left - 0.25 * window.innerWidth / 100}px`;
+                    }
+                }
+            }
+
+            function updateParagraphIndicator(targetItem) {
+                const paragraph = targetItem.querySelector('.paragraph.is-support-medium.is-selector.is-scramble');
+                if (paragraph && paragraph !== activeParagraph) {
+                    if (activeParagraph) {
+                        activeParagraph.classList.remove('active');
+                    }
+                    paragraph.classList.add('active');
+                    activeParagraph = paragraph;
+                }
+            }
+
+            items.forEach(item => {
+                const imgs = item.querySelectorAll(imgSelector);
+                if (imgs.length === 0) {
+                    console.error(`Image with class ${imgSelector} not found in item`, item);
+                    return;
+                }
+
+                item.addEventListener('mouseenter', function() {
+                    if (itemSelector === '.garment_item' && currentActiveGarment !== item) {
+                        imgs.forEach(img => {
+                            img.style.opacity = '0.8';
+                        });
+                        item.classList.add('hover-inner-shadow'); // Add hover inner shadow for garments
+                    } else if (itemSelector === '.threads_trigger-item' && currentActiveThread !== item) {
+                        imgs.forEach(img => {
+                            img.style.opacity = '0.8';
+                        });
+                    }
+                });
+
+                item.addEventListener('mouseleave', function() {
+                    if (itemSelector === '.garment_item' && currentActiveGarment !== item) {
+                        imgs.forEach(img => {
+                            img.style.opacity = '0.5';
+                        });
+                        item.classList.remove('hover-inner-shadow'); // Remove hover inner shadow for garments
+                    } else if (itemSelector === '.threads_trigger-item' && currentActiveThread !== item) {
+                        imgs.forEach(img => {
+                            img.style.opacity = '0.5';
+                        });
+                    }
+                });
+
+                item.addEventListener('click', function() {
+                    if (item.classList.contains('active')) {
+                        return; // Do nothing if the item is already active
+                    }
+
+                    items.forEach(d => {
+                        const otherImgs = d.querySelectorAll(imgSelector);
+                        otherImgs.forEach(otherImg => {
+                            otherImg.style.opacity = '0.5';
+                        });
+                        if (enableShadow) {
+                            d.classList.remove('inner-shadow');
+                        }
+                        d.classList.remove('hover-inner-shadow'); // Remove hover inner shadow when another item is clicked
+                        d.classList.remove('active');
+                        setThreadParagraphActive(d, false); // Set paragraph to inactive
+                    });
+
+                    imgs.forEach(img => {
+                        img.style.opacity = '1';
+                    });
+                    if (enableShadow) {
+                        item.classList.add('inner-shadow');
+                    }
+                    item.classList.add('active');
+                    setThreadParagraphActive(item, true); // Set paragraph to active
+
+                    if (itemSelector === '.garment_item') {
+                        currentActiveGarment = item;
+                    } else {
+                        currentActiveThread = item;
+                    }
+
+                    if (cornerWrap) {
+                        positionCornerWrap(item);
+                        cornerWrap.classList.add('inner-shadow'); // Add inner shadow to the corner wrap
+                    }
+                    updateParagraphIndicator(item);
+                });
+            });
+
+            // Ensure the active paragraph remains active even when clicking outside
+            document.addEventListener('click', function(event) {
+                const isItem = event.target.closest(itemSelector);
+                if (!isItem && activeParagraph) {
+                    activeParagraph.classList.add('active');
+                }
+            });
+        }
+
+        // Display the first set of garment images by default after everything is set up
+        displayGarmentImages(0);
+
+        // Ensure the first garment image is set to full opacity by default
+        const firstGarmentImg = document.querySelector('.garment_item .img.is-garment');
+        if (firstGarmentImg) {
+            firstGarmentImg.style.opacity = '1';
+        }
+
+        // GSAP and ScrollTrigger code
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Initial blur-in effect when entering the viewport
+        gsap.fromTo("#canvas3d", {
+            filter: "blur(20px)",
+        }, {
+            filter: "blur(0px)", // End with no blur
+            duration: 2, // Adjust duration as needed
+            ease: "power2.out", // Easing for the blur-in effect
+            delay: 0.5, // Add a delay before starting the blur-in
+            scrollTrigger: {
+                trigger: "#stickyWrap",
+                start: "top bottom", // Start when the top of #stickyWrap enters the bottom of the viewport
+                end: "top top", // End when the top of #stickyWrap reaches the top of the viewport
+                once: true // Ensure this animation only runs once
+            }
+        });
+
+        // Create a timeline for the y movement animation
+        const tl = gsap.timeline({
+            scrollTrigger: {
+                trigger: "#stickyWrap",
+                start: "top top",
+                end: "bottom bottom", // Ensures the animation spans the entire scroll distance
+                scrub: true,
+            }
+        });
+
+        // Add the y animation to the timeline
+        tl.to("#canvas3d", {
+            y: "100vh",
+            ease: "power2.inOut", // Power2 easing for the scroll movement
+            scrollTrigger: {
+                trigger: "#stickyWrap",
+                start: "top top",
+                end: "bottom bottom", // Ensures the animation spans the entire scroll distance
+                scrub: true,
+                onUpdate: (self) => {
+                    if (self.progress === 1) {
+                        gsap.set("#canvas3d", { y: "100vh", immediateRender: false });
+                        ScrollTrigger.getById("canvas3dScrollTrigger").disable();
+                    }
+                },
+                onLeave: () => {
+                    gsap.set("#canvas3d", { y: "100vh" });
+                },
+                onLeaveBack: () => {
+                    gsap.set("#canvas3d", { y: "0" }); // Reset position when scrolling back
+                },
+                id: "canvas3dScrollTrigger"
+            }
+        });
+    }).catch(error => {
+        console.error('Error preloading images:', error);
     });
-
-    // Ensure the active paragraph remains active even when clicking outside
-    document.addEventListener('click', function(event) {
-      const isItem = event.target.closest(itemSelector);
-      if (!isItem && activeParagraph) {
-        activeParagraph.classList.add('active');
-      }
-    });
-  }
-
-  // Display the first set of garment images by default after everything is set up
-  displayGarmentImages(0);
-
-  // Ensure the first garment image is set to full opacity by default
-  const firstGarmentImg = document.querySelector('.garment_item .img.is-garment');
-  if (firstGarmentImg) {
-    firstGarmentImg.style.opacity = '1';
-  }
-
-  // GSAP and ScrollTrigger code
-  gsap.registerPlugin(ScrollTrigger);
-
-  // Initial blur-in effect when entering the viewport
-  gsap.fromTo("#canvas3d", {
-    filter: "blur(20px)",
-  }, {
-    filter: "blur(0px)", // End with no blur
-    duration: 2, // Adjust duration as needed
-    ease: "power2.out", // Easing for the blur-in effect
-    delay: 0.5, // Add a delay before starting the blur-in
-    scrollTrigger: {
-      trigger: "#stickyWrap",
-      start: "top bottom", // Start when the top of #stickyWrap enters the bottom of the viewport
-      end: "top top", // End when the top of #stickyWrap reaches the top of the viewport
-      once: true // Ensure this animation only runs once
-    }
-  });
-
-  // Create a timeline for the y movement animation
-  const tl = gsap.timeline({
-    scrollTrigger: {
-      trigger: "#stickyWrap",
-      start: "top top",
-      end: "bottom bottom", // Ensures the animation spans the entire scroll distance
-      scrub: true,
-    }
-  });
-
-  // Add the y animation to the timeline
-  tl.to("#canvas3d", {
-    y: "100vh",
-    ease: "power2.inOut", // Power2 easing for the scroll movement
-    scrollTrigger: {
-      trigger: "#stickyWrap",
-      start: "top top",
-      end: "bottom bottom", // Ensures the animation spans the entire scroll distance
-      scrub: true,
-      onUpdate: (self) => {
-        if (self.progress === 1) {
-          gsap.set("#canvas3d", { y: "100vh", immediateRender: false });
-          ScrollTrigger.getById("canvas3dScrollTrigger").disable();
-        }
-      },
-      onLeave: () => {
-        gsap.set("#canvas3d", { y: "100vh" });
-      },
-      onLeaveBack: () => {
-        gsap.set("#canvas3d", { y: "0" }); // Reset position when scrolling back
-      },
-      id: "canvas3dScrollTrigger"
-    }
-  });
 });
