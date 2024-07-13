@@ -770,15 +770,13 @@ document.addEventListener('DOMContentLoaded', function() {
   function displayGarmentImages(index) {
     // Hide all garment images first
     document.querySelectorAll('.img.is-garment, .img.is-garment-2, .img.is-garment-3').forEach(img => {
-      img.style.visibility = 'hidden';
-      img.style.opacity = '0';
+      img.style.display = 'none';
     });
 
     // Show the selected garment image based on the index for all garments
     const garmentClass = `.img.is-garment${index === 0 ? '' : '-' + (index + 1)}`;
     document.querySelectorAll(garmentClass).forEach(selectedImg => {
-      selectedImg.style.visibility = 'visible';
-      selectedImg.style.opacity = '1';
+      selectedImg.style.display = 'block';
     });
 
     // Set the opacity of the active garment images
