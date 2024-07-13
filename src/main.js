@@ -689,16 +689,6 @@ let currentActiveGarment = null;
 let currentActiveThread = null;
 
 document.addEventListener('DOMContentLoaded', function() {
-  // Preload garment images
-  const garmentImages = document.querySelectorAll('.img.is-garment, .img.is-garment-2, .img.is-garment-3');
-  garmentImages.forEach(img => {
-    const src = img.getAttribute('src');
-    if (src) {
-      const preloadedImg = new Image();
-      preloadedImg.src = src;
-    }
-  });
-
   // Initialize the first garment as active by default
   const defaultGarment = document.querySelector('.garment_item');
   if (defaultGarment) {
